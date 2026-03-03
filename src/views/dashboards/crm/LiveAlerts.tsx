@@ -131,7 +131,7 @@ const LiveAlerts = () => {
         sx={{
           flex: 1,
           overflowY: 'auto',
-          maxHeight: '61.80vh',
+          maxHeight: '67.75vh',
           display: 'flex',
           flexDirection: 'column',
           gap: 0,

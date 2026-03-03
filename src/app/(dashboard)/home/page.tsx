@@ -5,7 +5,6 @@ import LiveAlerts from '@/views/dashboards/crm/LiveAlerts'
 
 // import DonutChart from '@/views/charts/DonutChart'
 // import Statictics from '@/views/charts/Statistics'
-import OverviewTable from '@/views/tables/OverviewTable'
 
 // TODO [Database Integration]
 // Replace dummyTrucks with an API call or server-side fetch like:
@@ -14,6 +13,7 @@ import OverviewTable from '@/views/tables/OverviewTable'
 
 // import { dummyTrucks } from '@/data/truckDummydata'
 import LineChart from '@/views/charts/LineChart'
+import LiveFeed from '@/components/LiveFeed'
 
 const Dashboard = async () => {
   return (
@@ -21,16 +21,16 @@ const Dashboard = async () => {
       {/* Left section */}
       <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 1, md: 1 } }}>
         <Grid container spacing={6}>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 3 }}>
             <VehicleNoCard title='ENTRY' type='entry' todayCount={30} weekCount={184} monthCount={720} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 3 }}>
             <VehicleNoCard title='EXIT' type='exit' todayCount={20} weekCount={120} monthCount={480} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 3 }}>
             <VehicleNoCard title='LOADING' type='load' todayCount={20} weekCount={120} monthCount={480} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 3 }}>
             <VehicleNoCard title='UNLOADING' type='unload' todayCount={20} weekCount={120} monthCount={480} />
           </Grid>
           {/* <Grid size={{ xs: 12, sm: 12 }} sx={{ order: { xs: 4, md: 4 } }}>
@@ -38,6 +38,9 @@ const Dashboard = async () => {
           </Grid> */}
           <Grid size={{ xs: 12, sm: 12 }} sx={{ order: { xs: 4, md: 4 } }}>
             <LineChart />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 12 }} sx={{ order: { xs: 4, md: 4 } }}>
+            <LiveFeed />
           </Grid>
         </Grid>
       </Grid>
@@ -48,10 +51,6 @@ const Dashboard = async () => {
           <Grid size={{ xs: 12 }}>
             <LiveAlerts />
           </Grid>
-          {/* Add more charts here */}
-          {/* <Grid size={{ xs: 12 }}>
-            <YourNextChart />
-          </Grid> */}
         </Grid>
       </Grid>
 
