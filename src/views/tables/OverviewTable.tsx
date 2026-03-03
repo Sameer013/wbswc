@@ -189,7 +189,7 @@ const OverviewTable = ({ truckData }: { truckData?: Truck[] }) => {
 
   return (
     <Card>
-      <CardHeader title='Live Truck Overview' action={<OptionMenu options={['Refresh', 'Update', 'Share']} />} />
+      <CardHeader title='Live Event Overview' action={<OptionMenu options={['Refresh', 'Update', 'Share']} />} />
       <div className='overflow-x-auto'>
         <table className={tableStyles.table}>
           <thead>

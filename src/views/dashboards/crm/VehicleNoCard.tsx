@@ -11,11 +11,13 @@ import Box from '@mui/material/Box'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
 
 // Icon Imports
-import LocalShipping from '@mui/icons-material/LocalShipping'
+// import LocalShipping from '@mui/icons-material/LocalShipping'
 import Login from '@mui/icons-material/Login'
 import Logout from '@mui/icons-material/Logout'
 import ArrowCircleDown from '@mui/icons-material/ArrowCircleDown'
 import ArrowCircleUp from '@mui/icons-material/ArrowCircleUp'
+
+// import Chip from '@mui/material/Chip'
 
 // import Inventory from '@mui/icons-material/Inventory'
 
@@ -30,37 +32,72 @@ interface VehicleNoCardProps {
 const iconConfig = {
   entry: {
     Icon: Login,
-    iconColor: 'success' as SvgIconProps['color'],
+    iconColor: 'primary' as SvgIconProps['color'],
     arrow: '→',
-    countColor: 'success.main',
-    bgColor: 'rgba(76, 175, 80, 0.08)',
-    borderColor: 'rgba(76, 175, 80, 0.3)'
+    countColor: 'text.primary',
+    bgColor: 'rgba(105, 108, 255, 0.08)',
+    borderColor: 'rgba(105, 108, 255, 0.3)'
   },
   exit: {
     Icon: Logout,
-    iconColor: 'error' as SvgIconProps['color'],
+    iconColor: 'primary' as SvgIconProps['color'],
     arrow: '←',
-    countColor: 'error.main',
-    bgColor: 'rgba(244, 67, 54, 0.08)',
-    borderColor: 'rgba(244, 67, 54, 0.3)'
+    countColor: 'text.primary',
+    bgColor: 'rgba(105, 108, 255, 0.08)',
+    borderColor: 'rgba(105, 108, 255, 0.3)'
   },
   unload: {
     Icon: ArrowCircleUp,
     iconColor: 'warning' as SvgIconProps['color'],
-    arrow: '←',
+    arrow: '↑',
     countColor: 'warning.main',
     bgColor: 'rgba(255, 152, 0, 0.08)',
     borderColor: 'rgba(255, 152, 0, 0.3)'
   },
   load: {
     Icon: ArrowCircleDown,
-    iconColor: 'primary' as SvgIconProps['color'],
-    arrow: '→',
-    countColor: 'primary.main',
-    bgColor: 'rgba(105, 108, 255, 0.08)',
-    borderColor: 'rgba(105, 108, 255, 0.3)'
+    iconColor: 'warning' as SvgIconProps['color'],
+    arrow: '↓',
+    countColor: 'warning.main',
+    bgColor: 'rgba(255, 152, 0, 0.08)',
+    borderColor: 'rgba(255, 152, 0, 0.3)'
   }
 }
+
+// const iconConfig = {
+//   entry: {
+//     Icon: Login,
+//     iconColor: 'success' as SvgIconProps['color'],
+//     arrow: '→',
+//     countColor: 'success.main',
+//     bgColor: 'rgba(76, 175, 80, 0.08)',
+//     borderColor: 'rgba(76, 175, 80, 0.3)'
+//   },
+//   exit: {
+//     Icon: Logout,
+//     iconColor: 'error' as SvgIconProps['color'],
+//     arrow: '←',
+//     countColor: 'error.main',
+//     bgColor: 'rgba(244, 67, 54, 0.08)',
+//     borderColor: 'rgba(244, 67, 54, 0.3)'
+//   },
+//   unload: {
+//     Icon: ArrowCircleUp,
+//     iconColor: 'warning' as SvgIconProps['color'],
+//     arrow: '←',
+//     countColor: 'warning.main',
+//     bgColor: 'rgba(255, 152, 0, 0.08)',
+//     borderColor: 'rgba(255, 152, 0, 0.3)'
+//   },
+//   load: {
+//     Icon: ArrowCircleDown,
+//     iconColor: 'primary' as SvgIconProps['color'],
+//     arrow: '→',
+//     countColor: 'primary.main',
+//     bgColor: 'rgba(105, 108, 255, 0.08)',
+//     borderColor: 'rgba(105, 108, 255, 0.3)'
+//   }
+// }
 
 const StatCard = ({ label, count, type }: { label: string; count: number; type: VehicleNoCardProps['type'] }) => {
   const config = iconConfig[type]
@@ -83,9 +120,7 @@ const StatCard = ({ label, count, type }: { label: string; count: number; type: 
           <Typography variant='h5' color={config.countColor} fontWeight={700}>
             {count}
           </Typography>
-          <Typography variant='caption' color='success.main'>
-            +12.6%
-          </Typography>
+          {/* <Chip label='+12.6%' color='success' variant='tonal' size='small' /> */}
         </Box>
       </CardContent>
     </Card>
@@ -153,10 +188,10 @@ const VehicleNoCard = ({ title, type, todayCount, weekCount, monthCount }: Vehic
           <Grid size={{ xs: 12 }}>
             <StatCard label='Today' count={todayCount} type={type} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 6, sm: 6 }}>
             <StatCard label='Last 7 days' count={weekCount} type={type} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 6, sm: 6 }}>
             <StatCard label='Last 30 days' count={monthCount} type={type} />
           </Grid>
         </Grid>
