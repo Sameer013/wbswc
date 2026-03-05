@@ -21,16 +21,16 @@ const Dashboard = async () => {
       {/* Left section */}
       <Grid size={{ xs: 12, md: 8 }} sx={{ order: { xs: 1, md: 1 } }}>
         <Grid container spacing={6}>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <VehicleNoCard title='ENTRY' type='entry' todayCount={30} weekCount={184} monthCount={720} />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <VehicleNoCard title='EXIT' type='exit' todayCount={20} weekCount={120} monthCount={480} />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <VehicleNoCard title='LOADING' type='load' todayCount={20} weekCount={120} monthCount={480} />
           </Grid>
-          <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <VehicleNoCard title='UNLOADING' type='unload' todayCount={20} weekCount={120} monthCount={480} />
           </Grid>
           {/* <Grid size={{ xs: 12, sm: 12 }} sx={{ order: { xs: 4, md: 4 } }}>

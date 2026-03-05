@@ -76,7 +76,8 @@ const StatItem = ({
         borderRadius: 1.5,
         backgroundColor: isToday ? config.borderColor : config.bgColor,
         border: `1px solid ${config.borderColor}`,
-        minWidth: 0
+        minWidth: 0,
+        textAlign: 'center'
       }}
     >
       <Typography variant='caption' color={isToday ? 'text.primary' : 'text.secondary'} display='block' noWrap>
@@ -96,58 +97,78 @@ const VehicleNoCard = ({ title, type, todayCount, weekCount, monthCount }: Vehic
   return (
     <Card sx={{ height: '100%' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 34,
-            height: 34,
-            borderRadius: 1.5,
-            backgroundColor: config.bgColor,
-            border: `1px solid ${config.borderColor}`,
-            position: 'relative',
-            flexShrink: 0
-          }}
-        >
-          <Icon color={config.iconColor} sx={{ fontSize: 18 }} />
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: -5,
-              right: -5,
-              width: 15,
-              height: 15,
-              borderRadius: '50%',
-              backgroundColor: 'background.paper',
-              border: `1px solid ${config.borderColor}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.5rem',
-              color: config.countColor,
-              fontWeight: 700,
-              lineHeight: 1
-            }}
-          >
-            {config.arrow}
-          </Box>
-        </Box>
+        <Icon color={config.iconColor} sx={{ fontSize: 36 }} />
+
         <Typography variant='h6' fontWeight={600} noWrap>
           {title}
         </Typography>
+        <StatItem label='Today' count={todayCount} type={type} isToday />
       </Box>
 
       <Divider />
 
       <CardContent sx={{ py: 1.5, px: 1.5, '&:last-child': { pb: 1.5 } }}>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <StatItem label='Today' count={todayCount} type={type} isToday />
           <StatItem label='7 days' count={weekCount} type={type} />
           <StatItem label='30 days' count={monthCount} type={type} />
         </Box>
       </CardContent>
     </Card>
+
+    // <Card sx={{ height: '100%' }}>
+    //   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25 }}>
+    //     <Box
+    //       sx={{
+    //         display: 'flex',
+    //         alignItems: 'center',
+    //         justifyContent: 'center',
+    //         width: 34,
+    //         height: 34,
+    //         borderRadius: 1.5,
+    //         backgroundColor: config.bgColor,
+    //         border: `1px solid ${config.borderColor}`,
+    //         position: 'relative',
+    //         flexShrink: 0
+    //       }}
+    //     >
+    //       <Icon color={config.iconColor} sx={{ fontSize: 18 }} />
+    //       <Box
+    //         sx={{
+    //           position: 'absolute',
+    //           bottom: -5,
+    //           right: -5,
+    //           width: 15,
+    //           height: 15,
+    //           borderRadius: '50%',
+    //           backgroundColor: 'background.paper',
+    //           border: `1px solid ${config.borderColor}`,
+    //           display: 'flex',
+    //           alignItems: 'center',
+    //           justifyContent: 'center',
+    //           fontSize: '0.5rem',
+    //           color: config.countColor,
+    //           fontWeight: 700,
+    //           lineHeight: 1
+    //         }}
+    //       >
+    //         {config.arrow}
+    //       </Box>
+    //     </Box>
+    //     <Typography variant='h6' fontWeight={600} noWrap>
+    //       {title}
+    //     </Typography>
+    //   </Box>
+
+    //   <Divider />
+
+    //   <CardContent sx={{ py: 1.5, px: 1.5, '&:last-child': { pb: 1.5 } }}>
+    //     <Box sx={{ display: 'flex', gap: 1 }}>
+    //       <StatItem label='Today' count={todayCount} type={type} isToday />
+    //       <StatItem label='7 days' count={weekCount} type={type} />
+    //       <StatItem label='30 days' count={monthCount} type={type} />
+    //     </Box>
+    //   </CardContent>
+    // </Card>
   )
 }
 

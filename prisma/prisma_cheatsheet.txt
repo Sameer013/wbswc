@@ -1,0 +1,28 @@
+# but do only when you want to test
+npx prisma db push  # faster than migrate for local dev, as it skips migration history
+
+
+# As a developer when you add new models in schema run this
+
+$ npx prisma migrate dev --name describe_your_change
+# git commit and push to repo
+
+
+# As a fellow developer pulling the repo run this
+$ git pull 
+$ npx prisma migrate deploy
+
+
+When using insert,update,delete use this type of raw query:
+const trunkNo = 'TRK001'
+const status = 'active'
+
+await prisma.$executeRaw`
+  INSERT INTO records_master (trunk_no, status) 
+  VALUES (${trunkNo}, ${status})`
+
+Prisma will automatically bind variable for you, so dont worry about SQL injection
+
+
+use `queryRaw` when you want to select just query
+use `executeRaw` when you want to insert,update,delete just query
