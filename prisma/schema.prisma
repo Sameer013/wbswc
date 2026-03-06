@@ -19,3 +19,34 @@ model Users {
   name      String?
   createdAt DateTime @default(now())
 }
+
+
+model Event_Type {
+  eventId          Int      @id @default(autoincrement())
+  eventType        String   @unique
+  description String?
+
+  eventMasters      EventMaster[]
+}
+
+model EventMaster {
+  id            Int   @id @default(autoincrement())
+  eventId   Int
+  eventTimestamp DateTime
+  value         String?
+
+  eventType     Event_Type @relation(fields: [eventId], references: [eventId])
+  anprEvent     AnprEvent?
+
+  @@index([eventTimestamp])
+  @@index([eventId])
+}
+
+model AnprEvent {
+  id            Int   @id @default(autoincrement())
+  eventMasterId       Int   @unique
+  vehicleNo     String
+  vehicleWt     Float?
+
+  eventmaster         EventMaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade)
+}

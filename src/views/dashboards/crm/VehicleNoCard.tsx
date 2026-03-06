@@ -1,13 +1,17 @@
 'use client'
 
+// import Image from 'next/image'
+
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
-import Login from '@mui/icons-material/Login'
+
+// import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import Logout from '@mui/icons-material/Logout'
+import Login from '@mui/icons-material/Login'
 import ArrowCircleDown from '@mui/icons-material/ArrowCircleDown'
 import ArrowCircleUp from '@mui/icons-material/ArrowCircleUp'
 
@@ -15,160 +19,124 @@ interface VehicleNoCardProps {
   title: string
   type: 'entry' | 'exit' | 'unload' | 'load'
   todayCount: number
-  weekCount: number
   monthCount: number
+  yearCount: number
+  iconSrc?: string
 }
 
 const iconConfig = {
   entry: {
     Icon: Login,
     iconColor: 'primary' as SvgIconProps['color'],
-    arrow: '→',
     countColor: 'text.primary',
     bgColor: 'rgba(105, 108, 255, 0.08)',
-    borderColor: 'rgba(105, 108, 255, 0.3)'
+    borderColor: 'rgba(105, 108, 255, 0.3)',
+    accentColor: '#696cff'
   },
   exit: {
     Icon: Logout,
     iconColor: 'primary' as SvgIconProps['color'],
-    arrow: '←',
     countColor: 'text.primary',
     bgColor: 'rgba(105, 108, 255, 0.08)',
-    borderColor: 'rgba(105, 108, 255, 0.3)'
+    borderColor: 'rgba(105, 108, 255, 0.3)',
+    accentColor: '#696cff'
   },
   unload: {
     Icon: ArrowCircleUp,
     iconColor: 'warning' as SvgIconProps['color'],
-    arrow: '↑',
     countColor: 'text.primary',
     bgColor: 'rgba(255, 152, 0, 0.08)',
-    borderColor: 'rgba(255, 152, 0, 0.3)'
+    borderColor: 'rgba(255, 152, 0, 0.3)',
+    accentColor: '#ff9800'
   },
   load: {
     Icon: ArrowCircleDown,
     iconColor: 'warning' as SvgIconProps['color'],
-    arrow: '↓',
     countColor: 'text.primary',
     bgColor: 'rgba(255, 152, 0, 0.08)',
-    borderColor: 'rgba(255, 152, 0, 0.3)'
+    borderColor: 'rgba(255, 152, 0, 0.3)',
+    accentColor: '#ff9800'
   }
 }
 
-const StatItem = ({
-  label,
-  count,
-  type,
-  isToday
-}: {
-  label: string
-  count: number
-  type: VehicleNoCardProps['type']
-  isToday?: boolean
-}) => {
-  const config = iconConfig[type]
-
-  return (
-    <Box
-      sx={{
-        flex: 1,
-        px: 1.5,
-        py: 1,
-        borderRadius: 1.5,
-        backgroundColor: isToday ? config.borderColor : config.bgColor,
-        border: `1px solid ${config.borderColor}`,
-        minWidth: 0,
-        textAlign: 'center'
-      }}
-    >
-      <Typography variant='caption' color={isToday ? 'text.primary' : 'text.secondary'} display='block' noWrap>
-        {label}
-      </Typography>
-      <Typography variant='h6' color={config.countColor} fontWeight={isToday ? 800 : 700} lineHeight={1.3}>
-        {count}
-      </Typography>
-    </Box>
-  )
-}
-
-const VehicleNoCard = ({ title, type, todayCount, weekCount, monthCount }: VehicleNoCardProps) => {
+const VehicleNoCard = ({ title, type, todayCount, monthCount, yearCount, iconSrc }: VehicleNoCardProps) => {
   const config = iconConfig[type]
   const { Icon } = config
 
   return (
     <Card sx={{ height: '100%' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25 }}>
-        <Icon color={config.iconColor} sx={{ fontSize: 36 }} />
-
-        <Typography variant='h6' fontWeight={600} noWrap>
+      <Box
+        sx={{
+          px: 2,
+          py: 0.75,
+          backgroundColor: config.bgColor,
+          borderBottom: `1px solid ${config.borderColor}`,
+          textAlign: 'center'
+        }}
+      >
+        <Typography variant='h6' fontWeight={700} letterSpacing={2} sx={{ fontSize: '0.625rem' }}>
           {title}
         </Typography>
-        <StatItem label='Today' count={todayCount} type={type} isToday />
+      </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          px: 2.5,
+          py: 2
+        }}
+      >
+        {/* {iconSrc ? (
+          <Image src={iconSrc} alt={title} width={38} height={38} style={{ objectFit: 'contain' }} />
+        ) : (
+          <Icon color={config.iconColor} sx={{ fontSize: 36 }} />
+        )} */}
+        <Icon color={config.iconColor} sx={{ fontSize: 36 }} />
+
+        <Box sx={{ textAlign: 'right' }}>
+          <Typography fontWeight={800} color={config.countColor} sx={{ fontSize: '2.5rem', lineHeight: 1 }}>
+            {todayCount}
+          </Typography>
+        </Box>
       </Box>
 
       <Divider />
 
       <CardContent sx={{ py: 1.5, px: 1.5, '&:last-child': { pb: 1.5 } }}>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <StatItem label='7 days' count={weekCount} type={type} />
-          <StatItem label='30 days' count={monthCount} type={type} />
+          {[
+            { label: 'M', count: monthCount },
+            { label: 'Y', count: yearCount }
+          ].map(({ label, count }) => (
+            <Box
+              key={label}
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-evenly',
+                px: 1.5,
+                py: 1,
+                borderRadius: 1.5,
+                backgroundColor: config.bgColor,
+                border: `1px solid ${config.borderColor}`,
+                gap: 1
+              }}
+            >
+              <Typography variant='caption' color='text.secondary' display='block' sx={{ fontSize: '0.625rem' }}>
+                {label}
+              </Typography>
+              <Typography variant='h5' fontWeight={700} color='text.primary' fontSize={'1.25rem'} lineHeight={1.3}>
+                {count}
+              </Typography>
+            </Box>
+          ))}
         </Box>
       </CardContent>
     </Card>
-
-    // <Card sx={{ height: '100%' }}>
-    //   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25 }}>
-    //     <Box
-    //       sx={{
-    //         display: 'flex',
-    //         alignItems: 'center',
-    //         justifyContent: 'center',
-    //         width: 34,
-    //         height: 34,
-    //         borderRadius: 1.5,
-    //         backgroundColor: config.bgColor,
-    //         border: `1px solid ${config.borderColor}`,
-    //         position: 'relative',
-    //         flexShrink: 0
-    //       }}
-    //     >
-    //       <Icon color={config.iconColor} sx={{ fontSize: 18 }} />
-    //       <Box
-    //         sx={{
-    //           position: 'absolute',
-    //           bottom: -5,
-    //           right: -5,
-    //           width: 15,
-    //           height: 15,
-    //           borderRadius: '50%',
-    //           backgroundColor: 'background.paper',
-    //           border: `1px solid ${config.borderColor}`,
-    //           display: 'flex',
-    //           alignItems: 'center',
-    //           justifyContent: 'center',
-    //           fontSize: '0.5rem',
-    //           color: config.countColor,
-    //           fontWeight: 700,
-    //           lineHeight: 1
-    //         }}
-    //       >
-    //         {config.arrow}
-    //       </Box>
-    //     </Box>
-    //     <Typography variant='h6' fontWeight={600} noWrap>
-    //       {title}
-    //     </Typography>
-    //   </Box>
-
-    //   <Divider />
-
-    //   <CardContent sx={{ py: 1.5, px: 1.5, '&:last-child': { pb: 1.5 } }}>
-    //     <Box sx={{ display: 'flex', gap: 1 }}>
-    //       <StatItem label='Today' count={todayCount} type={type} isToday />
-    //       <StatItem label='7 days' count={weekCount} type={type} />
-    //       <StatItem label='30 days' count={monthCount} type={type} />
-    //     </Box>
-    //   </CardContent>
-    // </Card>
   )
 }
 

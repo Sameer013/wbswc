@@ -8,6 +8,8 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 
+import { useTheme } from '@mui/material/styles'
+
 // Third-party Imports
 import type { ApexOptions } from 'apexcharts'
 
@@ -37,29 +39,34 @@ const chartCategories = {
 const series = [
   {
     type: 'line',
-    name: 'Entry',
+    name: 'entry',
     data: [42, 55, 38, 61, 47, 70, 33, 58, 65, 44, 52, 39, 67, 48, 56]
   },
   {
     type: 'line',
-    name: 'Exit',
+    name: 'exit',
     data: [38, 50, 35, 57, 43, 65, 30, 54, 60, 40, 48, 36, 62, 44, 51]
   },
   {
-    type: 'bar',
-    name: 'Loading',
+    type: 'line',
+    name: 'loading',
     data: [320, 450, 280, 510, 390, 620, 240, 480, 550, 360, 430, 300, 580, 410, 470]
   },
   {
-    type: 'bar',
-    name: 'Unloading',
+    type: 'line',
+    name: 'unloading',
     data: [290, 420, 260, 480, 370, 590, 220, 450, 520, 340, 400, 275, 550, 385, 445]
   }
 ]
 
 const LineChart = () => {
+  const theme = useTheme()
   const divider = 'var(--mui-palette-divider)'
+  const paper = 'var(--mui-palette-background-paper)'
   const disabledText = 'var(--mui-palette-text-disabled)'
+  const secondaryText = 'var(--mui-palette-text-secondary)'
+  const mode = theme.palette.mode
+  const colors = ['#ea5455', '#7367f0', '#ff9f43', '#28c76f']
 
   const options: ApexOptions = {
     chart: {
@@ -68,27 +75,26 @@ const LineChart = () => {
       zoom: { enabled: false },
       toolbar: { show: false }
     },
+    theme: { mode },
     legend: {
       show: true,
       position: 'bottom'
     },
 
     // colors: ['#ff9f43', '#28c76f', '#ea5455', '#7367f0'],
-    colors: ['#ea5455', '#7367f0', '#ff9f43', '#28c76f'],
+    colors,
     stroke: {
       curve: 'straight',
       dashArray: [0, 0, 0, 0], // Truck Exit dashed, rest solid
-      width: [2, 2, 0, 0] // No stroke width for bars
+      width: [2, 2, 2, 2] // No stroke width for bars
     },
     dataLabels: { enabled: false },
     markers: {
       size: 0,
       strokeWidth: 1,
       strokeOpacity: 1,
-
-      // colors: ['#ff9f43', '#28c76f', '#ea5455', '#7367f0'],
-      colors: ['#ea5455', '#7367f0', '#ff9f43', '#28c76f'],
-      strokeColors: ['#fff']
+      colors,
+      strokeColors: paper
     },
     grid: {
       padding: { top: -10 },
@@ -97,39 +103,39 @@ const LineChart = () => {
     },
     tooltip: {
       shared: true,
-      intersect: false
+      intersect: false,
+      theme: mode
     },
 
     yaxis: [
       {
-        seriesName: 'Truck Entry',
+        seriesName: 'entry',
         opposite: false,
         title: {
           text: 'Truck Count',
-          style: { color: '#ff9f43' }
+          style: { color: secondaryText }
         },
         labels: {
           style: { colors: disabledText, fontSize: '13px' }
         }
       },
       {
-        seriesName: 'Truck Entry',
+        seriesName: 'exit',
         show: false
       },
       {
-        // y1 — Bars: Goods Loading (index 2)
-        seriesName: 'Loading',
+        seriesName: 'loading',
         opposite: true,
         title: {
-          text: 'Goods (tons)',
-          style: { color: '#ea5455' }
+          text: 'Loading Count',
+          style: { color: secondaryText }
         },
         labels: {
           style: { colors: disabledText, fontSize: '13px' }
         }
       },
       {
-        seriesName: 'Loading',
+        seriesName: 'unloading',
         show: false
       }
     ],
