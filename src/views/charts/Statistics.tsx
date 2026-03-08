@@ -142,7 +142,9 @@ const Statictics = () => {
       hover: {
         size: 6
       },
-      radius: 4
+      
+      // radius: 4
+
     },
     stroke: {
       curve: 'smooth',
@@ -153,8 +155,8 @@ const Statictics = () => {
       show: true,
       position: 'bottom',
       markers: {
-        width: 8,
-        height: 8,
+        // width: 8,
+        // height: 8,
         offsetY: 1,
         offsetX: theme.direction === 'rtl' ? 8 : -4
       },

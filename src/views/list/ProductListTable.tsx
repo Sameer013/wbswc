@@ -2,16 +2,22 @@
 
 import { useMemo, useState } from 'react'
 
+import Link from 'next/link'
+
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import Checkbox from '@mui/material/Checkbox'
+
+// import Chip from '@mui/material/Chip'
+// import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
+
 import Typography from '@mui/material/Typography'
+
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -29,7 +35,9 @@ import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
-import OptionMenu from '@core/components/option-menu'
+
+// import OptionMenu from '@core/components/option-menu'
+
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
 // Style Imports
@@ -56,7 +64,7 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 const columnHelper = createColumnHelper<VehicleType>()
 
 const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => {
-  const [data, setData] = useState<VehicleType[]>(tableData)
+  const [data] = useState<VehicleType[]>(tableData)
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState({})
 
@@ -115,35 +123,37 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       columnHelper.accessor('vehicleWt', {
         header: 'Weight (Tons)',
         cell: ({ row }) => <Typography>{row.original.vehicleWt}</Typography>
-      })
+      }),
 
-      // {
-      //   id: 'actions',
-      //   header: 'Actions',
-      //   enableSorting: false,
-      //   cell: ({ row }) => (
-      //     <div className='flex items-center'>
-      //       <IconButton>
-      //         <i className='tabler-edit text-textSecondary' />
-      //       </IconButton>
-      //       <OptionMenu
-      //         iconButtonProps={{ size: 'medium' }}
-      //         iconClassName='text-textSecondary'
-      //         options={[
-      //           { text: 'Download', icon: 'tabler-download' },
-      //           {
-      //             text: 'Delete',
-      //             icon: 'tabler-trash',
-      //             menuItemProps: {
-      //               onClick: () => setData(prev => prev.filter(v => v.id !== row.original.id))
-      //             }
-      //           },
-      //           { text: 'Duplicate', icon: 'tabler-copy' }
-      //         ]}
-      //       />
-      //     </div>
-      //   )
-      // }
+      {
+        id: 'actions',
+        header: 'Actions',
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className='flex items-center'>
+            <Link href={`/reports/vehicle/${row.original.id}/pdf`} target='_blank' rel='noopener noreferrer'>
+              <IconButton>
+                <i className='tabler-file-invoice text-textSecondary' />
+              </IconButton>
+            </Link>
+            {/* <OptionMenu
+              iconButtonProps={{ size: 'medium' }}
+              iconClassName='text-textSecondary'
+              options={[
+                { text: 'Download', icon: 'tabler-download' },
+                {
+                  text: 'Delete',
+                  icon: 'tabler-trash',
+                  menuItemProps: {
+                    onClick: () => setData(prev => prev.filter(v => v.id !== row.original.id))
+                  }
+                },
+                { text: 'Duplicate', icon: 'tabler-copy' }
+              ]}
+            /> */}
+          </div>
+        )
+      }
     ],
     []
   )

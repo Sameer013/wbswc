@@ -1,10 +1,6 @@
-import { notFound } from 'next/navigation'
-
-// import dynamic from 'next/dynamic'
-
 import { prisma } from '@/libs/prisma'
 
-import PdfViewerClient from './PdfViewerClient'
+import PdfClient from './PdfClient'
 
 export default async function VehiclePdfPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -18,7 +14,7 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     )
   }
 
-  // Fetch dataq
+  // Fetch data
   const event = await prisma.eventmaster.findUnique({
     where: { id: eventId },
     include: {
@@ -27,7 +23,7 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     }
   })
 
-  // If the event or vehicle record doesn't exist, show 404
+
   if (!event || !event.anprevent) {
     return (
       <div className='flex h-screen items-center justify-center p-6'>
@@ -44,5 +40,5 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     vehicleWt: event.anprevent.vehicleWt
   }
 
-  return <PdfViewerClient record={recordStr} />
+  return <PdfClient record={recordStr} />
 }

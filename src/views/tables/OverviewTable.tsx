@@ -89,7 +89,7 @@ const columnHelper = createColumnHelper<Truck>()
 
 const OverviewTable = ({ truckData }: { truckData?: Truck[] }) => {
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState<Truck[]>(truckData ?? [])
+  const [data] = useState<Truck[]>(truckData ?? [])
 
   const columns = useMemo<ColumnDef<Truck, any>[]>(
     () => [

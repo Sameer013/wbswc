@@ -1,10 +1,17 @@
 'use server'
 
 import { prisma } from '@/libs/prisma'
-import type { WarehouseEvent } from '@/components/LiveFeed'
+
 
 import db from '@/libs/db'
 import type { VehicleType } from '@/views/list/ProductListTable'
+
+
+interface WarehouseEvent {
+  id: number
+  timestamp: Date
+  event_msg: string
+}
 
 export async function getLiveFeed(): Promise<WarehouseEvent[]> {
   const events = await prisma.$queryRaw<WarehouseEvent[]>`SELECT e.id as id, et.eventType as event_msg ,

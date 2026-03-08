@@ -21,7 +21,7 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
   const generatedAt = new Date()
 
   return (
-    <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} author='WB Warehouse'>
+    <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} producer='sigma'  author='WBSWC'>
       <Page size='A4' style={styles.page}>
         <View style={styles.headerRow}>
           <View style={styles.logoContainer}>
@@ -106,7 +106,8 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>WB Warehouse — Weighbridge Management System</Text>
+          <Text style={styles.footerText}>WB State Warehousing Corporation</Text>
+          <Text style={styles.footerText}>Developed by Sigma e Solution Pvt. Ltd.</Text>
           <Text style={styles.footerText}>
             Generated: {formatDate(generatedAt)} {formatTime(generatedAt)}
           </Text>
