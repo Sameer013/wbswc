@@ -1,52 +1,72 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["views"]
 }
 
 datasource db {
   provider = "mysql"
 }
 
-model Users {
+model anprevent {
+  id            Int         @id @default(autoincrement())
+  eventMasterId Int         @unique(map: "AnprEvent_eventMasterId_key")
+  vehicleNo     String
+  vehicleWt     Float?
+  eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
+}
+
+model users {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
+  email     String   @unique(map: "Users_email_key")
   name      String?
   createdAt DateTime @default(now())
 }
 
-
-model Event_Type {
-  eventId          Int      @id @default(autoincrement())
-  eventType        String   @unique
+model event_type {
+  eventId     Int           @id @default(autoincrement())
+  eventType   String        @unique(map: "Event_Type_eventType_key")
   description String?
-
-  eventMasters      EventMaster[]
+  eventmaster eventmaster[]
 }
 
-model EventMaster {
-  id            Int   @id @default(autoincrement())
-  eventId   Int
+model eventmaster {
+  id             Int        @id @default(autoincrement())
+  eventId        Int
   eventTimestamp DateTime
-  value         String?
+  value          String?
+  anprevent      anprevent?
+  event_type     event_type @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
 
-  eventType     Event_Type @relation(fields: [eventId], references: [eventId])
-  anprEvent     AnprEvent?
-
-  @@index([eventTimestamp])
-  @@index([eventId])
+  @@index([eventId], map: "EventMaster_eventId_idx")
+  @@index([eventTimestamp], map: "EventMaster_eventTimestamp_idx")
 }
 
-model AnprEvent {
-  id            Int   @id @default(autoincrement())
-  eventMasterId       Int   @unique
-  vehicleNo     String
-  vehicleWt     Float?
+view v_alldata {
+  entryCnt  BigInt @default(0)
+  exitCnt   BigInt @default(0)
+  loadCnt   BigInt @default(0)
+  unloadCnt BigInt @default(0)
+}
 
-  eventmaster         EventMaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade)
+view v_chartdata {
+  date      DateTime? @db.Date
+  Entry     Decimal?  @db.Decimal(23, 0)
+  Exit      Decimal?  @db.Decimal(23, 0)
+  Loading   Decimal?  @db.Decimal(23, 0)
+  Unloading Decimal?  @db.Decimal(23, 0)
+}
+
+view v_day {
+  entryCnt  BigInt @default(0)
+  exitCnt   BigInt @default(0)
+  loadCnt   BigInt @default(0)
+  unloadCnt BigInt @default(0)
+}
+
+view v_mnthdata {
+  entryCnt  BigInt @default(0)
+  exitCnt   BigInt @default(0)
+  loadCnt   BigInt @default(0)
+  unloadCnt BigInt @default(0)
 }

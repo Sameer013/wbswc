@@ -187,6 +187,28 @@ const EventRow = ({ event, isNew, isLast }: { event: WarehouseEvent; isNew: bool
   )
 }
 
+function parsedbtime(timestamp: string | Date): Date {
+  // this function was created by chatgpt, why you may ask
+  // I am storing db time as +05:30 but when I fetch data from db it is coming as UTC time with Z or +00:00, so I need to convert it back to local time
+  if (timestamp instanceof Date) {
+    return new Date(
+      timestamp.getUTCFullYear(),
+      timestamp.getUTCMonth(),
+      timestamp.getUTCDate(),
+      timestamp.getUTCHours(),
+      timestamp.getUTCMinutes(),
+      timestamp.getUTCSeconds()
+    )
+  }
+
+  const clean = timestamp.replace('Z', '').replace('+00:00', '').replace('T', ' ').split('.')[0]
+  const [datePart, timePart] = clean.split(' ')
+  const [year, month, day] = datePart.split('-').map(Number)
+  const [hours, minutes, seconds] = (timePart ?? '00:00:00').split(':').map(Number)
+
+  return new Date(year, month - 1, day, hours, minutes, seconds)
+}
+
 const LiveAlerts = () => {
   const [visibleEvents, setVisibleEvents] = useState<WarehouseEvent[]>([])
   const [newIds, setNewIds] = useState<Set<number>>(new Set())
@@ -204,7 +226,7 @@ const LiveAlerts = () => {
 
       const mapped: WarehouseEvent[] = events.map(e => ({
         ...e,
-        timestamp: new Date(e.timestamp)
+        timestamp: parsedbtime(e.timestamp)
       }))
 
       const freshIds = new Set<number>()

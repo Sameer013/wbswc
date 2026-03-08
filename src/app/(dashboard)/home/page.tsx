@@ -16,7 +16,7 @@ import LineChart from '@/views/charts/LineChart'
 // import LiveFeed from '@/components/LiveFeed'
 import LiveAlertsFeed from '@/views/dashboards/crm/LiveAlertsFeed'
 
-import DashboardCard2 from '@/components/DashboardCard'
+import DashboardCard2 from '@/components/DashboardCard2'
 
 const Dashboard = async () => {
   return (

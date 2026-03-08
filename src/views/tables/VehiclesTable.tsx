@@ -1,9 +1,10 @@
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 
+import { getVehicleTableData } from '@/app/server/action'
+
 // Component Imports
 import ProductListTable from '@views/list/ProductListTable'
-import ProductCard from '@views/list/ProductCard'
 
 // Data Imports
 // import { getEcommerceData } from '@/app/server/actions'
@@ -27,15 +28,12 @@ import ProductCard from '@views/list/ProductCard'
 } */
 
 const VehiclesTable = async () => {
-  // Vars
+  const data = await getVehicleTableData()
 
   return (
     <Grid container spacing={6}>
-      {/* <Grid size={{ xs: 12 }}>
-        <ProductCard />
-      </Grid> */}
       <Grid size={{ xs: 12 }}>
-        <ProductListTable productData={[]} />
+        <ProductListTable tableData={data} />
       </Grid>
     </Grid>
   )

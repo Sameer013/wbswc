@@ -1,72 +1,96 @@
 'use client'
 
 // Next Imports
+import { useEffect, useState } from 'react'
+
 import dynamic from 'next/dynamic'
 
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
-
 import { useTheme } from '@mui/material/styles'
 
 // Third-party Imports
 import type { ApexOptions } from 'apexcharts'
 
+// Server Action
+import { getChartData } from '@/app/server/action'
+
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-const chartCategories = {
-  dates: [
-    '7/12',
-    '8/12',
-    '9/12',
-    '10/12',
-    '11/12',
-    '12/12',
-    '13/12',
-    '14/12',
-    '15/12',
-    '16/12',
-    '17/12',
-    '18/12',
-    '19/12',
-    '20/12',
-    '21/12'
-  ]
+interface ChartRow {
+  date: string
+  Entry: string
+  Exit: string
+  Loading: string
+  Unloading: string
 }
 
-const series = [
-  {
-    type: 'line',
-    name: 'entry',
-    data: [42, 55, 38, 61, 47, 70, 33, 58, 65, 44, 52, 39, 67, 48, 56]
-  },
-  {
-    type: 'line',
-    name: 'exit',
-    data: [38, 50, 35, 57, 43, 65, 30, 54, 60, 40, 48, 36, 62, 44, 51]
-  },
-  {
-    type: 'line',
-    name: 'loading',
-    data: [320, 450, 280, 510, 390, 620, 240, 480, 550, 360, 430, 300, 580, 410, 470]
-  },
-  {
-    type: 'line',
-    name: 'unloading',
-    data: [290, 420, 260, 480, 370, 590, 220, 450, 520, 340, 400, 275, 550, 385, 445]
-  }
-]
-
 const LineChart = () => {
+  const [data, setData] = useState<ChartRow[]>([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getChartData()
+
+        if (res && Array.isArray(res.data)) {
+          setData(res.data as ChartRow[])
+        } else if (Array.isArray(res)) {
+          setData(res as ChartRow[])
+        }
+      } catch (error) {
+        console.error('Failed to fetch Chart Series.')
+      }
+    }
+
+    fetchData()
+
+    const interval = setInterval(fetchData, 60000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   const theme = useTheme()
   const divider = 'var(--mui-palette-divider)'
   const paper = 'var(--mui-palette-background-paper)'
   const disabledText = 'var(--mui-palette-text-disabled)'
   const secondaryText = 'var(--mui-palette-text-secondary)'
   const mode = theme.palette.mode
+
   const colors = ['#ea5455', '#7367f0', '#ff9f43', '#28c76f']
+
+  const categories = data.map(d =>
+    new Date(d.date).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'numeric'
+    })
+  )
+
+  const series = [
+    {
+      name: 'Entry',
+      type: 'line',
+      data: data.map(d => Number(d.Entry))
+    },
+    {
+      name: 'Exit',
+      type: 'line',
+      data: data.map(d => Number(d.Exit))
+    },
+    {
+      name: 'Loading',
+      type: 'line',
+      data: data.map(d => Number(d.Loading))
+    },
+    {
+      name: 'Unloading',
+      type: 'line',
+      data: data.map(d => Number(d.Unloading))
+    }
+  ]
 
   const options: ApexOptions = {
     chart: {
@@ -80,13 +104,11 @@ const LineChart = () => {
       show: true,
       position: 'bottom'
     },
-
-    // colors: ['#ff9f43', '#28c76f', '#ea5455', '#7367f0'],
     colors,
     stroke: {
       curve: 'straight',
-      dashArray: [0, 0, 0, 0], // Truck Exit dashed, rest solid
-      width: [2, 2, 2, 2] // No stroke width for bars
+      dashArray: [0, 0, 0, 0],
+      width: [2, 2, 2, 2]
     },
     dataLabels: { enabled: false },
     markers: {
@@ -106,10 +128,9 @@ const LineChart = () => {
       intersect: false,
       theme: mode
     },
-
     yaxis: [
       {
-        seriesName: 'entry',
+        seriesName: 'Entry',
         opposite: false,
         title: {
           text: 'Truck Count',
@@ -119,12 +140,9 @@ const LineChart = () => {
           style: { colors: disabledText, fontSize: '13px' }
         }
       },
+      { seriesName: 'Exit', show: false },
       {
-        seriesName: 'exit',
-        show: false
-      },
-      {
-        seriesName: 'loading',
+        seriesName: 'Loading',
         opposite: true,
         title: {
           text: 'Loading Count',
@@ -134,10 +152,7 @@ const LineChart = () => {
           style: { colors: disabledText, fontSize: '13px' }
         }
       },
-      {
-        seriesName: 'unloading',
-        show: false
-      }
+      { seriesName: 'Unloading', show: false }
     ],
     xaxis: {
       axisBorder: { show: false },
@@ -146,22 +161,13 @@ const LineChart = () => {
       labels: {
         style: { colors: disabledText, fontSize: '13px' }
       },
-
-      categories: chartCategories.dates
+      categories
     }
   }
 
   return (
     <Card>
-      <CardHeader
-        title='Overview of Truck Movements'
-        sx={{
-          flexDirection: ['column', 'row'],
-          alignItems: ['flex-start', 'center'],
-          '& .MuiCardHeader-action': { mb: 0 },
-          '& .MuiCardHeader-content': { mb: [0, 0] }
-        }}
-      />
+      <CardHeader title='Overview of Truck Movements' />
       <CardContent>
         <AppReactApexCharts type='line' width='100%' height={200} options={options} series={series} />
       </CardContent>

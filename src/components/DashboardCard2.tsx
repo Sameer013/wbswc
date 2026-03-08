@@ -32,13 +32,9 @@ const DashboardCard2 = () => {
   const [data, setData] = useState<VehicleStatsData>(defaultStats)
 
   useEffect(() => {
-    console.log('Fetching vehicle stats...')
-
     const fetchStats = async () => {
       try {
         const stats = await getVehicleStats()
-
-        console.log(' Stats received:', JSON.stringify(stats))
 
         setData(stats)
       } catch (error) {

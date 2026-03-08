@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return res.json({ error: 'Missing required type, timestamp fields' }, { status: 400 })
     }
 
-    const eventType = await prisma.event_Type.findUnique({
+    const eventType = await prisma.event_type.findUnique({
       where: { eventType: type }
     })
 
@@ -19,23 +19,29 @@ export async function POST(request: Request) {
       return res.json({ error: `Invalid event type: ${type}` }, { status: 400 })
     }
 
-    const eventMaster = await prisma.eventMaster.create({
+    const localTimestamp = timestamp.replace(' ', 'T') + '.000Z'
+
+    const eventMaster = await prisma.eventmaster.create({
       data: {
         eventId: eventType.eventId,
+        eventTimestamp: localTimestamp,
 
-        eventTimestamp: new Date(timestamp),
         value: value
 
         // eventTimestamp: timestamp
       }
     })
 
-    console.log('Inserted Time:', timestamp)
-
-    console.log('Inserted eventMaster:', eventMaster)
-
     return res.json({ success: true, data: eventMaster }, { status: 201 })
   } catch (error) {
-    return res.json({ error: `Failed to insert new event: ${error}` }, { status: 500 })
+    console.error('Full error:', error)
+
+    return res.json(
+      {
+        error: `Failed to insert new event`,
+        msg: error instanceof Error ? error.message : String(error)
+      },
+      { status: 500 }
+    )
   }
 }

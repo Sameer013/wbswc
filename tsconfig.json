@@ -57,7 +57,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/app/reports/vehicle/[id]/pdf/route.bkp"
   ],
   "exclude": [
     "node_modules"

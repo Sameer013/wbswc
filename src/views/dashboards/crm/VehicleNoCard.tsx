@@ -1,6 +1,6 @@
 'use client'
 
-// import Image from 'next/image'
+import Image from 'next/image'
 
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
@@ -88,12 +88,12 @@ const VehicleNoCard = ({ title, type, todayCount, monthCount, yearCount, iconSrc
           py: 2
         }}
       >
-        {/* {iconSrc ? (
+        {iconSrc ? (
           <Image src={iconSrc} alt={title} width={38} height={38} style={{ objectFit: 'contain' }} />
         ) : (
           <Icon color={config.iconColor} sx={{ fontSize: 36 }} />
-        )} */}
-        <Icon color={config.iconColor} sx={{ fontSize: 36 }} />
+        )}
+        {/* <Icon color={config.iconColor} sx={{ fontSize: 36 }} /> */}
 
         <Box sx={{ textAlign: 'right' }}>
           <Typography fontWeight={800} color={config.countColor} sx={{ fontSize: '2.5rem', lineHeight: 1 }}>

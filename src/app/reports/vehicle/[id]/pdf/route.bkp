@@ -1,0 +1,46 @@
+import { Readable } from 'stream'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/libs/prisma'
+import { generatePdfStream } from '@/libs/generatePDF'
+
+export const runtime = 'nodejs'
+
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+    const eventId = parseInt(id, 10)
+
+    if (isNaN(eventId)) {
+      return NextResponse.json({ success: false, message: 'Invalid event ID' }, { status: 400 })
+    }
+
+    const event = await prisma.eventmaster.findUnique({
+      where: { id: eventId },
+      include: { anprevent: true, event_type: true }
+    })
+
+    if (!event || !event.anprevent) {
+      return NextResponse.json({ success: false, message: 'Event not found' }, { status: 404 })
+    }
+
+    const nodeStream = await generatePdfStream({
+      id: event.id,
+      eventType: event.event_type.eventType,
+      eventTimestamp: event.eventTimestamp,
+      vehicleNo: event.anprevent.vehicleNo,
+      vehicleWt: event.anprevent.vehicleWt
+    })
+
+    const webStream = Readable.toWeb(nodeStream as Readable) as ReadableStream<Uint8Array>
+
+    return new NextResponse(webStream, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'inline; filename="report.pdf"',
+      }
+    })
+  } catch (error) {
+    console.error('[PDF Route Error]', error)
+    return NextResponse.json({ success: false, message: 'Failed to generate PDF' }, { status: 500 })
+  }
+}

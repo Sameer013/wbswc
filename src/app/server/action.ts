@@ -3,10 +3,12 @@
 import { prisma } from '@/libs/prisma'
 import type { WarehouseEvent } from '@/components/LiveFeed'
 
+import db from '@/libs/db'
+import type { VehicleType } from '@/views/list/ProductListTable'
+
 export async function getLiveFeed(): Promise<WarehouseEvent[]> {
-  const events = await prisma.$queryRaw<
-    WarehouseEvent[]
-  >`SELECT e.id as id, et.eventType as event_msg ,e.eventtimestamp as timestamp FROM eventmaster e 
+  const events = await prisma.$queryRaw<WarehouseEvent[]>`SELECT e.id as id, et.eventType as event_msg ,
+  e.eventtimestamp as timestamp FROM eventmaster e 
 JOIN event_type et on e.eventId = et.eventId
 ORDER BY e.eventTimestamp desc
 LIMIT 20
@@ -69,5 +71,41 @@ export async function getVehicleStats(): Promise<VehicleStats> {
       load: { todayCount: 0, monthCount: 0, yearCount: 0 },
       unload: { todayCount: 0, monthCount: 0, yearCount: 0 }
     }
+  }
+}
+
+export async function getChartData() {
+  try {
+    const [data] = await db.query(`
+      SELECT date, entryCnt 'Entry', exitCnt 'Exit', loadCnt 'Loading', unloadCnt 'Unloading'
+      FROM (
+        SELECT date, entryCnt, exitCnt, loadCnt, unloadCnt
+        FROM v_chartdata
+        ORDER BY date DESC
+        LIMIT 15
+      ) AS recent
+      ORDER BY date ASC`)
+
+    return { data: data }
+  } catch (error) {
+    console.error('getChartData failed:', error)
+
+    return { data: [] }
+  }
+}
+
+export async function getVehicleTableData() {
+  try {
+    const [data] = await db.query(`
+      select e.id,e.eventTimestamp timestamp, a.vehicleNo, time(e.eventTimestamp) entry_time,'-' exit_time,a.vehicleWt
+from eventmaster e
+join anprevent a on e.id = a.eventMasterId
+order by e.eventTimestamp desc limit 20`)
+
+    return data as VehicleType[]
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return [] as VehicleType[]
   }
 }
