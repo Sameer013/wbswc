@@ -9,7 +9,7 @@ SELECT
         ELSE 0
       END
     )
-  ) AS `Entry`,
+  ) AS `entryCnt`,
   sum(
     (
       CASE
@@ -17,7 +17,7 @@ SELECT
         ELSE 0
       END
     )
-  ) AS `Exit`,
+  ) AS `exitCnt`,
   sum(
     (
       CASE
@@ -25,7 +25,7 @@ SELECT
         ELSE 0
       END
     )
-  ) AS `Loading`,
+  ) AS `loadCnt`,
   sum(
     (
       CASE
@@ -33,7 +33,7 @@ SELECT
         ELSE 0
       END
     )
-  ) AS `Unloading`
+  ) AS `unloadCnt`
 FROM
   `warehousedb`.`eventmaster`
 GROUP BY

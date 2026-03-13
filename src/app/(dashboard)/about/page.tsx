@@ -1,11 +1,5 @@
 'use client'
 
-
 export default function Page() {
-  return (
-    <>
-     Hello Sameer
-    </>
-  )
+  return <>Hello Sameer</>
 }
-

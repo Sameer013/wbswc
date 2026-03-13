@@ -2,10 +2,9 @@
 
 import { prisma } from '@/libs/prisma'
 
-
 import db from '@/libs/db'
 import type { VehicleType } from '@/views/list/ProductListTable'
-
+import type { AlertType } from '@/views/dashboards/crm/LiveAlerts'
 
 interface WarehouseEvent {
   id: number
@@ -60,8 +59,6 @@ export async function getVehicleStats(): Promise<VehicleStats> {
     const month = result.find(r => r.period === 'month') ?? { entryCnt: 0, exitCnt: 0, loadCnt: 0, unloadCnt: 0 }
     const all = result.find(r => r.period === 'year') ?? { entryCnt: 0, exitCnt: 0, loadCnt: 0, unloadCnt: 0 }
 
-    console.log('Vehicle stats query result:')
-
     return {
       entry: { todayCount: n(day.entryCnt), monthCount: n(month.entryCnt), yearCount: n(all.entryCnt) },
       exit: { todayCount: n(day.exitCnt), monthCount: n(month.exitCnt), yearCount: n(all.exitCnt) },
@@ -114,5 +111,37 @@ order by e.eventTimestamp desc limit 20`)
     console.error('Fetch failed:', error)
 
     return [] as VehicleType[]
+  }
+}
+
+export async function getIntrusionAlerts(): Promise<AlertType[]> {
+  try {
+    const data = await prisma.intrusionevent.findMany({
+      include: {
+        eventmaster: {
+          select: {
+            eventTimestamp: true
+          }
+        }
+      },
+      orderBy: {
+        eventmaster: {
+          eventTimestamp: 'desc'
+        }
+      }
+    })
+
+    return data.map(event => ({
+      id: event.id,
+      description: event.description,
+      location: event.location,
+      severity: event.severity,
+      timestamp: event.eventmaster.eventTimestamp.toISOString(),
+      isNew: false
+    }))
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return []
   }
 }

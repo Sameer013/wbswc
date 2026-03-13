@@ -16,6 +16,15 @@ model anprevent {
   eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
 }
 
+model intrusionevent {
+  id            Int               @id @default(autoincrement())
+  eventMasterId Int               @unique(map: "IntrusionEvent_eventMasterId_key")
+  location      String
+  severity      IntrusionSeverity @default(medium)
+  description   String
+  eventmaster   eventmaster       @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
+}
+
 model users {
   id        Int      @id @default(autoincrement())
   email     String   @unique(map: "Users_email_key")
@@ -31,12 +40,13 @@ model event_type {
 }
 
 model eventmaster {
-  id             Int        @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   eventId        Int
   eventTimestamp DateTime
   value          String?
   anprevent      anprevent?
-  event_type     event_type @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
+  event_type     event_type      @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
+  intrusionevent intrusionevent?
 
   @@index([eventId], map: "EventMaster_eventId_idx")
   @@index([eventTimestamp], map: "EventMaster_eventTimestamp_idx")
@@ -51,10 +61,10 @@ view v_alldata {
 
 view v_chartdata {
   date      DateTime? @db.Date
-  Entry     Decimal?  @db.Decimal(23, 0)
-  Exit      Decimal?  @db.Decimal(23, 0)
-  Loading   Decimal?  @db.Decimal(23, 0)
-  Unloading Decimal?  @db.Decimal(23, 0)
+  entryCnt  Decimal?  @db.Decimal(23, 0)
+  exitCnt   Decimal?  @db.Decimal(23, 0)
+  loadCnt   Decimal?  @db.Decimal(23, 0)
+  unloadCnt Decimal?  @db.Decimal(23, 0)
 }
 
 view v_day {
@@ -69,4 +79,11 @@ view v_mnthdata {
   exitCnt   BigInt @default(0)
   loadCnt   BigInt @default(0)
   unloadCnt BigInt @default(0)
+}
+
+enum IntrusionSeverity {
+  low
+  medium
+  high
+  critical
 }

@@ -2,9 +2,11 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   basePath: process.env.BASEPATH,
-  experimental: {
-    esmExternals: 'loose'
-  },
+  transpilePackages: ['@react-pdf/renderer'],
+
+  // experimental: {
+  //   esmExternals: 'loose'
+  // },
   // serverExternalPackages: ['@react-pdf/renderer'],
   redirects: async () => {
     return [

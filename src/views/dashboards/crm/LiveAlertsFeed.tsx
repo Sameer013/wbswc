@@ -16,6 +16,7 @@ import LogoutRounded from '@mui/icons-material/LogoutRounded'
 import FileUploadRounded from '@mui/icons-material/FileUploadRounded'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 import PhotoCameraRounded from '@mui/icons-material/PhotoCameraRounded'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
 import AccessTime from '@mui/icons-material/AccessTime'
 
@@ -35,7 +36,7 @@ interface RawWarehouseEvent {
   event_msg: string
 }
 
-type EventKey = 'entry' | 'exit' | 'loading' | 'unloading' | 'anpr'
+type EventKey = 'entry' | 'exit' | 'loading' | 'unloading' | 'anpr' | 'intrusion'
 
 type MuiColor = 'success' | 'error' | 'primary' | 'warning' | 'secondary'
 
@@ -46,9 +47,9 @@ interface EventMeta {
   Icon: React.ElementType
 }
 
-type FilterOption = 'All Events' | 'Entry / Exit' | 'Loading / Unloading' | 'ANPR'
+type FilterOption = 'All Events' | 'Entry / Exit' | 'Loading / Unloading' | 'ANPR' | 'Intrusion'
 
-const FILTER_OPTIONS: FilterOption[] = ['All Events', 'Entry / Exit', 'Loading / Unloading', 'ANPR']
+const FILTER_OPTIONS: FilterOption[] = ['All Events', 'Entry / Exit', 'Loading / Unloading', 'ANPR', 'Intrusion']
 
 function matchesFilter(msg: string, filter: FilterOption): boolean {
   const key = msg?.toLowerCase().trim() as EventKey
@@ -67,16 +68,34 @@ function matchesFilter(msg: string, filter: FilterOption): boolean {
 
 const EVENT_META: Record<EventKey, EventMeta> = {
   entry: { label: 'Vehicle Entry', location: 'Main Gate', color: 'success', Icon: LoginRounded },
-  exit: { label: 'Vehicle Exit', location: 'Main Gate', color: 'error', Icon: LogoutRounded },
+  exit: { label: 'Vehicle Exit', location: 'Main Gate', color: 'success', Icon: LogoutRounded },
   loading: { label: 'Loading Activity', location: 'Loading Bay', color: 'primary', Icon: FileDownloadRounded },
   unloading: { label: 'Unloading Activity', location: 'Loading Bay', color: 'warning', Icon: FileUploadRounded },
-  anpr: { label: 'ANPR Event', location: 'Perimeter', color: 'secondary', Icon: PhotoCameraRounded }
+  anpr: { label: 'ANPR Event', location: 'Perimeter', color: 'secondary', Icon: PhotoCameraRounded },
+  intrusion: { label: 'Intrusion Event', location: 'Perimeter', color: 'error', Icon: ErrorOutlineIcon }
 }
+
+// function getEventMeta(msg: string): EventMeta {
+//   const key = msg?.toLowerCase().trim() as EventKey
+
+//   return EVENT_META[key] ?? EVENT_META.anpr
+// }
 
 function getEventMeta(msg: string): EventMeta {
   const key = msg?.toLowerCase().trim() as EventKey
 
-  return EVENT_META[key] ?? EVENT_META.anpr
+  if (!EVENT_META[key]) {
+    console.warn(`Unknown event type: "${msg}"`)
+  }
+
+  return (
+    EVENT_META[key] ?? {
+      label: msg ?? 'Unknown Event',
+      location: 'Unknown',
+      color: 'secondary',
+      Icon: ErrorOutlineIcon
+    }
+  )
 }
 
 function formatTimestamp(date: Date): string {
@@ -240,7 +259,7 @@ const LiveAlerts = () => {
       setVisibleEvents(mapped)
 
       if (freshIds.size > 0) {
-        setTimeout(() => setNewIds(new Set()), 2000)
+        setTimeout(() => setNewIds(new Set()), 5000)
       }
     } catch (err) {
       console.error('Error fetching warehouse events:', err)
