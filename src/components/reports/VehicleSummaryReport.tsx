@@ -19,8 +19,8 @@ export type EventSummaryRecord2 = {
   exit_time: Date
   weight: number | null
   total_minutes: number | null
-  cycle_date: Date
-  created_at: Date
+  cycle_date: Date | null
+  created_at: Date | null
 }
 
 const formatDate = (d: Date) =>
@@ -169,7 +169,7 @@ const VehicleSummaryReport = ({
                   <Text style={styles.tableCellLabel}>{record.total_minutes ?? '--'}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 0.9 }}>
-                  <Text style={styles.tableCellLabel}>{formatDate(record.cycle_date)}</Text>
+                  <Text style={styles.tableCellLabel}>{record.cycle_date ? formatDate(record.cycle_date) : '--'}</Text>
                 </View>
               </View>
             ))
