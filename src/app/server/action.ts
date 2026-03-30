@@ -14,11 +14,11 @@ interface WarehouseEvent {
 
 export async function getLiveFeed(): Promise<WarehouseEvent[]> {
   const events = await prisma.$queryRaw<WarehouseEvent[]>`SELECT e.id as id, et.eventType as event_msg ,
-  e.eventtimestamp as timestamp FROM eventmaster e 
-JOIN event_type et on e.eventId = et.eventId
-ORDER BY e.eventTimestamp desc
-LIMIT 20
-`
+    e.eventtimestamp as timestamp FROM eventmaster e 
+    JOIN event_type et on e.eventId = et.eventId
+    ORDER BY e.eventTimestamp desc
+    LIMIT 20
+  `
 
   return events
 }

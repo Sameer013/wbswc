@@ -23,6 +23,7 @@ import AccessTime from '@mui/icons-material/AccessTime'
 import OptionMenu from '@core/components/option-menu'
 
 import { getLiveFeed } from '@/app/server/action'
+import { formatTimestamp } from '@/utils/functions'
 
 export interface WarehouseEvent {
   id: number
@@ -96,16 +97,6 @@ function getEventMeta(msg: string): EventMeta {
       Icon: ErrorOutlineIcon
     }
   )
-}
-
-function formatTimestamp(date: Date): string {
-  const dd = String(date.getDate()).padStart(2, '0')
-  const mm = String(date.getMonth() + 1).padStart(2, '0')
-  const yyyy = date.getFullYear()
-  const hh = String(date.getHours()).padStart(2, '0')
-  const min = String(date.getMinutes()).padStart(2, '0')
-
-  return `${dd}-${mm}-${yyyy} ${hh}:${min}`
 }
 
 function getRelativeTime(date: Date): string {
@@ -259,7 +250,7 @@ const LiveAlerts = () => {
       setVisibleEvents(mapped)
 
       if (freshIds.size > 0) {
-        setTimeout(() => setNewIds(new Set()), 5000)
+        setTimeout(() => setNewIds(new Set()), 10000)
       }
     } catch (err) {
       console.error('Error fetching warehouse events:', err)

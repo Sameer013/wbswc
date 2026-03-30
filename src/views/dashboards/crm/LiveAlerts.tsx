@@ -18,6 +18,7 @@ import AccessTime from '@mui/icons-material/AccessTime'
 
 import OptionMenu from '@core/components/option-menu'
 import { getIntrusionAlerts } from '@/app/server/action'
+import { formatTimestamp } from '@/utils/functions'
 
 export type AlertType = {
   id: number
@@ -63,7 +64,7 @@ const LiveAlerts = () => {
       setAlerts(data)
 
       if (freshIds.size > 0) {
-        setTimeout(() => setNewIds(new Set()), 5000)
+        setTimeout(() => setNewIds(new Set()), 10000)
       }
     } catch (err) {
       console.error('Error fetching intrusion alerts:', err)
@@ -207,7 +208,7 @@ const LiveAlerts = () => {
                     <Box className='flex items-center gap-1'>
                       <AccessTime sx={{ fontSize: 12, color: 'text.disabled' }} />
                       <Typography variant='caption' color='text.disabled'>
-                        {item.timestamp}
+                        {formatTimestamp(new Date(item.timestamp))}
                       </Typography>
                     </Box>
                     <Box className='flex items-center gap-1'>

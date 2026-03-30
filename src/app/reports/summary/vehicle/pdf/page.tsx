@@ -2,8 +2,9 @@ import { prisma } from '@/libs/prisma'
 
 import PdfClient from './PdfClient'
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ from: string, to: string }> }) {
- 
+import { convertUTCtoLocalTime } from '@/utils/functions'
+
+export default async function Page({ searchParams }: { searchParams: Promise<{ from: string; to: string }> }) {
   const { from, to } = await searchParams // to access ?from=${fromDate}&to=${toDate} in url
 
   if (!from || !to) {
@@ -29,32 +30,61 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   }
 
   // Fetch all events
-  const events = await prisma.eventmaster.findMany({
+  // const events = await prisma.eventmaster.findMany({
+  //   where: {
+  //     eventTimestamp: {
+  //       gte: fromDate,
+  //       lt: toDate
+  //     }
+  //   },
+
+  //   // distinct: ['eventTimestamp'],
+  //   include: {
+  //     anprevent: true,
+  //     event_type: true
+  //   },
+  //   orderBy: {
+  //     eventTimestamp: 'asc'
+  //   }
+  // })
+
+  const events2 = await prisma.vehicle_cycle.findMany({
     where: {
-      eventTimestamp: {
+      cycle_date: {
         gte: fromDate,
         lt: toDate
       }
     },
-    
-    // distinct: ['eventTimestamp'],
-    include: {
-      anprevent: true,
-      event_type: true
-    },
     orderBy: {
-      eventTimestamp: 'asc' 
+      cycle_date: 'asc'
     }
   })
 
- 
-  const formattedRecords = events.map(event => ({
-    id: event.id,
-    eventType: event.event_type?.eventType || 'Unknown',
-    eventTimestamp: event.eventTimestamp, 
-    vehicleNo: event.anprevent?.vehicleNo || '-',
-    vehicleWt: event.anprevent?.vehicleWt || null
-  }))
+  // const formattedRecords = events.map(event => {
+  //   return {
+  //     id: event.id,
+  //     eventType: event.event_type?.eventType || 'Unknown',
+  //     eventTimestamp: convertUTCtoLocalTime(event.eventTimestamp), // UTC time that is coming from Prisma is in UTC format, so function to convert it to local timezone
+  //     vehicleNo: event.anprevent?.vehicleNo || '-',
+  //     vehicleWt: event.anprevent?.vehicleWt || null
+  //   }
+  // })
 
-  return <PdfClient records={formattedRecords} fromDate={from} toDate={to} />
+  const formattedRecords2 = events2.map(event => {
+    return {
+      id: event.id,
+      vehicleNo: event.vehicleNo || 0,
+      entry_time: convertUTCtoLocalTime(event.entry_time),
+      weight_time: convertUTCtoLocalTime(event.weight_time),
+      exit_time: convertUTCtoLocalTime(event.exit_time),
+      weight: event.weight || null,
+      cycle_date: event.cycle_date,
+      created_at: convertUTCtoLocalTime(event.created_at),
+      total_minutes: event.total_minutes
+    }
+  })
+
+  console.log(formattedRecords2)
+
+  return <PdfClient records={formattedRecords2} fromDate={from} toDate={to} />
 }

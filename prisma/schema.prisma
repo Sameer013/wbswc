@@ -8,23 +8,6 @@ datasource db {
   provider = "mysql"
 }
 
-model anprevent {
-  id            Int         @id @default(autoincrement())
-  eventMasterId Int         @unique(map: "AnprEvent_eventMasterId_key")
-  vehicleNo     String
-  vehicleWt     Float?
-  eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
-}
-
-model intrusionevent {
-  id            Int               @id @default(autoincrement())
-  eventMasterId Int               @unique(map: "IntrusionEvent_eventMasterId_key")
-  location      String
-  severity      IntrusionSeverity @default(medium)
-  description   String
-  eventmaster   eventmaster       @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
-}
-
 model users {
   id        Int      @id @default(autoincrement())
   email     String   @unique(map: "Users_email_key")
@@ -39,6 +22,14 @@ model event_type {
   eventmaster eventmaster[]
 }
 
+model vehicle_event {
+  id            Int         @id @default(autoincrement())
+  eventMasterId Int         @unique(map: "VehicleEvent_eventMasterId_key")
+  vehicleNo     String
+  movement      String
+  eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "VehivleEvent_eventMasterId_fkey")
+}
+
 model eventmaster {
   id             Int             @id @default(autoincrement())
   eventId        Int
@@ -47,9 +38,39 @@ model eventmaster {
   anprevent      anprevent?
   event_type     event_type      @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
   intrusionevent intrusionevent?
+  vehicle_event  vehicle_event?
 
   @@index([eventId], map: "EventMaster_eventId_idx")
   @@index([eventTimestamp], map: "EventMaster_eventTimestamp_idx")
+}
+
+model vehicle_cycle {
+  id            Int       @id @default(autoincrement())
+  vehicleNo     String?   @db.VarChar(50)
+  entry_time    DateTime? @db.DateTime(0)
+  weight_time   DateTime? @db.DateTime(0)
+  exit_time     DateTime? @db.DateTime(0)
+  weight        Float?
+  total_minutes Int?
+  cycle_date    DateTime  @db.Date
+  created_at    DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model anprevent {
+  id            Int         @id @default(autoincrement())
+  eventMasterId Int         @unique(map: "AnprEvent_eventMasterId_key")
+  vehicleNo     String
+  vehicleWt     Float?
+  eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
+}
+
+model intrusionevent {
+  id            Int                     @id @default(autoincrement())
+  eventMasterId Int                     @unique(map: "IntrusionEvent_eventMasterId_key")
+  location      String
+  severity      intrusionevent_severity @default(medium)
+  description   String
+  eventmaster   eventmaster             @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
 }
 
 view v_alldata {
@@ -81,7 +102,7 @@ view v_mnthdata {
   unloadCnt BigInt @default(0)
 }
 
-enum IntrusionSeverity {
+enum intrusionevent_severity {
   low
   medium
   high

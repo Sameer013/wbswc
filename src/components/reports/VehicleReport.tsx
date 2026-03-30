@@ -21,12 +21,12 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
   const generatedAt = new Date()
 
   return (
-    <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} producer='sigma'  author='WBSWC'>
+    <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} producer='sigma' author='WBSWC'>
       <Page size='A4' style={styles.page}>
         <View style={styles.headerRow}>
           <View style={styles.logoContainer}>
-            <Image style={styles.logoIcon} src={'/images/logo1.png'} />  {/* Logo Icon */}  
-            <Image style={styles.logoText} src={'/images/logo2.png'} /> {/* Logo Text */}  
+            <Image style={styles.logoIcon} src={'/images/logo1.png'} /> {/* Logo Icon */}
+            <Image style={styles.logoText} src={'/images/logo2.png'} /> {/* Logo Text */}
           </View>
           <View>
             <Text style={styles.reportLabel}>VEHICLE EVENT REPORT</Text>
@@ -107,7 +107,7 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
 
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>WB State Warehousing Corporation</Text>
-          <Text style={styles.footerText}>Developed by Sigma e Solution Pvt. Ltd.</Text>
+
           <Text style={styles.footerText}>
             Generated: {formatDate(generatedAt)} {formatTime(generatedAt)}
           </Text>

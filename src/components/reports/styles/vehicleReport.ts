@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center'
   },
-  
+
   logoIcon: {
     width: 60,
     height: 'auto',
@@ -113,15 +113,15 @@ export const styles = StyleSheet.create({
   tableCell: {
     flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 10
+    paddingHorizontal: 6
   },
   tableCellLabel: {
-    fontSize: 8,
+    fontSize: 7,
     color: GRAY,
     marginBottom: 2
   },
   tableCellValue: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
     color: '#111827'
   },
