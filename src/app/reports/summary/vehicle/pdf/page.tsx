@@ -48,15 +48,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   //   }
   // })
 
-  const events2 = await prisma.vehicle_cycle.findMany({
+  const events2 = await prisma.v_report.findMany({
     where: {
-      cycle_date: {
+      event_date: {
         gte: fromDate,
         lt: toDate
       }
     },
     orderBy: {
-      cycle_date: 'asc'
+      event_date: 'asc'
     }
   })
 
@@ -70,21 +70,24 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   //   }
   // })
 
-  const formattedRecords2 = events2.map(event => {
+  // console.log(events2)
+
+  const formattedRecords2 = events2.map((event, index) => {
     return {
-      id: event.id,
+      id: index + 1,
       vehicleNo: event.vehicleNo || 0,
       entry_time: convertUTCtoLocalTime(event.entry_time),
-      weight_time: convertUTCtoLocalTime(event.weight_time),
       exit_time: convertUTCtoLocalTime(event.exit_time),
-      weight: event.weight || null,
-      cycle_date: event.cycle_date,
-      created_at: convertUTCtoLocalTime(event.created_at),
-      total_minutes: event.total_minutes
+      tear_wt_time: convertUTCtoLocalTime(event.tear_wt_time),
+      gross_wt_time: convertUTCtoLocalTime(event.gross_wt_time),
+      tear_wt: event.tear_wt || 0,
+      gross_wt: event.gross_wt || 0,
+      net_wt: event.net_wt || 0,
+      event_date: convertUTCtoLocalTime(event.event_date)
     }
   })
 
-  console.log(formattedRecords2)
+  // console.log(formattedRecords2)
 
   return <PdfClient records={formattedRecords2} fromDate={from} toDate={to} />
 }

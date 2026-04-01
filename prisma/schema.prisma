@@ -22,14 +22,6 @@ model event_type {
   eventmaster eventmaster[]
 }
 
-model vehicle_event {
-  id            Int         @id @default(autoincrement())
-  eventMasterId Int         @unique(map: "VehicleEvent_eventMasterId_key")
-  vehicleNo     String
-  movement      String
-  eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "VehivleEvent_eventMasterId_fkey")
-}
-
 model eventmaster {
   id             Int             @id @default(autoincrement())
   eventId        Int
@@ -38,30 +30,40 @@ model eventmaster {
   anprevent      anprevent?
   event_type     event_type      @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
   intrusionevent intrusionevent?
-  vehicle_event  vehicle_event?
 
   @@index([eventId], map: "EventMaster_eventId_idx")
   @@index([eventTimestamp], map: "EventMaster_eventTimestamp_idx")
 }
 
 model vehicle_cycle {
-  id            Int       @id @default(autoincrement())
-  vehicleNo     String?   @db.VarChar(50)
-  entry_time    DateTime? @db.DateTime(0)
-  weight_time   DateTime? @db.DateTime(0)
-  exit_time     DateTime? @db.DateTime(0)
-  weight        Float?
-  total_minutes Int?
-  cycle_date    DateTime  @db.Date
-  created_at    DateTime? @default(now()) @db.Timestamp(0)
+  id             Int       @id @default(autoincrement())
+  vehicleNo      String?   @db.VarChar(50)
+  entry_time     DateTime? @db.DateTime(0)
+  weight_time    DateTime? @db.DateTime(0)
+  exit_time      DateTime? @db.DateTime(0)
+  weight         Float?
+  entry_imageId  Int?
+  weight_imageId Int?
+  exit_imageId   Int?
+  created_at     DateTime  @default(now()) @db.Timestamp(0)
+
+  @@index([vehicleNo], map: "idx_vehicle")
+  @@index([weight_time], map: "idx_weight_time")
 }
 
 model anprevent {
-  id            Int         @id @default(autoincrement())
-  eventMasterId Int         @unique(map: "AnprEvent_eventMasterId_key")
-  vehicleNo     String
-  vehicleWt     Float?
-  eventmaster   eventmaster @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
+  id                Int          @id @default(autoincrement())
+  eventMasterId     Int          @unique(map: "AnprEvent_eventMasterId_key")
+  vehicleNo         String
+  updated_vehicleNo String?      @db.VarChar(20)
+  vehicleWt         Float?
+  imageId           Int?
+  created_at        DateTime?    @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?    @default(now()) @db.Timestamp(0)
+  eventmaster       eventmaster  @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
+  anpr_images       anpr_images? @relation(fields: [imageId], references: [id], map: "fk_anpr_images")
+
+  @@index([imageId], map: "fk_anpr_images")
 }
 
 model intrusionevent {
@@ -71,6 +73,50 @@ model intrusionevent {
   severity      intrusionevent_severity @default(medium)
   description   String
   eventmaster   eventmaster             @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
+}
+
+model anpr_images {
+  id         Int         @id @default(autoincrement())
+  truckImage Bytes?      @db.MediumBlob
+  plateImage Bytes?      @db.MediumBlob
+  created_at DateTime?   @default(now()) @db.Timestamp(0)
+  anprevent  anprevent[]
+}
+
+model curation_state {
+  id            Int       @id @default(1)
+  last_event_id Int?      @default(0)
+  last_run      DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model vehicle_cycle_new {
+  id             Int       @id @default(autoincrement())
+  vehicleNo      String?   @db.VarChar(50)
+  entry_time     DateTime? @db.DateTime(0)
+  weight_time    DateTime? @db.DateTime(0)
+  exit_time      DateTime? @db.DateTime(0)
+  weight         Float?
+  entry_imageId  Int?
+  weight_imageId Int?
+  exit_imageId   Int?
+  created_at     DateTime  @default(now()) @db.Timestamp(0)
+
+  @@index([vehicleNo], map: "idx_vehicle")
+  @@index([weight_time], map: "idx_weight_time")
+}
+
+model weighbridge_records {
+  id               Int       @id @default(autoincrement())
+  vehicle_no       String?   @db.VarChar(20)
+  gross            Int?
+  tare             Int?
+  net              Int?
+  bags             Int?
+  gross_timestamp  DateTime? @db.DateTime(0)
+  tare_timestamp   DateTime? @db.DateTime(0)
+  system_timestamp DateTime? @db.DateTime(0)
+  raw_data         String?   @db.LongText
+  created_at       DateTime? @default(now()) @db.Timestamp(0)
 }
 
 view v_alldata {
@@ -100,6 +146,18 @@ view v_mnthdata {
   exitCnt   BigInt @default(0)
   loadCnt   BigInt @default(0)
   unloadCnt BigInt @default(0)
+}
+
+view v_report {
+  vehicleNo     String?   @db.VarChar(50)
+  entry_time    DateTime? @db.DateTime(0)
+  exit_time     DateTime? @db.DateTime(0)
+  tear_wt_time  DateTime? @db.DateTime(0)
+  gross_wt_time DateTime? @db.DateTime(0)
+  tear_wt       Float?
+  gross_wt      Float?
+  net_wt        Float?
+  event_date    DateTime? @db.Date
 }
 
 enum intrusionevent_severity {

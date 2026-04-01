@@ -16,8 +16,8 @@ export function formatTimestamp(date: Date): string {
   return `${dd}-${mm}-${yyyy} ${hh}:${min}`
 }
 
-export function convertUTCtoLocalTime(date: Date | null): Date {
-  if (!date) return new Date(`01-01-2000 00:00`)
+export function convertUTCtoLocalTime(date: Date | null): Date | null {
+  if (!date) return null
 
   const d = date
 
@@ -26,6 +26,7 @@ export function convertUTCtoLocalTime(date: Date | null): Date {
   const yyyy = d.getUTCFullYear()
   const hh = String(d.getUTCHours()).padStart(2, '0')
   const min = String(d.getUTCMinutes()).padStart(2, '0')
+  const ss = String(d.getUTCSeconds()).padStart(2, '0')
 
-  return new Date(`${dd}-${mm}-${yyyy} ${hh}:${min}`)
+  return new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`)
 }

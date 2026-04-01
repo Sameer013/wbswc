@@ -14,13 +14,14 @@ export type EventSummaryRecord = {
 export type EventSummaryRecord2 = {
   id: number
   vehicleNo: string | number
-  entry_time: Date
-  weight_time: Date
-  exit_time: Date
-  weight: number | null
-  total_minutes: number | null
-  cycle_date: Date | null
-  created_at: Date | null
+  entry_time: Date | null
+  exit_time: Date | null
+  tear_wt_time: Date | null
+  gross_wt_time: Date | null
+  tear_wt: number | null
+  gross_wt: number | null
+  net_wt: number | null
+  event_date: Date | null
 }
 
 const formatDate = (d: Date) =>
@@ -91,16 +92,19 @@ const VehicleSummaryReport = ({
             <View style={{ ...styles.tableCell, flex: 1.2 }}>
               <Text style={styles.tableCellValue}>Vehicle No.</Text>
             </View>
-            <View style={{ ...styles.tableCell, flex: 1.4 }}>
+            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Entry Time</Text>
             </View>
-            <View style={{ ...styles.tableCell, flex: 1 }}>
+            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+              <Text style={styles.tableCellValue}>Exit Time</Text>
+            </View>
+            <View style={{ ...styles.tableCell, flex: 0.8 }}>
               <Text style={styles.tableCellValue}>Tear Weight</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1.4 }}>
               <Text style={styles.tableCellValue}>Tear Weight Time</Text>
             </View>
-            <View style={{ ...styles.tableCell, flex: 1 }}>
+            <View style={{ ...styles.tableCell, flex: 0.8 }}>
               <Text style={styles.tableCellValue}>Gross Weight</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1.4 }}>
@@ -108,12 +112,6 @@ const VehicleSummaryReport = ({
             </View>
             <View style={{ ...styles.tableCell, flex: 1 }}>
               <Text style={styles.tableCellValue}>Net Weight</Text>
-            </View>
-            <View style={{ ...styles.tableCell, flex: 1.4 }}>
-              <Text style={styles.tableCellValue}>Exit Time</Text>
-            </View>
-            <View style={{ ...styles.tableCell, flex: 0.8 }}>
-              <Text style={styles.tableCellValue}>Duration</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 0.9 }}>
               <Text style={styles.tableCellValue}>Date</Text>
@@ -130,46 +128,49 @@ const VehicleSummaryReport = ({
                 <View style={{ ...styles.tableCell, flex: 1.2 }}>
                   <Text style={styles.tableCellLabel}>{record.vehicleNo}</Text>
                 </View>
-                <View style={{ ...styles.tableCell, flex: 1.4 }}>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>
-                    {formatDate(record.entry_time)} {formatTime(record.entry_time)}
+                    {record.entry_time ? `${formatDate(record.entry_time)} ${formatTime(record.entry_time)}` : '--'}
+                  </Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>
+                    {record.exit_time ? `${formatDate(record.exit_time)} ${formatTime(record.exit_time)}` : '--'}
+                  </Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
+                  <Text style={styles.tableCellLabel}>
+                    {record.tear_wt != null ? `${record.tear_wt.toFixed(2)} Kg` : '--'}
+                  </Text>
+                </View>
+
+                <View style={{ ...styles.tableCell, flex: 1.4, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>
+                    {record.tear_wt_time
+                      ? `${formatDate(record.tear_wt_time)} ${formatTime(record.tear_wt_time)}`
+                      : '--'}
+                  </Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
+                  <Text style={styles.tableCellLabel}>
+                    {record.gross_wt != null ? `${record.gross_wt.toFixed(2)} Kg` : '--'}
+                  </Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 1.4, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>
+                    {record.gross_wt_time
+                      ? `${formatDate(record.gross_wt_time)} ${formatTime(record.gross_wt_time)}`
+                      : '--'}
                   </Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'right' }}>
                   <Text style={styles.tableCellLabel}>
-                    {record.weight != null ? `${record.weight.toFixed(2)} T` : '--'}
+                    {record.net_wt != null ? `${record.net_wt.toFixed(2)} Kg` : '--'}
                   </Text>
                 </View>
-                <View style={{ ...styles.tableCell, flex: 1.4 }}>
-                  <Text style={styles.tableCellLabel}>
-                    {formatDate(record.weight_time)} {formatTime(record.weight_time)}
-                  </Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
-                  <Text style={styles.tableCellLabel}>
-                    {record.weight != null ? `${record.weight.toFixed(2)} T` : '--'}
-                  </Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 1.4 }}>
-                  <Text style={styles.tableCellLabel}>
-                    {formatDate(record.weight_time)} {formatTime(record.weight_time)}
-                  </Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
-                  <Text style={styles.tableCellLabel}>
-                    {record.weight != null ? `${record.weight.toFixed(2)} T` : '--'}
-                  </Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 1.4 }}>
-                  <Text style={styles.tableCellLabel}>
-                    {formatDate(record.exit_time)} {formatTime(record.exit_time)}
-                  </Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{record.total_minutes ?? '--'}</Text>
-                </View>
+
                 <View style={{ ...styles.tableCell, flex: 0.9 }}>
-                  <Text style={styles.tableCellLabel}>{record.cycle_date ? formatDate(record.cycle_date) : '--'}</Text>
+                  <Text style={styles.tableCellLabel}>{record.event_date ? formatDate(record.event_date) : '--'}</Text>
                 </View>
               </View>
             ))
