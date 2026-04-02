@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography'
 const ReportPage = () => {
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
+  const [vehicleNo, setVehicleNo] = useState<string>('')
   const [error, setError] = useState<string>('')
 
   const handleGenerate = () => {
@@ -21,16 +22,16 @@ const ReportPage = () => {
 
     if (!fromDate || !toDate) {
       setError('Please select both From and To dates.')
-      
+
       return
     }
 
     if (new Date(fromDate) > new Date(toDate)) {
       setError('From Date cannot be later than To Date.')
-      
+
       return
     }
-    
+
     window.open(`/reports/summary/vehicle/pdf?from=${fromDate}&to=${toDate}`, '_blank')
   }
 
@@ -65,6 +66,16 @@ const ReportPage = () => {
                   shrink: true
                 }}
               />
+              <TextField
+                fullWidth
+                label='Vehicle No (Optional)'
+                type='text'
+                value={vehicleNo}
+                onChange={e => setVehicleNo(e.target.value)}
+                InputLabelProps={{
+                  shrink: true
+                }}
+              />
             </div>
 
             {error && (
@@ -73,9 +84,9 @@ const ReportPage = () => {
               </Typography>
             )}
 
-            <Button 
-              variant='contained' 
-              color='primary' 
+            <Button
+              variant='contained'
+              color='primary'
               onClick={handleGenerate}
               startIcon={<i className='tabler-file-invoice' />}
             >

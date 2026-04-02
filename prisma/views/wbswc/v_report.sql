@@ -1,18 +1,37 @@
 SELECT
-  `wbswc`.`vehicle_cycle`.`vehicleNo` AS `vehicleNo`,
-  max(`wbswc`.`vehicle_cycle`.`entry_time`) AS `entry_time`,
-  max(`wbswc`.`vehicle_cycle`.`exit_time`) AS `exit_time`,
-  min(`wbswc`.`vehicle_cycle`.`weight_time`) AS `tear_wt_time`,
-  max(`wbswc`.`vehicle_cycle`.`weight_time`) AS `gross_wt_time`,
-  min(`wbswc`.`vehicle_cycle`.`weight`) AS `tear_wt`,
-  max(`wbswc`.`vehicle_cycle`.`weight`) AS `gross_wt`,
-(
-    max(`wbswc`.`vehicle_cycle`.`weight`) - min(`wbswc`.`vehicle_cycle`.`weight`)
-  ) AS `net_wt`,
-  cast(
-    max(`wbswc`.`vehicle_cycle`.`weight_time`) AS date
-  ) AS `event_date`
+  max(cast(`wr`.`system_timestamp` AS date)) AS `event_date`,
+  `wr`.`vehicle_no` AS `vehicleNo`,
+  max(
+    (
+      CASE
+        WHEN (`em`.`eventId` = 1) THEN `em`.`eventTimestamp`
+      END
+    )
+  ) AS `entry_time`,
+  max(
+    (
+      CASE
+        WHEN (`em`.`eventId` = 2) THEN `em`.`eventTimestamp`
+      END
+    )
+  ) AS `exit_time`,
+  `wr`.`tare` AS `tare_wt`,
+  `wr`.`gross` AS `gross_wt`,
+  `wr`.`net` AS `net_wt`,
+  max(`wr`.`tare_timestamp`) AS `tare_wt_time`,
+  max(`wr`.`gross_timestamp`) AS `gross_wt_time`
 FROM
-  `wbswc`.`vehicle_cycle`
+  (
+    (
+      `wbswc`.`weighbridge_records` `wr`
+      JOIN `wbswc`.`anprevent` `a` ON((`a`.`vehicleNo` = `wr`.`vehicle_no`))
+    )
+    JOIN `wbswc`.`eventmaster` `em` ON((`em`.`id` = `a`.`eventMasterId`))
+  )
 GROUP BY
-  `wbswc`.`vehicle_cycle`.`vehicleNo`
+  `wr`.`vehicle_no`,
+  `wr`.`tare`,
+  `wr`.`gross`,
+  `wr`.`net`
+ORDER BY
+  `event_date`

@@ -149,6 +149,18 @@ view v_mnthdata {
 }
 
 view v_report {
+  event_date    DateTime? @db.Date
+  vehicleNo     String?   @db.VarChar(20)
+  entry_time    DateTime?
+  exit_time     DateTime?
+  tare_wt       Int?
+  gross_wt      Int?
+  net_wt        Int?
+  tare_wt_time  DateTime? @db.DateTime(0)
+  gross_wt_time DateTime? @db.DateTime(0)
+}
+
+view v_report_old {
   vehicleNo     String?   @db.VarChar(50)
   entry_time    DateTime? @db.DateTime(0)
   exit_time     DateTime? @db.DateTime(0)

@@ -29,25 +29,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
     )
   }
 
-  // Fetch all events
-  // const events = await prisma.eventmaster.findMany({
-  //   where: {
-  //     eventTimestamp: {
-  //       gte: fromDate,
-  //       lt: toDate
-  //     }
-  //   },
-
-  //   // distinct: ['eventTimestamp'],
-  //   include: {
-  //     anprevent: true,
-  //     event_type: true
-  //   },
-  //   orderBy: {
-  //     eventTimestamp: 'asc'
-  //   }
-  // })
-
   const events2 = await prisma.v_report.findMany({
     where: {
       event_date: {
@@ -59,16 +40,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
       event_date: 'asc'
     }
   })
-
-  // const formattedRecords = events.map(event => {
-  //   return {
-  //     id: event.id,
-  //     eventType: event.event_type?.eventType || 'Unknown',
-  //     eventTimestamp: convertUTCtoLocalTime(event.eventTimestamp), // UTC time that is coming from Prisma is in UTC format, so function to convert it to local timezone
-  //     vehicleNo: event.anprevent?.vehicleNo || '-',
-  //     vehicleWt: event.anprevent?.vehicleWt || null
-  //   }
-  // })
 
   // console.log(events2)
 

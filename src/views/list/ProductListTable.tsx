@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 
 import Link from 'next/link'
 
-
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -15,9 +14,9 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 import Typography from '@mui/material/Typography'
-
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -134,14 +133,18 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
 
       {
         id: 'actions',
-        header: 'Actions',
+        header: 'Reports',
         enableSorting: false,
         cell: ({ row }) => (
           <div className='flex items-center'>
             <Link href={`/reports/vehicle/${row.original.id}/pdf`} target='_blank' rel='noopener noreferrer'>
-              <IconButton>
+              {/* <IconButton>
                 <i className='tabler-file-invoice text-textSecondary' />
-              </IconButton>
+              </IconButton> */}
+              <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium'>
+                PDF
+              </Button>
+              {/* <PictureAsPdfIcon /> */}
             </Link>
             {/* <OptionMenu
               iconButtonProps={{ size: 'medium' }}

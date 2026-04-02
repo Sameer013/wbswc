@@ -16,9 +16,9 @@ export type EventSummaryRecord2 = {
   vehicleNo: string | number
   entry_time: Date | null
   exit_time: Date | null
-  tear_wt_time: Date | null
+  tare_wt_time: Date | null
   gross_wt_time: Date | null
-  tear_wt: number | null
+  tare_wt: number | null
   gross_wt: number | null
   net_wt: number | null
   event_date: Date | null
@@ -140,14 +140,14 @@ const VehicleSummaryReport = ({
                 </View>
                 <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
                   <Text style={styles.tableCellLabel}>
-                    {record.tear_wt != null ? `${record.tear_wt.toFixed(2)} Kg` : '--'}
+                    {record.tare_wt != null ? `${record.tare_wt.toFixed(2)} Kg` : '--'}
                   </Text>
                 </View>
 
                 <View style={{ ...styles.tableCell, flex: 1.4, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>
-                    {record.tear_wt_time
-                      ? `${formatDate(record.tear_wt_time)} ${formatTime(record.tear_wt_time)}`
+                    {record.tare_wt_time
+                      ? `${formatDate(record.tare_wt_time)} ${formatTime(record.tare_wt_time)}`
                       : '--'}
                   </Text>
                 </View>
