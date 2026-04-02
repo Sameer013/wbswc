@@ -49,9 +49,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
       vehicleNo: event.vehicleNo || 0,
       entry_time: convertUTCtoLocalTime(event.entry_time),
       exit_time: convertUTCtoLocalTime(event.exit_time),
-      tear_wt_time: convertUTCtoLocalTime(event.tear_wt_time),
+      tare_wt_time: convertUTCtoLocalTime(event.tare_wt_time),
       gross_wt_time: convertUTCtoLocalTime(event.gross_wt_time),
-      tear_wt: event.tear_wt || 0,
+      tare_wt: event.tare_wt || 0,
       gross_wt: event.gross_wt || 0,
       net_wt: event.net_wt || 0,
       event_date: convertUTCtoLocalTime(event.event_date)
