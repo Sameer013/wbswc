@@ -101,7 +101,7 @@ export async function getChartData() {
 export async function getVehicleTableData() {
   try {
     const [data] = await db.query(`
-      select e.id,e.eventTimestamp timestamp, a.vehicleNo, time(e.eventTimestamp) entry_time,'-' exit_time,a.vehicleWt
+      select e.id,e.eventTimestamp timestamp, a.updated_vehicleNo, time(e.eventTimestamp) entry_time,'-' exit_time,a.vehicleWt
 from eventmaster e
 join anprevent a on e.id = a.eventMasterId
 order by e.eventTimestamp desc limit 20`)
