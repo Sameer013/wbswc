@@ -23,7 +23,6 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     }
   })
 
-
   if (!event || !event.anprevent) {
     return (
       <div className='flex h-screen items-center justify-center p-6'>
@@ -36,7 +35,7 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     id: event.id,
     eventType: event.event_type.eventType,
     eventTimestamp: event.eventTimestamp.toISOString(),
-    vehicleNo: event.anprevent.vehicleNo,
+    vehicleNo: event.anprevent.updated_vehicleNo ? event.anprevent.updated_vehicleNo : event.anprevent.vehicleNo,
     vehicleWt: event.anprevent.vehicleWt
   }
 
