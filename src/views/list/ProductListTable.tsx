@@ -49,6 +49,7 @@ export type VehicleType = {
   exit_time: string
   vehicleWt: number | string
   wtTimestamp: string
+  updated_vehicleNo?: string
   actions?: string
 }
 
@@ -107,7 +108,11 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
       columnHelper.accessor('vehicleNo', {
         header: 'Vehicle No',
-        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo}</Typography>
+        cell: ({ row }) => (
+          <Typography fontWeight={700}>
+            {row.original.updated_vehicleNo ? row.original.updated_vehicleNo : '-'}
+          </Typography>
+        )
       }),
       columnHelper.accessor('entry_time', {
         header: 'Entry Time',
