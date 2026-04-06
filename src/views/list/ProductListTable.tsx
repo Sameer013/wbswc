@@ -44,12 +44,12 @@ import tableStyles from '@core/styles/table.module.css'
 export type VehicleType = {
   id: string | number
   timestamp: string
-  vehicleNo: string
   entry_time: string
   exit_time: string
   vehicleWt: number | string
   wtTimestamp: string
   updated_vehicleNo?: string
+  vehicleNo?: string
   actions?: string
 }
 
@@ -110,7 +110,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         header: 'Vehicle No',
         cell: ({ row }) => (
           <Typography fontWeight={700}>
-            {row.original.updated_vehicleNo ? row.original.updated_vehicleNo : '-'}
+            {row.original.updated_vehicleNo ? row.original.updated_vehicleNo : row.original.vehicleNo}
           </Typography>
         )
       }),
