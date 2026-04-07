@@ -141,7 +141,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         // cell: ({ row }) => <Typography>NULL</Typography>
       }),
       columnHelper.accessor('grosswtTimestamp', {
-        header: 'Gross Timestamp',
+        header: 'Gros Timestamp',
 
         cell: ({ row }) => <Typography>{row.original.grosswtTimestamp}</Typography> //TODO add weight timestamp
         // cell: ({ row }) => <Typography>NULL</Typography>
