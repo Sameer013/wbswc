@@ -18,7 +18,7 @@ const NavbarContent = () => {
         <NavToggle />
         <ModeDropdown />
       </div>
-      <h1 className='text-xl font-bold'>AI Warehouse Management System</h1>
+      <h1 className='text-xl font-bold'>Singur RIDF Warehouse</h1>
       <div className='flex items-center'>
         <UserDropdown />
       </div>

@@ -46,8 +46,10 @@ export type VehicleType = {
   timestamp: string
   entry_time: string
   exit_time: string
-  vehicleWt: number | string
-  wtTimestamp: string
+  tareWt: number | string
+  grossWt: number | string
+  tarewtTimestamp: string
+  grosswtTimestamp: string
   updated_vehicleNo?: string
   vehicleNo?: string
   actions?: string
@@ -124,14 +126,24 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
           <Typography>{row.original.exit_time === '-' ? '-' : row.original.exit_time?.slice(0, 5)}</Typography>
         )
       }),
-      columnHelper.accessor('vehicleWt', {
-        header: 'Weight (Tons)',
-        cell: ({ row }) => <Typography>{row.original.vehicleWt}</Typography>
+      columnHelper.accessor('tareWt', {
+        header: 'Tare Weight (KGS)',
+        cell: ({ row }) => <Typography>{row.original.tareWt}</Typography>
       }),
-      columnHelper.accessor('wtTimestamp', {
-        header: 'Weight Timestamp',
+      columnHelper.accessor('grossWt', {
+        header: 'Gross Weight (KGS)',
+        cell: ({ row }) => <Typography>{row.original.grossWt}</Typography>
+      }),
+      columnHelper.accessor('tarewtTimestamp', {
+        header: 'Tare Timestamp',
 
-        cell: ({ row }) => <Typography>{row.original.wtTimestamp}</Typography> //TODO add weight timestamp
+        cell: ({ row }) => <Typography>{row.original.tarewtTimestamp}</Typography> //TODO add weight timestamp
+        // cell: ({ row }) => <Typography>NULL</Typography>
+      }),
+      columnHelper.accessor('grosswtTimestamp', {
+        header: 'Gross Timestamp',
+
+        cell: ({ row }) => <Typography>{row.original.grosswtTimestamp}</Typography> //TODO add weight timestamp
         // cell: ({ row }) => <Typography>NULL</Typography>
       }),
 
