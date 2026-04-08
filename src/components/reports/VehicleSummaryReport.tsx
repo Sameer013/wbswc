@@ -14,14 +14,14 @@ export type EventSummaryRecord = {
 export type EventSummaryRecord2 = {
   id: number
   vehicleNo: string | number
-  entry_time: Date | null
-  exit_time: Date | null
-  tare_wt_time: Date | null
-  gross_wt_time: Date | null
-  tare_wt: number | null
-  gross_wt: number | null
+  entry_time: Date | string | null
+  exit_time: Date | string | null
+  tare_wt_time: Date | string | null
+  gross_wt_time: Date | string | null
+  tare_wt: number | string | null
+  gross_wt: number | string | null
   net_wt: number | null
-  event_date: Date | null
+  event_date: Date | string | null
 }
 
 const formatDate = (d: Date) =>
@@ -130,47 +130,52 @@ const VehicleSummaryReport = ({
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>
-                    {record.entry_time ? `${formatDate(record.entry_time)} ${formatTime(record.entry_time)}` : '--'}
+                    {/* {record.entry_time ? `${formatDate(record.entry_time)} ${formatTime(record.entry_time)}` : '--'} */}
+                    {record.entry_time
+                      ? `${formatDate(new Date(record.entry_time))} ${formatTime(new Date(record.entry_time))}`
+                      : '--'}
                   </Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>
-                    {record.exit_time ? `${formatDate(record.exit_time)} ${formatTime(record.exit_time)}` : '--'}
-                  </Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
-                  <Text style={styles.tableCellLabel}>
-                    {record.tare_wt != null ? `${record.tare_wt.toFixed(2)} Kg` : '--'}
-                  </Text>
-                </View>
-
-                <View style={{ ...styles.tableCell, flex: 1.4, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>
-                    {record.tare_wt_time
-                      ? `${formatDate(record.tare_wt_time)} ${formatTime(record.tare_wt_time)}`
+                    {/* {record.exit_time ? `${formatDate(record.exit_time)} ${formatTime(record.exit_time)}` : '--'} */}
+                    {record.exit_time
+                      ? `${formatDate(new Date(record.exit_time))} ${formatTime(new Date(record.exit_time))}`
                       : '--'}
                   </Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
+                  <Text style={styles.tableCellLabel}>{record.tare_wt != null ? `${record.tare_wt} Kg` : '--'}</Text>
+                </View>
+
+                <View style={{ ...styles.tableCell, flex: 1.4, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>
-                    {record.gross_wt != null ? `${record.gross_wt.toFixed(2)} Kg` : '--'}
+                    {/* {record.tare_wt_time
+                      ? `${formatDate(record.tare_wt_time)} ${formatTime(record.tare_wt_time)}`
+                      : '--'} */}
+                    {record.tare_wt_time
+                      ? `${formatDate(new Date(record.tare_wt_time))} ${formatTime(new Date(record.tare_wt_time))}`
+                      : '--'}
                   </Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 0.8, textAlign: 'right' }}>
+                  <Text style={styles.tableCellLabel}>{record.gross_wt != null ? `${record.gross_wt} Kg` : '--'}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1.4, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>
                     {record.gross_wt_time
-                      ? `${formatDate(record.gross_wt_time)} ${formatTime(record.gross_wt_time)}`
+                      ? `${formatDate(new Date(record.gross_wt_time))} ${formatTime(new Date(record.gross_wt_time))}`
                       : '--'}
                   </Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'right' }}>
-                  <Text style={styles.tableCellLabel}>
-                    {record.net_wt != null ? `${record.net_wt.toFixed(2)} Kg` : '--'}
-                  </Text>
+                  <Text style={styles.tableCellLabel}>{record.net_wt != null ? `${record.net_wt} Kg` : '--'}</Text>
                 </View>
 
                 <View style={{ ...styles.tableCell, flex: 0.9 }}>
-                  <Text style={styles.tableCellLabel}>{record.event_date ? formatDate(record.event_date) : '--'}</Text>
+                  <Text style={styles.tableCellLabel}>
+                    {record.event_date ? formatDate(new Date(record.event_date)) : '--'}
+                  </Text>
                 </View>
               </View>
             ))

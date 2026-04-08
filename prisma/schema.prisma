@@ -30,38 +30,48 @@ model eventmaster {
   anprevent      anprevent?
   event_type     event_type      @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
   intrusionevent intrusionevent?
+  vehicle_event  vehicle_event?
 
   @@index([eventId], map: "EventMaster_eventId_idx")
   @@index([eventTimestamp], map: "EventMaster_eventTimestamp_idx")
 }
 
 model vehicle_cycle {
-  id             Int       @id @default(autoincrement())
-  vehicleNo      String?   @db.VarChar(50)
-  entry_time     DateTime? @db.DateTime(0)
-  weight_time    DateTime? @db.DateTime(0)
-  exit_time      DateTime? @db.DateTime(0)
-  weight         Float?
-  entry_imageId  Int?
-  weight_imageId Int?
-  exit_imageId   Int?
-  created_at     DateTime  @default(now()) @db.Timestamp(0)
+  cycle_date      DateTime  @db.Date
+  vehicleNo       String    @default("") @db.VarChar(50)
+  entry_time      DateTime? @db.DateTime(0)
+  weight_time     DateTime? @db.DateTime(0)
+  exit_time       DateTime? @db.DateTime(0)
+  weight          Float?
+  entry_imageId   Int?
+  weight_imageId  Int?
+  exit_imageId    Int?
+  created_at      DateTime? @default(now()) @db.Timestamp(0)
+  total_minutes   Int       @default(0)
+  final_vehicleNo String?   @db.VarChar(255)
+  final_weight    Float?
+  matched_wb_id   Int?
+  info_entryexit  String?   @db.VarChar(400)
+  info_anpr       String?   @db.VarChar(400)
 
+  @@id([cycle_date, vehicleNo])
   @@index([vehicleNo], map: "idx_vehicle")
   @@index([weight_time], map: "idx_weight_time")
+  @@index([matched_wb_id], map: "idx_matched_wb_id")
 }
 
 model anprevent {
-  id                Int          @id @default(autoincrement())
-  eventMasterId     Int          @unique(map: "AnprEvent_eventMasterId_key")
+  id                Int                 @id @default(autoincrement())
+  eventMasterId     Int                 @unique(map: "AnprEvent_eventMasterId_key")
   vehicleNo         String
-  updated_vehicleNo String?      @db.VarChar(20)
+  updated_vehicleNo String?             @db.VarChar(20)
   vehicleWt         Float?
   imageId           Int?
-  created_at        DateTime?    @default(now()) @db.Timestamp(0)
-  updated_at        DateTime?    @default(now()) @db.Timestamp(0)
-  eventmaster       eventmaster  @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
-  anpr_images       anpr_images? @relation(fields: [imageId], references: [id], map: "fk_anpr_images")
+  created_at        DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  flag              Boolean             @default(false)
+  eventmaster       eventmaster         @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
+  anpr_images       weighbridge_images? @relation(fields: [imageId], references: [id], map: "fk_anpr_images")
 
   @@index([imageId], map: "fk_anpr_images")
 }
@@ -75,34 +85,63 @@ model intrusionevent {
   eventmaster   eventmaster             @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
 }
 
-model anpr_images {
-  id         Int         @id @default(autoincrement())
-  truckImage Bytes?      @db.MediumBlob
-  plateImage Bytes?      @db.MediumBlob
-  created_at DateTime?   @default(now()) @db.Timestamp(0)
-  anprevent  anprevent[]
+model curation_state {
+  id            Int       @id @default(1)
+  last_event_id Int?      @default(0)
+  last_run_l1   DateTime? @default(now()) @db.Timestamp(0)
+  last_run_l2   DateTime? @db.Timestamp(0)
 }
 
-model curation_state {
+model correction_state {
   id            Int       @id @default(1)
   last_event_id Int?      @default(0)
   last_run      DateTime? @default(now()) @db.Timestamp(0)
 }
 
-model vehicle_cycle_new {
-  id             Int       @id @default(autoincrement())
-  vehicleNo      String?   @db.VarChar(50)
-  entry_time     DateTime? @db.DateTime(0)
-  weight_time    DateTime? @db.DateTime(0)
-  exit_time      DateTime? @db.DateTime(0)
-  weight         Float?
-  entry_imageId  Int?
-  weight_imageId Int?
-  exit_imageId   Int?
-  created_at     DateTime  @default(now()) @db.Timestamp(0)
+model device_logs {
+  id         Int                 @id @default(autoincrement())
+  ip         String?             @db.VarChar(50)
+  status     device_logs_status?
+  event_time DateTime?           @db.DateTime(0)
+}
 
-  @@index([vehicleNo], map: "idx_vehicle")
-  @@index([weight_time], map: "idx_weight_time")
+model downtime {
+  id         Int       @id @default(autoincrement())
+  ip         String?   @db.VarChar(50)
+  down_start DateTime? @db.DateTime(0)
+  down_end   DateTime? @db.DateTime(0)
+}
+
+model entry_exit_images {
+  id            Int             @id @default(autoincrement())
+  truckImage    Bytes?          @db.MediumBlob
+  plateImage    Bytes?          @db.MediumBlob
+  created_at    DateTime?       @default(now()) @db.Timestamp(0)
+  vehicle_event vehicle_event[]
+}
+
+model vehicle_event {
+  id                Int                @id @default(autoincrement())
+  eventMasterId     Int                @unique(map: "AnprEvent_eventMasterId_key")
+  vehicleNo         String?
+  updated_vehicleNo String?            @db.VarChar(20)
+  imageId           Int?
+  created_at        DateTime?          @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?          @default(now()) @db.Timestamp(0)
+  movement          String?            @db.VarChar(255)
+  flag              Boolean            @default(false)
+  eventmaster       eventmaster        @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "vehicle_event_ibfk_1")
+  entry_exit_images entry_exit_images? @relation(fields: [imageId], references: [id], map: "vehicle_event_ibfk_2")
+
+  @@index([imageId], map: "fk_anpr_images")
+}
+
+model weighbridge_images {
+  id         Int         @id @default(autoincrement())
+  truckImage Bytes?      @db.MediumBlob
+  plateImage Bytes?      @db.MediumBlob
+  created_at DateTime?   @default(now()) @db.Timestamp(0)
+  anprevent  anprevent[]
 }
 
 model weighbridge_records {
@@ -117,6 +156,27 @@ model weighbridge_records {
   system_timestamp DateTime? @db.DateTime(0)
   raw_data         String?   @db.LongText
   created_at       DateTime? @default(now()) @db.Timestamp(0)
+
+  @@unique([vehicle_no, gross, tare, gross_timestamp, tare_timestamp], map: "unique_weigh")
+  @@index([gross_timestamp], map: "idx_gross_time")
+  @@index([tare_timestamp], map: "idx_tare_time")
+  @@index([vehicle_no], map: "idx_vehicle_no")
+}
+
+view vw_danpr {
+  dt   DateTime? @db.Date
+  vno  String?   @db.VarChar(20)
+  evt  String?   @db.Text
+  wts  String?   @db.Text
+  imgs String?   @db.Text
+}
+
+view vw_entryexit {
+  dt   DateTime? @db.Date
+  vno  String?   @db.VarChar(20)
+  evt  String?   @db.Text
+  et   String?   @db.Text
+  imgs String?   @db.Text
 }
 
 view v_alldata {
@@ -161,7 +221,7 @@ view v_report {
 }
 
 view v_report_old {
-  vehicleNo     String?   @db.VarChar(50)
+  vehicleNo     String    @default("") @db.VarChar(50)
   entry_time    DateTime? @db.DateTime(0)
   exit_time     DateTime? @db.DateTime(0)
   tear_wt_time  DateTime? @db.DateTime(0)
@@ -177,4 +237,9 @@ enum intrusionevent_severity {
   medium
   high
   critical
+}
+
+enum device_logs_status {
+  UP
+  DOWN
 }

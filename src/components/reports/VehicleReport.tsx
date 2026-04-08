@@ -50,7 +50,7 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
             <Text style={styles.summaryValue}>{record.vehicleNo}</Text>
           </View>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>WEIGHT (TONS)</Text>
+            <Text style={styles.summaryLabel}>WEIGHT (KG)</Text>
             <Text style={styles.summaryValue}>{record.vehicleWt != null ? record.vehicleWt.toFixed(2) : '--'}</Text>
           </View>
         </View>
@@ -80,7 +80,7 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
             <View style={styles.tableCell}>
               <Text style={styles.tableCellLabel}>Gross Weight</Text>
               <Text style={styles.tableCellValue}>
-                {record.vehicleWt != null ? `${record.vehicleWt.toFixed(2)} KGS` : '--'}
+                {record.vehicleWt != null ? `${record.vehicleWt.toFixed(2)} KG` : '--'}
               </Text>
             </View>
             <View style={styles.tableCell}>
