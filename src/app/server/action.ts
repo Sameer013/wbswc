@@ -43,6 +43,8 @@ type ViewRow = {
   unloadCnt: number
 }
 
+import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
+
 export async function getVehicleStats(): Promise<VehicleStats> {
   try {
     const result = await prisma.$queryRaw<(ViewRow & { period: string })[]>`
@@ -353,6 +355,171 @@ export async function getVehicleData(from: Date, to: Date): Promise<VehicleType[
     }))
 
     return dataWithIds
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return []
+  }
+}
+
+export async function getReportData(from: Date, to: Date): Promise<EventSummaryRecord2[]> {
+  try {
+    const data = await prisma.vehicle_cycle.findMany({
+      where: {
+        cycle_date: {
+          gte: from,
+          lte: to
+        }
+      },
+
+      orderBy: { cycle_date: 'asc' }
+    })
+
+    const reportData: EventSummaryRecord2[] = []
+    let globalId = 0
+
+    data.forEach(record => {
+      // ─── Parse info_entryexit (DESC order → reverse to ASC) ─────────
+      type GateEvent = { time: string; movement: '1' | '2' }
+      let gateEvents: GateEvent[] = []
+
+      if (record.info_entryexit) {
+        const [times_str, movements_str] = record.info_entryexit.split('#')
+        const times = times_str?.split(',') ?? []
+        const movements = movements_str?.split(',') ?? []
+
+        // reverse both since entryexit is DESC
+        times.reverse()
+        movements.reverse()
+
+        gateEvents = movements.map((movement, i) => ({
+          time: times[i],
+          movement: movement as '1' | '2'
+        }))
+      }
+
+      // ─── Parse info_anpr (already ASC order) ────────────────────────
+      type AnprEvent = { time: string; weight: number }
+      let anprEvents: AnprEvent[] = []
+
+      if (record.info_anpr) {
+        const [times_str, weights_str] = record.info_anpr.split('#')
+        const times = times_str?.split(',') ?? []
+        const weights = weights_str?.split(',') ?? []
+
+        anprEvents = weights
+          .map((w, i) => ({
+            time: times[i],
+            weight: parseFloat(w)
+          }))
+          .filter(e => !isNaN(e.weight))
+      }
+
+      // ─── Build cycles ────────────────────────────────────────────────
+      type Cycle = { entry_time: string | null; exit_time: string | null }
+      const cycles: Cycle[] = []
+
+      if (gateEvents.length === 0) {
+        // no gate events at all — one dummy cycle for ANPR fallback
+        cycles.push({ entry_time: null, exit_time: null })
+      } else {
+        let currentEntry: string | null = null
+
+        gateEvents.forEach(event => {
+          if (event.movement === '1') {
+            if (currentEntry !== null) {
+              // missed exit — close previous cycle, start new one
+              cycles.push({ entry_time: currentEntry, exit_time: null })
+            }
+
+            currentEntry = event.time
+          } else if (event.movement === '2') {
+            cycles.push({
+              entry_time: currentEntry,
+              exit_time: event.time
+            })
+            currentEntry = null
+          }
+        })
+
+        // if last entry never got an exit
+        if (currentEntry !== null) {
+          cycles.push({ entry_time: currentEntry, exit_time: null })
+        }
+      }
+
+      // ─── Link ANPR weights to cycles ────────────────────────────────
+      cycles.forEach(cycle => {
+        let cycleWeights: AnprEvent[] = []
+
+        if (cycle.entry_time || cycle.exit_time) {
+          // find cycle boundaries
+          // if entry missing → use start of day
+          // if exit missing → use end of day
+          const cycleStart = cycle.entry_time ? new Date(cycle.entry_time) : new Date(`${record.cycle_date}T00:00:00`)
+
+          const cycleEnd = cycle.exit_time ? new Date(cycle.exit_time) : new Date(`${record.cycle_date}T23:59:59`)
+
+          cycleWeights = anprEvents.filter(e => {
+            const t = new Date(e.time)
+
+            return t >= cycleStart && t <= cycleEnd
+          })
+        }
+
+        // fallback → no weights found in range, use all weights
+        if (cycleWeights.length === 0) {
+          cycleWeights = anprEvents
+        }
+
+        // tare = min weight, gross = max weight
+        let tare_wt: number | null = null
+        let gross_wt: number | null = null
+        let tare_wt_time: string | null = null
+        let gross_wt_time: string | null = null
+        let net_wt: number | null = null
+
+        if (cycleWeights.length >= 1) {
+          const minEntry = cycleWeights.reduce((a, b) => (a.weight <= b.weight ? a : b))
+          const maxEntry = cycleWeights.reduce((a, b) => (a.weight >= b.weight ? a : b))
+
+          tare_wt = minEntry.weight
+          tare_wt_time = minEntry.time
+
+          if (maxEntry.weight === minEntry.weight) {
+            // only one unique weight reading — no gross, no net
+            gross_wt = null
+            gross_wt_time = null
+            net_wt = null
+          } else {
+            gross_wt = maxEntry.weight
+            gross_wt_time = maxEntry.time
+            net_wt = gross_wt - tare_wt
+          }
+        }
+
+        if (gateEvents.length === 0) {
+          cycles.push({ entry_time: null, exit_time: null })
+        }
+
+        reportData.push({
+          id: globalId++,
+          vehicleNo: record.vehicleNo ?? null,
+          event_date: record.cycle_date ?? null,
+          entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
+          exit_time: cycle.exit_time?.slice(11, 16) ?? '-',
+          tare_wt,
+          tare_wt_time,
+          gross_wt,
+          gross_wt_time,
+          net_wt
+        })
+      })
+    })
+
+    console.log('Processed Report Data:', reportData)
+
+    return reportData
   } catch (error) {
     console.error('Fetch failed:', error)
 
