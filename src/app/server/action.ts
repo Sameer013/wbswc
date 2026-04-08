@@ -145,3 +145,217 @@ export async function getIntrusionAlerts(): Promise<AlertType[]> {
     return []
   }
 }
+
+// export async function getVehicleData() {
+//   try {
+//     const [anpr_data, entryexit_data] = await Promise.all([prisma.vw_danpr.findMany(), prisma.vw_entryexit.findMany()])
+
+//     // Build Map from entryexit keyed by vno
+
+//     const entryExitMap = new Map( // Looping through entryexit_data to create a map of vno to entry/exit times
+//       entryexit_data.map(record => {
+//         const times = record.evt?.split(',') ?? [] // '2026-04-03 08:48:55,2026-04-03 08:48:55' --> ['2026-04-03 08:48:55','2026-04-03 08:48:55']
+//         const types = record.et?.split(',') ?? [] // '1,2' --> ['1','2']
+
+//         // Creating one single array of events with time and movement type
+//         const events = types.map((type, i) => ({
+//           time: times[i]?.trim() ?? null,
+//           type: type.trim()
+//         }))
+
+//         // Resulted Array =>[{ time: '2026-04-03 08:48:55', type: '1' },{ time: '2026-04-03 10:45:24', type: '2' },{ time: '2026-04-03 11:46:55', type: '2' }]
+
+//         const vehicle_cycle: { entryTime: string | null; exitTime: string | null }[] = []
+
+//         let curr_entryTime: string | null = null
+
+//         for (let i = 0; i < events.length; i++) {
+//           const event = events[i]
+
+//           if (event.type === '1') {
+//             if (curr_entryTime !== null) {
+//               vehicle_cycle.push({
+//                 entryTime: curr_entryTime,
+//                 exitTime: null
+//               })
+//             }
+
+//             curr_entryTime = event.time
+//           } else if (event.type === '2') {
+//             vehicle_cycle.push({
+//               entryTime: curr_entryTime,
+//               exitTime: event.time
+//             })
+
+//             curr_entryTime = null
+//           }
+//         }
+
+//         if (curr_entryTime !== null) {
+//           vehicle_cycle.push({
+//             entryTime: curr_entryTime,
+//             exitTime: null
+//           })
+//         }
+
+//         return [record.vno, vehicle_cycle]
+//       })
+//     )
+
+//     // Merge anpr + entryexit by matching vno
+//     const formattedData = anpr_data.map(anpr => {
+//       const match = entryExitMap.get(anpr.vno)
+
+//       return {
+//         // --- From vw_danpr ---
+//         date: anpr.dt,
+//         plate: anpr.vno,
+//         speed: anpr.wts, // wts = weight/speed?
+//         images: anpr.imgs,
+
+//         // --- From vw_entryexit ---
+//         entryTime: match?.entryTime ?? null,
+//         exitTime: match?.exitTime ?? null,
+
+//         // --- Derived ---
+//         status: match?.exitTime ? 'exited' : match?.entryTime ? 'inside' : 'unknown'
+//       }
+//     })
+
+//     return { formattedData }
+//   } catch (error) {
+//     console.error('Fetch failed:', error)
+
+//     return { formattedData: [] }
+//   }
+// }
+
+export async function getVehicleData(from: Date, to: Date): Promise<VehicleType[]> {
+  try {
+    const [anpr_data, entryexit_data] = await Promise.all([
+      prisma.vw_danpr.findMany({ where: { dt: { gte: from, lte: to } } }),
+      prisma.vw_entryexit.findMany({ where: { dt: { gte: from, lte: to } } })
+    ])
+
+    const anprMap = new Map(anpr_data.map(a => [a.vno, a]))
+
+    const formattedData: VehicleType[] = entryexit_data.flatMap(record => {
+      const times = record.evt?.split(',') ?? []
+      const types = record.et?.split(',') ?? []
+
+      const anpr = anprMap.get(record.vno)
+      const weights = anpr?.wts?.split(',').map(Number) ?? []
+
+      const events = types
+        .map((type, i) => ({
+          type: type.trim(),
+          time: times[i]?.trim() ?? null,
+          weight: weights[i] ?? null
+        }))
+        .filter(e => e.time !== null)
+
+      events.sort((a, b) => new Date(a.time!).getTime() - new Date(b.time!).getTime())
+
+      const rows: VehicleType[] = []
+      let currentEntry: (typeof events)[0] | null = null
+
+      for (const event of events) {
+        if (event.type === '1') {
+          if (currentEntry) {
+            rows.push({
+              id: `${record.vno}-${currentEntry.time}`,
+              timestamp: currentEntry.time!,
+
+              vehicleNo: record.vno,
+              entry_time: currentEntry.time!,
+              exit_time: null,
+
+              tareWt: currentEntry.weight ?? null,
+              grossWt: currentEntry.weight ?? null,
+
+              tarewtTimestamp: currentEntry.time!,
+              grosswtTimestamp: currentEntry.time!
+            })
+          }
+
+          currentEntry = event
+        } else if (event.type === '2') {
+          if (currentEntry) {
+            const w1 = currentEntry.weight
+            const w2 = event.weight
+
+            const tareWt = w1 ?? null
+            const grossWt = w2 ?? null
+
+            rows.push({
+              id: `${record.vno}-${currentEntry.time}-${event.time}`,
+              timestamp: event.time!,
+
+              vehicleNo: record.vno,
+              entry_time: currentEntry.time!,
+              exit_time: event.time!,
+
+              tareWt,
+              grossWt,
+
+              tarewtTimestamp: currentEntry.time!,
+              grosswtTimestamp: event.time!
+            })
+
+            currentEntry = null
+          } else {
+            // exit without entry
+            rows.push({
+              id: `${record.vno}-${event.time}`,
+              timestamp: event.time!,
+
+              vehicleNo: record.vno,
+              entry_time: null,
+              exit_time: event.time!,
+
+              tareWt: event.weight ?? null,
+              grossWt: event.weight ?? null,
+
+              tarewtTimestamp: event.time!,
+              grosswtTimestamp: event.time!
+            })
+          }
+        }
+      }
+
+      // leftover entry
+      if (currentEntry) {
+        rows.push({
+          id: `${record.vno}`,
+          timestamp: currentEntry.time!,
+
+          vehicleNo: record.vno,
+          entry_time: currentEntry.time!,
+          exit_time: null,
+
+          tareWt: currentEntry.weight ?? null,
+          grossWt: currentEntry.weight ?? null,
+
+          tarewtTimestamp: currentEntry.time!,
+          grosswtTimestamp: currentEntry.time!
+        })
+      }
+
+      return rows
+    })
+
+    formattedData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    console.log('Formatted Vehicle Data:', formattedData)
+
+    const dataWithIds = formattedData.map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+
+    return dataWithIds
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return []
+  }
+}

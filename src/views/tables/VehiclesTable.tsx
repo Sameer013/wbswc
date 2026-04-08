@@ -30,6 +30,8 @@ import ProductListTable from '@views/list/ProductListTable'
 const VehiclesTable = async () => {
   const data = await getVehicleTableData()
 
+  // const data2 = await getVehicleData()
+
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>

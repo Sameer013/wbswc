@@ -44,14 +44,14 @@ import tableStyles from '@core/styles/table.module.css'
 export type VehicleType = {
   id: string | number
   timestamp: string
-  entry_time: string
-  exit_time: string
+  entry_time: string | null
+  exit_time: string | null
   tareWt: number | string
   grossWt: number | string
   tarewtTimestamp: string
   grosswtTimestamp: string
   updated_vehicleNo?: string
-  vehicleNo?: string
+  vehicleNo?: string | null
   actions?: string
 }
 
@@ -118,20 +118,20 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
       columnHelper.accessor('entry_time', {
         header: 'Entry Time',
-        cell: ({ row }) => <Typography>{row.original.entry_time?.slice(0, 5)}</Typography>
+        cell: ({ row }) => <Typography>{row.original.entry_time?.slice(11, 16)}</Typography>
       }),
       columnHelper.accessor('exit_time', {
         header: 'Exit Time',
         cell: ({ row }) => (
-          <Typography>{row.original.exit_time === '-' ? '-' : row.original.exit_time?.slice(0, 5)}</Typography>
+          <Typography>{row.original.exit_time === '-' ? '-' : row.original.exit_time?.slice(11, 16)}</Typography>
         )
       }),
       columnHelper.accessor('tareWt', {
-        header: 'Tare Weight (KGS)',
+        header: 'Tare Weight (KG)',
         cell: ({ row }) => <Typography>{row.original.tareWt}</Typography>
       }),
       columnHelper.accessor('grossWt', {
-        header: 'Gross Weight (KGS)',
+        header: 'Gross Weight (KG)',
         cell: ({ row }) => <Typography>{row.original.grossWt}</Typography>
       }),
       columnHelper.accessor('tarewtTimestamp', {
