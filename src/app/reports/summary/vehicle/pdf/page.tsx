@@ -5,7 +5,7 @@
 import PdfClient from './PdfClient'
 
 // import { convertUTCtoLocalTime } from '@/utils/functions'
-import { getVehicleData } from '@/app/server/action'
+import { getReportData } from '@/app/server/action'
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ from: string; to: string }> }) {
   const { from, to } = await searchParams // to access ?from=${fromDate}&to=${toDate} in url
@@ -43,7 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   //     event_date: 'asc'
   //   }
   // })
-  const events2 = await getVehicleData(fromDate, toDate)
+  const events2 = await getReportData(fromDate, toDate)
 
   // console.log(events2)
 
@@ -65,12 +65,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
       vehicleNo: event.vehicleNo || 0,
       entry_time: event.entry_time,
       exit_time: event.exit_time,
-      tare_wt_time: event.tarewtTimestamp,
-      gross_wt_time: event.grosswtTimestamp,
-      tare_wt: event.tareWt || 0,
-      gross_wt: event.grossWt || 0,
-      net_wt: 0,
-      event_date: event.timestamp
+      tare_wt_time: event.tare_wt_time,
+      gross_wt_time: event.gross_wt_time,
+      tare_wt: event.tare_wt || 0,
+      gross_wt: event.gross_wt || 0,
+      net_wt: event.net_wt ?? null,
+      event_date: event.event_date
     }
   })
 
