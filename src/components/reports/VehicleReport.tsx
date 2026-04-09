@@ -97,12 +97,12 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>STATUS</Text>
+        {/* <Text style={styles.sectionTitle}>STATUS</Text>
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>PROCESSED</Text>
           </View>
-        </View>
+        </View> */}
 
         <Text style={styles.sectionTitle}>VEHICLE IMAGES</Text>
         <View style={styles.imageRow}>
