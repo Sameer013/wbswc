@@ -465,7 +465,7 @@ export async function getReportData(
 
 export async function getVehicleImage(id: string): Promise<string> {
   try {
-    const image = await prisma.weighbridge_images.findUnique({
+    const image = await prisma.entry_exit_images.findUnique({
       where: { id: Number(id) }
     })
 
