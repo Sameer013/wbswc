@@ -18,24 +18,22 @@ const PDFButton = ({ record }: { record: any }) => {
     setLoading(true)
 
     try {
-      // 1. Fetch the raw images from your server action
-      // We use the ID already present in your manipulated record
+      // Fetch Raw Image Data as base64
       const entry_img = record.entry_imageId ? await getVehicleImage(record.entry_imageId) : null
       const exit_img = record.exit_imageId ? await getVehicleImage(record.exit_imageId) : null
 
-      // 2. Create a final data object that combines your
-      // manipulated row data with the freshly fetched images
+      // Prepare the data for the PDF component
       const finalReportData = {
         ...record,
         entry_image: entry_img,
         exit_image: exit_img
       }
 
-      // 3. Generate the PDF instance
+      // Generate the PDF instance
       const doc = <VehicleReport record={finalReportData} />
       const blob = await pdf(doc).toBlob()
 
-      // 4. Create and trigger the viewer
+      // Create a URL for the PDF blob and open it in a new tab
       const url = URL.createObjectURL(blob)
       const pdfWindow = window.open(url, '_blank')
 
@@ -44,7 +42,7 @@ const PDFButton = ({ record }: { record: any }) => {
         alert('Please allow popups to view the PDF report.')
       }
 
-      // Clean up the URL object from memory after the user has likely opened it
+      // Clean up the URL object from memory after the user has likely opened it after 60s
       setTimeout(() => URL.revokeObjectURL(url), 60000)
     } catch (error) {
       console.error('PDF Generation Error:', error)
