@@ -21,7 +21,7 @@ export type EventSummaryRecord2 = {
   tare_wt: number | string | null
   gross_wt: number | string | null
   net_wt: number | null
-  event_date: Date | string | null
+  event_date: Date | string
 }
 
 const formatDate = (d: Date) =>

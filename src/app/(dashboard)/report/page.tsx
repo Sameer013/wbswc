@@ -14,7 +14,8 @@ import Typography from '@mui/material/Typography'
 const ReportPage = () => {
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
-  const [vehicleNo, setVehicleNo] = useState<string>('')
+
+  // const [vehicleNo, setVehicleNo] = useState<string>('')
   const [error, setError] = useState<string>('')
 
   const handleGenerate = () => {
@@ -66,7 +67,7 @@ const ReportPage = () => {
                   shrink: true
                 }}
               />
-              <TextField
+              {/* <TextField
                 fullWidth
                 label='Vehicle No (Optional)'
                 type='text'
@@ -75,7 +76,7 @@ const ReportPage = () => {
                 InputLabelProps={{
                   shrink: true
                 }}
-              />
+              /> */}
             </div>
 
             {error && (

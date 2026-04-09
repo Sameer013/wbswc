@@ -43,7 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   //     event_date: 'asc'
   //   }
   // })
-  const events2 = await getReportData(fromDate, toDate)
+  const events2 = await getReportData(fromDate, toDate, undefined, 'asc')
 
   // console.log(events2)
 

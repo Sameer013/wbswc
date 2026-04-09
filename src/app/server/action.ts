@@ -231,155 +231,37 @@ export async function getIntrusionAlerts(): Promise<AlertType[]> {
 //     return { formattedData: [] }
 //   }
 // }
+function toISTDate(date: Date, time: 'start' | 'end'): Date {
+  const dateStr = date.toISOString().split('T')[0] // get YYYY-MM-DD part
 
-export async function getVehicleData(from: Date, to: Date): Promise<VehicleType[]> {
-  try {
-    const [anpr_data, entryexit_data] = await Promise.all([
-      prisma.vw_danpr.findMany({ where: { dt: { gte: from, lte: to } } }),
-      prisma.vw_entryexit.findMany({ where: { dt: { gte: from, lte: to } } })
-    ])
-
-    const anprMap = new Map(anpr_data.map(a => [a.vno, a]))
-
-    const formattedData: VehicleType[] = entryexit_data.flatMap(record => {
-      const times = record.evt?.split(',') ?? []
-      const types = record.et?.split(',') ?? []
-
-      const anpr = anprMap.get(record.vno)
-      const weights = anpr?.wts?.split(',').map(Number) ?? []
-
-      const events = types
-        .map((type, i) => ({
-          type: type.trim(),
-          time: times[i]?.trim() ?? null,
-          weight: weights[i] ?? null
-        }))
-        .filter(e => e.time !== null)
-
-      events.sort((a, b) => new Date(a.time!).getTime() - new Date(b.time!).getTime())
-
-      const rows: VehicleType[] = []
-      let currentEntry: (typeof events)[0] | null = null
-
-      for (const event of events) {
-        if (event.type === '1') {
-          if (currentEntry) {
-            rows.push({
-              id: `${record.vno}-${currentEntry.time}`,
-              timestamp: currentEntry.time!,
-
-              vehicleNo: record.vno,
-              entry_time: currentEntry.time!,
-              exit_time: null,
-
-              tareWt: currentEntry.weight ?? null,
-              grossWt: currentEntry.weight ?? null,
-
-              tarewtTimestamp: currentEntry.time!,
-              grosswtTimestamp: currentEntry.time!
-            })
-          }
-
-          currentEntry = event
-        } else if (event.type === '2') {
-          if (currentEntry) {
-            const w1 = currentEntry.weight
-            const w2 = event.weight
-
-            const tareWt = w1 ?? null
-            const grossWt = w2 ?? null
-
-            rows.push({
-              id: `${record.vno}-${currentEntry.time}-${event.time}`,
-              timestamp: event.time!,
-
-              vehicleNo: record.vno,
-              entry_time: currentEntry.time!,
-              exit_time: event.time!,
-
-              tareWt,
-              grossWt,
-
-              tarewtTimestamp: currentEntry.time!,
-              grosswtTimestamp: event.time!
-            })
-
-            currentEntry = null
-          } else {
-            // exit without entry
-            rows.push({
-              id: `${record.vno}-${event.time}`,
-              timestamp: event.time!,
-
-              vehicleNo: record.vno,
-              entry_time: null,
-              exit_time: event.time!,
-
-              tareWt: event.weight ?? null,
-              grossWt: event.weight ?? null,
-
-              tarewtTimestamp: event.time!,
-              grosswtTimestamp: event.time!
-            })
-          }
-        }
-      }
-
-      // leftover entry
-      if (currentEntry) {
-        rows.push({
-          id: `${record.vno}`,
-          timestamp: currentEntry.time!,
-
-          vehicleNo: record.vno,
-          entry_time: currentEntry.time!,
-          exit_time: null,
-
-          tareWt: currentEntry.weight ?? null,
-          grossWt: currentEntry.weight ?? null,
-
-          tarewtTimestamp: currentEntry.time!,
-          grosswtTimestamp: currentEntry.time!
-        })
-      }
-
-      return rows
-    })
-
-    formattedData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    console.log('Formatted Vehicle Data:', formattedData)
-
-    const dataWithIds = formattedData.map((item, index) => ({
-      ...item,
-      id: index + 1
-    }))
-
-    return dataWithIds
-  } catch (error) {
-    console.error('Fetch failed:', error)
-
-    return []
+  if (time === 'start') {
+    return new Date(`${dateStr}T00:00:00+05:30`)
+  } else {
+    return new Date(`${dateStr}T23:59:59+05:30`)
   }
 }
 
-export async function getReportData(from: Date, to: Date): Promise<EventSummaryRecord2[]> {
+export async function getReportData(
+  from?: Date,
+  to?: Date,
+  limit?: number,
+  order: 'asc' | 'desc' = 'desc'
+): Promise<EventSummaryRecord2[]> {
   try {
     const data = await prisma.vehicle_cycle.findMany({
       where: {
-        cycle_date: {
-          gte: from,
-          lte: to
-        }
+        ...(from && to ? { cycle_date: { gte: from, lte: to } } : {})
       },
 
-      orderBy: { cycle_date: 'asc' }
+      orderBy: { cycle_date: 'desc' },
+      ...(limit ? { take: limit } : {})
     })
 
     const reportData: EventSummaryRecord2[] = []
-    let globalId = 0
+    let globalId = 1
 
     data.forEach(record => {
-      // ─── Parse info_entryexit (DESC order → reverse to ASC) ─────────
+      // Parsing info_entryexit
       type GateEvent = { time: string; movement: '1' | '2' }
       let gateEvents: GateEvent[] = []
 
@@ -388,17 +270,17 @@ export async function getReportData(from: Date, to: Date): Promise<EventSummaryR
         const times = times_str?.split(',') ?? []
         const movements = movements_str?.split(',') ?? []
 
-        // reverse both since entryexit is DESC
-        times.reverse()
-        movements.reverse()
+        // console.log('Times_str:', times_str)
+        // console.log('Movements_str:', movements_str)
 
         gateEvents = movements.map((movement, i) => ({
           time: times[i],
           movement: movement as '1' | '2'
         }))
+
+        // console.log('Parsed Gate Events:', gateEvents)
       }
 
-      // ─── Parse info_anpr (already ASC order) ────────────────────────
       type AnprEvent = { time: string; weight: number }
       let anprEvents: AnprEvent[] = []
 
@@ -407,18 +289,19 @@ export async function getReportData(from: Date, to: Date): Promise<EventSummaryR
         const times = times_str?.split(',') ?? []
         const weights = weights_str?.split(',') ?? []
 
-        anprEvents = weights
-          .map((w, i) => ({
-            time: times[i],
-            weight: parseFloat(w)
-          }))
-          .filter(e => !isNaN(e.weight))
+        anprEvents = weights.map((w, i) => ({
+          time: times[i],
+          weight: Number(w)
+        }))
       }
 
-      // ─── Build cycles ────────────────────────────────────────────────
+      // console.log('Parsed ANPR Events:', anprEvents)
+
+      // Vehicle cycles
       type Cycle = { entry_time: string | null; exit_time: string | null }
       const cycles: Cycle[] = []
 
+      // It handles and creates cycles if there is no entry but exit, entry but no exit everything is taken care of
       if (gateEvents.length === 0) {
         // no gate events at all — one dummy cycle for ANPR fallback
         cycles.push({ entry_time: null, exit_time: null })
@@ -448,22 +331,26 @@ export async function getReportData(from: Date, to: Date): Promise<EventSummaryR
         }
       }
 
-      // ─── Link ANPR weights to cycles ────────────────────────────────
+      // Link ANPR weights to cycles
       cycles.forEach(cycle => {
         let cycleWeights: AnprEvent[] = []
 
         if (cycle.entry_time || cycle.exit_time) {
-          // find cycle boundaries
+          // Find events where atleast one of these is true
           // if entry missing → use start of day
           // if exit missing → use end of day
-          const cycleStart = cycle.entry_time ? new Date(cycle.entry_time) : new Date(`${record.cycle_date}T00:00:00`)
+          const cycleStart = cycle.entry_time
+            ? new Date(cycle.entry_time)
+            : toISTDate(new Date(record.cycle_date), 'start')
 
-          const cycleEnd = cycle.exit_time ? new Date(cycle.exit_time) : new Date(`${record.cycle_date}T23:59:59`)
+          const cycleEnd = cycle.exit_time ? new Date(cycle.exit_time) : toISTDate(new Date(record.cycle_date), 'end')
 
+          // filter weights that fall wiithin the cycle entry exit time
           cycleWeights = anprEvents.filter(e => {
             const t = new Date(e.time)
 
-            return t >= cycleStart && t <= cycleEnd
+            // Return true and false
+            return t >= cycleStart && t <= cycleEnd && t.toDateString() === new Date(record.cycle_date).toDateString()
           })
         }
 
@@ -480,20 +367,29 @@ export async function getReportData(from: Date, to: Date): Promise<EventSummaryR
         let net_wt: number | null = null
 
         if (cycleWeights.length >= 1) {
-          const minEntry = cycleWeights.reduce((a, b) => (a.weight <= b.weight ? a : b))
-          const maxEntry = cycleWeights.reduce((a, b) => (a.weight >= b.weight ? a : b))
+          // Using reduce() to comapre two values at a time in just 2 lines of code instead of loops
+          // tare_wt = 0
+          // gross_wt = 0
+          // for(let i=0; i< cycleWeights.length; i++){
+          // let wt = cycleWeights[i].weight
+          // let time = cycleWeights[i].time
+          // if( wt < tare_wt){ tare_wt = wt}
+          // if( wt > gross_wt){ gross_wt = wt}
+          // }
+          const minWt = cycleWeights.reduce((a, b) => (a.weight <= b.weight ? a : b))
+          const maxWt = cycleWeights.reduce((a, b) => (a.weight >= b.weight ? a : b))
 
-          tare_wt = minEntry.weight
-          tare_wt_time = minEntry.time
+          tare_wt = minWt.weight
+          tare_wt_time = minWt.time
 
-          if (maxEntry.weight === minEntry.weight) {
-            // only one unique weight reading — no gross, no net
+          if (maxWt.weight === minWt.weight) {
+            // only one unique weight reading no gross, no net
             gross_wt = null
             gross_wt_time = null
             net_wt = null
           } else {
-            gross_wt = maxEntry.weight
-            gross_wt_time = maxEntry.time
+            gross_wt = maxWt.weight
+            gross_wt_time = maxWt.time
             net_wt = gross_wt - tare_wt
           }
         }
@@ -505,21 +401,37 @@ export async function getReportData(from: Date, to: Date): Promise<EventSummaryR
         reportData.push({
           id: globalId++,
           vehicleNo: record.vehicleNo ?? null,
-          event_date: record.cycle_date ?? null,
+          event_date: record.cycle_date,
           entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
           exit_time: cycle.exit_time?.slice(11, 16) ?? '-',
-          tare_wt,
-          tare_wt_time,
-          gross_wt,
-          gross_wt_time,
-          net_wt
+          tare_wt: tare_wt,
+          tare_wt_time: tare_wt_time,
+          gross_wt: gross_wt,
+          gross_wt_time: gross_wt_time,
+          net_wt: net_wt
         })
       })
     })
 
-    console.log('Processed Report Data:', reportData)
+    const ordered_reportData = reportData.sort((a, b) => {
+      // Sort by event_date desc
+      const dateA = new Date(a.event_date as string)
+      const dateB = new Date(b.event_date as string)
 
-    return reportData
+      if (dateB.getTime() !== dateA.getTime()) {
+        return dateB.getTime() - dateA.getTime() // desc by date
+      }
+
+      // If same date, sort by entry_time desc
+      const timeA = a.entry_time !== '-' ? (a.entry_time as string) : '00:00'
+      const timeB = b.entry_time !== '-' ? (b.entry_time as string) : '00:00'
+
+      return timeB.localeCompare(timeA)
+    })
+
+    console.log('Processed Report Data:', ordered_reportData)
+
+    return order === 'asc' ? reportData : ordered_reportData
   } catch (error) {
     console.error('Fetch failed:', error)
 

@@ -6,10 +6,7 @@ import VehicleReport from '@/components/reports/VehicleReport'
 
 // We are using dynamic import with ssr: false to prevent the PDFViewer component from being rendered on the server (SSR).
 
-const PDFViewer = dynamic(
-  () => import('@react-pdf/renderer').then(mod => mod.PDFViewer),
-  { ssr: false }
-)
+const PDFViewer = dynamic(() => import('@react-pdf/renderer').then(mod => mod.PDFViewer), { ssr: false })
 
 export type EventRecordStr = {
   id: number

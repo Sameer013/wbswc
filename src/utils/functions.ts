@@ -30,3 +30,17 @@ export function convertUTCtoLocalTime(date: Date | null): Date | null {
 
   return new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`)
 }
+
+export function formatDate(d: Date): string {
+  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`
+}
+
+export function formatInputDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr)
+
+    return formatDate(d)
+  } catch (e) {
+    return dateStr
+  }
+}

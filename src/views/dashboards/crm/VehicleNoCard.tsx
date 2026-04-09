@@ -108,7 +108,7 @@ const VehicleNoCard = ({ title, type, todayCount, monthCount, yearCount, iconSrc
         <Box sx={{ display: 'flex', gap: 1 }}>
           {[
             { label: 'M', count: monthCount },
-            { label: 'Y', count: yearCount }
+            { label: '3M', count: yearCount }
           ].map(({ label, count }) => (
             <Box
               key={label}

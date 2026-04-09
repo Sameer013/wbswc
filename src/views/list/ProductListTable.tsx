@@ -40,20 +40,10 @@ import TablePaginationComponent from '@components/TablePaginationComponent'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
+import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
+import { formatDate } from '@/utils/functions'
 
-export type VehicleType = {
-  id: string | number
-  timestamp: string
-  entry_time: string | null
-  exit_time: string | null
-  tareWt: number | string
-  grossWt: number | string
-  tarewtTimestamp: string
-  grosswtTimestamp: string
-  updated_vehicleNo?: string
-  vehicleNo?: string | null
-  actions?: string
-}
+export type VehicleType = EventSummaryRecord2 & { actions?: string }
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
@@ -99,52 +89,60 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       //   header: 'Timestamp',
       //   cell: ({ row }) => <Typography>{new Date(row.original.timestamp).toLocaleString()}</Typography>
       // }),
-      columnHelper.accessor('timestamp', {
+      columnHelper.accessor('event_date', {
         header: 'Date',
         cell: ({ row }) => {
-          const date = new Date(row.original.timestamp)
-          const formatted = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`
+          // const date = new Date(row.original.event_date?.toString() || '--')
+          // const formatted = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`
 
-          return <Typography>{formatted}</Typography>
+          return (
+            <Typography>{row.original.event_date ? formatDate(new Date(row.original.event_date)) : '-'}</Typography>
+          )
         }
       }),
       columnHelper.accessor('vehicleNo', {
         header: 'Vehicle No',
-        cell: ({ row }) => (
-          <Typography fontWeight={700}>
-            {row.original.updated_vehicleNo ? row.original.updated_vehicleNo : row.original.vehicleNo}
-          </Typography>
-        )
+        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo}</Typography>
       }),
       columnHelper.accessor('entry_time', {
         header: 'Entry Time',
-        cell: ({ row }) => <Typography>{row.original.entry_time?.slice(11, 16)}</Typography>
+        cell: ({ row }) => <Typography>{row.original.entry_time?.toString().slice(0, 5) ?? '-'}</Typography>
       }),
       columnHelper.accessor('exit_time', {
         header: 'Exit Time',
-        cell: ({ row }) => (
-          <Typography>{row.original.exit_time === '-' ? '-' : row.original.exit_time?.slice(11, 16)}</Typography>
-        )
+        cell: ({ row }) => <Typography>{row.original.exit_time?.toString().slice(0, 5) ?? '-'}</Typography>
       }),
-      columnHelper.accessor('tareWt', {
+      columnHelper.accessor('tare_wt', {
         header: 'Tare Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.tareWt}</Typography>
+        cell: ({ row }) => <Typography>{row.original.tare_wt}</Typography>
       }),
-      columnHelper.accessor('grossWt', {
+      columnHelper.accessor('gross_wt', {
         header: 'Gross Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.grossWt}</Typography>
+        cell: ({ row }) => <Typography>{row.original.gross_wt}</Typography>
       }),
-      columnHelper.accessor('tarewtTimestamp', {
+      columnHelper.accessor('tare_wt_time', {
         header: 'Tare Timestamp',
 
-        cell: ({ row }) => <Typography>{row.original.tarewtTimestamp}</Typography> //TODO add weight timestamp
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.tare_wt_time ? row.original.tare_wt_time.toString().slice(11, 16) : '-'}
+          </Typography>
+        ) //TODO add weight timestamp
         // cell: ({ row }) => <Typography>NULL</Typography>
       }),
-      columnHelper.accessor('grosswtTimestamp', {
-        header: 'Gros Timestamp',
+      columnHelper.accessor('gross_wt_time', {
+        header: 'Gross Timestamp',
 
-        cell: ({ row }) => <Typography>{row.original.grosswtTimestamp}</Typography> //TODO add weight timestamp
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.gross_wt_time ? row.original.gross_wt_time.toString().slice(11, 16) : '-'}
+          </Typography>
+        ) //TODO add weight timestamp
         // cell: ({ row }) => <Typography>NULL</Typography>
+      }),
+      columnHelper.accessor('net_wt', {
+        header: 'Net Weight (KG)',
+        cell: ({ row }) => <Typography>{row.original.net_wt}</Typography>
       }),
 
       {
