@@ -2,9 +2,13 @@
 
 import { useMemo, useState } from 'react'
 
-import Link from 'next/link'
+// import Link from 'next/link'
+
+// import { useRouter } from 'next/navigation'
 
 // MUI Imports
+import dynamic from 'next/dynamic'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
@@ -13,7 +17,8 @@ import Button from '@mui/material/Button'
 // import Checkbox from '@mui/material/Checkbox'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+
+// import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 import Typography from '@mui/material/Typography'
 
@@ -31,7 +36,8 @@ import {
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 
-// Component Imports
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // import OptionMenu from '@core/components/option-menu'
@@ -43,6 +49,15 @@ import tableStyles from '@core/styles/table.module.css'
 import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
 import { formatDate } from '@/utils/functions'
 
+const PDFButton = dynamic(() => import('@/components/PDFButton'), {
+  ssr: false,
+  loading: () => (
+    <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium' disabled>
+      PDF
+    </Button>
+  )
+})
+
 export type VehicleType = EventSummaryRecord2 & { actions?: string }
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -52,6 +67,13 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 
   return itemRank.passed
 }
+
+// const handlePDFReports = (row: VehicleType) => () => {
+//   const router = useRouter()
+
+//   localStorage.setItem('v_pdfData', JSON.stringify(row))
+//   router.push(`reports/vehicle/${row.id}/pdf/PdfClient`)
+// }
 
 const columnHelper = createColumnHelper<VehicleType>()
 
@@ -81,8 +103,8 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       //   )
       // },
       columnHelper.accessor('id', {
-        header: 'S.No',
-        cell: ({ row }) => <Typography>{row.original.id}</Typography>
+        header: 'Trip ID',
+        cell: ({ row }) => <Typography>T{row.original.id}</Typography>
       }),
 
       // columnHelper.accessor('timestamp', {
@@ -151,15 +173,16 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         enableSorting: false,
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <Link href={`/reports/vehicle/${row.original.id}/pdf`} target='_blank' rel='noopener noreferrer'>
-              {/* <IconButton>
+            {/* <Link href={`/reports/vehicle/${row.original.id}/pdf`} target='_blank' rel='noopener noreferrer'> */}
+            {/* <IconButton>
                 <i className='tabler-file-invoice text-textSecondary' />
               </IconButton> */}
-              <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium'>
-                PDF
-              </Button>
-              {/* <PictureAsPdfIcon /> */}
-            </Link>
+            {/* <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium' onClick={() => window.open(`/reports/vehicle/${id}/pdf`, '_blank')}>
+              PDF
+            </Button> */}
+            <PDFButton record={row.original} />
+            {/* <PictureAsPdfIcon /> */}
+            {/* </Link> */}
             {/* <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'

@@ -172,5 +172,47 @@ export const styles = StyleSheet.create({
   footerText: {
     fontSize: 7.5,
     color: GRAY
+  },
+  imageRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12
+  },
+  imageBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 6,
+    padding: 8,
+    alignItems: 'center'
+  },
+  imageLabel: {
+    fontSize: 8,
+    color: '#64748b',
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 6,
+    letterSpacing: 0.5
+  },
+  vehicleImage: {
+    width: '100%',
+    height: 140,
+    objectFit: 'cover',
+    borderRadius: 4
+  },
+  noImage: {
+    width: '100%',
+    height: 140,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 4
+  },
+  noImageText: {
+    fontSize: 9,
+    color: '#94a3b8',
+    fontFamily: 'Helvetica'
   }
 })

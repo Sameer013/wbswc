@@ -250,36 +250,44 @@ export async function getReportData(
   try {
     const data = await prisma.vehicle_cycle.findMany({
       where: {
-        ...(from && to ? { cycle_date: { gte: from, lte: to } } : {})
+        ...(from && to ? { cycle_date: { gte: from, lt: to } } : {})
       },
 
       orderBy: { cycle_date: 'desc' },
       ...(limit ? { take: limit } : {})
     })
 
+    // console.log('Raw Report Data:', data)
     const reportData: EventSummaryRecord2[] = []
     let globalId = 1
 
     data.forEach(record => {
       // Parsing info_entryexit
-      type GateEvent = { time: string; movement: '1' | '2' }
+      type GateEvent = { time: string; movement: '1' | '2'; imageId: string }
       let gateEvents: GateEvent[] = []
 
       if (record.info_entryexit) {
-        const [times_str, movements_str] = record.info_entryexit.split('#')
+        const [times_str, movements_str, image_str] = record.info_entryexit.split('#')
         const times = times_str?.split(',') ?? []
         const movements = movements_str?.split(',') ?? []
+        const imageIds = image_str?.split(',') ?? []
 
         // console.log('Times_str:', times_str)
         // console.log('Movements_str:', movements_str)
 
         gateEvents = movements.map((movement, i) => ({
           time: times[i],
+          imageId: imageIds[i],
           movement: movement as '1' | '2'
         }))
 
         // console.log('Parsed Gate Events:', gateEvents)
       }
+
+      // console.log('Gate Events before sorting:', gateEvents)
+      gateEvents.reverse()
+
+      // console.log('Gate Events after sorting:', gateEvents)
 
       type AnprEvent = { time: string; weight: number }
       let anprEvents: AnprEvent[] = []
@@ -298,7 +306,12 @@ export async function getReportData(
       // console.log('Parsed ANPR Events:', anprEvents)
 
       // Vehicle cycles
-      type Cycle = { entry_time: string | null; exit_time: string | null }
+      type Cycle = {
+        entry_time: string | null
+        exit_time: string | null
+        entry_imageId?: string | null
+        exit_imageId?: string | null
+      }
       const cycles: Cycle[] = []
 
       // It handles and creates cycles if there is no entry but exit, entry but no exit everything is taken care of
@@ -307,27 +320,32 @@ export async function getReportData(
         cycles.push({ entry_time: null, exit_time: null })
       } else {
         let currentEntry: string | null = null
+        let currentEntryImg: string | null = null
 
         gateEvents.forEach(event => {
           if (event.movement === '1') {
             if (currentEntry !== null) {
               // missed exit — close previous cycle, start new one
-              cycles.push({ entry_time: currentEntry, exit_time: null })
+              cycles.push({ entry_time: currentEntry, exit_time: null, entry_imageId: null })
             }
 
             currentEntry = event.time
+            currentEntryImg = event.imageId
           } else if (event.movement === '2') {
             cycles.push({
               entry_time: currentEntry,
-              exit_time: event.time
+              exit_time: event.time,
+              entry_imageId: currentEntryImg,
+              exit_imageId: event.imageId
             })
             currentEntry = null
+            currentEntryImg = null
           }
         })
 
         // if last entry never got an exit
         if (currentEntry !== null) {
-          cycles.push({ entry_time: currentEntry, exit_time: null })
+          cycles.push({ entry_time: currentEntry, exit_time: null, entry_imageId: currentEntryImg, exit_imageId: null })
         }
       }
 
@@ -404,6 +422,8 @@ export async function getReportData(
           event_date: record.cycle_date,
           entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
           exit_time: cycle.exit_time?.slice(11, 16) ?? '-',
+          entry_imageId: cycle.entry_imageId ?? null,
+          exit_imageId: cycle.exit_imageId ?? null,
           tare_wt: tare_wt,
           tare_wt_time: tare_wt_time,
           gross_wt: gross_wt,
@@ -429,12 +449,32 @@ export async function getReportData(
       return timeB.localeCompare(timeA)
     })
 
-    // console.log('Processed Report Data:', ordered_reportData)
+    // console.log('Order:', order)
 
-    return order === 'asc' ? reportData : ordered_reportData
+    const finalData = order === 'asc' ? reportData : ordered_reportData
+
+    // console.log('Final Report Data:', finalData)
+
+    return finalData
   } catch (error) {
     console.error('Fetch failed:', error)
 
     return []
+  }
+}
+
+export async function getVehicleImage(id: string): Promise<string> {
+  try {
+    const image = await prisma.weighbridge_images.findUnique({
+      where: { id: Number(id) }
+    })
+
+    if (!image || !image.truckImage) return ''
+
+    return `data:image/jpg;base64,${Buffer.from(image.truckImage).toString('base64')}`
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return ''
   }
 }

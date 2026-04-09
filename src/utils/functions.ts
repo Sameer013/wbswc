@@ -44,3 +44,7 @@ export function formatInputDate(dateStr: string): string {
     return dateStr
   }
 }
+
+export function blobToBase64(buffer: ArrayBuffer): string {
+  return `data:image/jpeg;base64,${Buffer.from(buffer).toString('base64')}`
+}

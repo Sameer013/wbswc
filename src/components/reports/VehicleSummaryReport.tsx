@@ -22,6 +22,10 @@ export type EventSummaryRecord2 = {
   gross_wt: number | string | null
   net_wt: number | null
   event_date: Date | string
+  entry_imageId?: string | null
+  exit_imageId?: string | null
+  entry_image?: string | null
+  exit_image?: string | null
 }
 
 const formatDate = (d: Date) =>

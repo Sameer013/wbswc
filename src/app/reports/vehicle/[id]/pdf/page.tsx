@@ -1,6 +1,9 @@
-import { prisma } from '@/libs/prisma'
+// import { prisma } from '@/libs/prisma'
 
-import PdfClient from './PdfClient'
+import PDFButton from '@/components/PDFButton'
+
+// import PdfClient from './PdfClient'
+import { getReportData } from '@/app/server/action'
 
 export default async function VehiclePdfPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -14,16 +17,22 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     )
   }
 
-  // Fetch data
-  const event = await prisma.eventmaster.findUnique({
-    where: { id: eventId },
-    include: {
-      anprevent: true,
-      event_type: true
-    }
-  })
+  const events = await getReportData(undefined, undefined, 20)
 
-  if (!event || !event.anprevent) {
+  // Fetch data
+  // const event = await prisma.eventmaster.findUnique({
+  //   where: { id: eventId },
+  //   include: {
+  //     anprevent: true,
+  //     event_type: true
+  //   }
+  // })
+
+  const event = Array.isArray(events) ? events[0] : events
+
+  console.log('Fetched Event:', event.id, event ? 'Event found' : 'Event not found')
+
+  if (!event || !event.id) {
     return (
       <div className='flex h-screen items-center justify-center p-6'>
         <div className='rounded-lg bg-red-50 p-4 text-red-800'>Event ID not found.</div>
@@ -31,13 +40,15 @@ export default async function VehiclePdfPage({ params }: { params: Promise<{ id:
     )
   }
 
-  const recordStr = {
-    id: event.id,
-    eventType: event.event_type.eventType,
-    eventTimestamp: event.eventTimestamp.toISOString(),
-    vehicleNo: event.anprevent.updated_vehicleNo ? event.anprevent.updated_vehicleNo : event.anprevent.vehicleNo,
-    vehicleWt: event.anprevent.vehicleWt
-  }
+  // const recordStr = {
+  //   id: event.id,
+  //   entry_time:
+  //   eventType: event.event_type.eventType,
+  //   eventTimestamp: event.eventTimestamp.toISOString(),
+  //   vehicleNo: event.anprevent.updated_vehicleNo ? event.anprevent.updated_vehicleNo : event.anprevent.vehicleNo,
+  //   vehicleWt: event.anprevent.vehicleW
+  // }
 
-  return <PdfClient record={recordStr} />
+  // return <PdfClient record={recordStr} />
+  return <PDFButton record={event} />
 }

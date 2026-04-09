@@ -1,16 +1,18 @@
+'use client'
+
+// import { get } from 'http'
+
 import React from 'react'
 
 import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 
 import { styles } from './styles/vehicleReport'
+import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
+import { getVehicleImage } from '@/app/server/action'
 
-type EventRecord = {
-  id: number
-  eventType: string
-  eventTimestamp: Date
-  vehicleNo: string
-  vehicleWt: number | null
-}
+// import { getVehicleImage } from '@/app/server/action'
+
+export type EventRecord = EventSummaryRecord2
 
 const formatDate = (d: Date) =>
   `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`
@@ -19,14 +21,16 @@ const formatTime = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${Stri
 
 const VehicleReport = ({ record }: { record: EventRecord }) => {
   const generatedAt = new Date()
+  const entryImg = getVehicleImage(record.entry_imageId || '') // Implement this function to fetch image URL based on ID
+  const exitImg = getVehicleImage(record.exit_imageId || '') // Implement this function to fetch image URL based on ID
 
   return (
     <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} producer='sigma' author='WBSWC'>
       <Page size='A4' style={styles.page}>
         <View style={styles.headerRow}>
           <View style={styles.logoContainer}>
-            <Image style={styles.logoIcon} src={'/images/logo1.png'} /> {/* Logo Icon */}
-            <Image style={styles.logoText} src={'/images/logo2.png'} /> {/* Logo Text */}
+            <Image style={styles.logoIcon} src={'/images/logo1.png'} />
+            <Image style={styles.logoText} src={'/images/logo2.png'} />
           </View>
           <View>
             <Text style={styles.reportLabel}>VEHICLE EVENT REPORT</Text>
@@ -39,19 +43,23 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
         <View style={styles.summaryBand}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>EVENT DATE</Text>
-            <Text style={styles.summaryValue}>{formatDate(record.eventTimestamp)}</Text>
+            <Text style={styles.summaryValue}>{formatDate(new Date(record.event_date))}</Text>
           </View>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>ENTRY TIME</Text>
-            <Text style={styles.summaryValue}>{formatTime(record.eventTimestamp)}</Text>
+            <Text style={styles.summaryValue}>{record.entry_time ? `${record.entry_time}` : '--'}</Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>EXIT TIME</Text>
+            <Text style={styles.summaryValue}>{record.exit_time ? `${record.exit_time}` : '--'}</Text>
           </View>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>VEHICLE NO.</Text>
             <Text style={styles.summaryValue}>{record.vehicleNo}</Text>
           </View>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>WEIGHT (KG)</Text>
-            <Text style={styles.summaryValue}>{record.vehicleWt != null ? record.vehicleWt.toFixed(2) : '--'}</Text>
+            <Text style={styles.summaryLabel}>NET WEIGHT (KG)</Text>
+            <Text style={styles.summaryValue}>{record.net_wt ? `${record.net_wt}` : '--'}</Text>
           </View>
         </View>
 
@@ -63,12 +71,12 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
               <Text style={styles.tableCellValue}>#{record.id}</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text style={styles.tableCellLabel}>Event Type</Text>
-              <Text style={styles.tableCellValue}>{record.eventType}</Text>
+              <Text style={styles.tableCellLabel}>Tare Weight</Text>
+              <Text style={styles.tableCellValue}>{record.tare_wt ? `${record.tare_wt} KG` : '--'}</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text style={styles.tableCellLabel}>Date</Text>
-              <Text style={styles.tableCellValue}>{formatDate(record.eventTimestamp)}</Text>
+              <Text style={styles.tableCellLabel}>Tare Weight Time</Text>
+              <Text style={styles.tableCellValue}>{record.tare_wt_time ? `${record.tare_wt_time}` : '--'}</Text>
             </View>
           </View>
 
@@ -79,13 +87,11 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
             </View>
             <View style={styles.tableCell}>
               <Text style={styles.tableCellLabel}>Gross Weight</Text>
-              <Text style={styles.tableCellValue}>
-                {record.vehicleWt != null ? `${record.vehicleWt.toFixed(2)} KG` : '--'}
-              </Text>
+              <Text style={styles.tableCellValue}>{record.gross_wt ? `${record.gross_wt} KG` : '--'}</Text>
             </View>
             <View style={styles.tableCell}>
-              <Text style={styles.tableCellLabel}>Entry Time</Text>
-              <Text style={styles.tableCellValue}>{formatTime(record.eventTimestamp)}</Text>
+              <Text style={styles.tableCellLabel}>Gross Weight Time</Text>
+              <Text style={styles.tableCellValue}>{record.gross_wt_time ? `${record.gross_wt_time}` : '--'}</Text>
             </View>
           </View>
         </View>
@@ -94,6 +100,30 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>PROCESSED</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>VEHICLE IMAGES</Text>
+        <View style={styles.imageRow}>
+          <View style={styles.imageBox}>
+            <Text style={styles.imageLabel}>ENTRY</Text>
+            {entryImg ? (
+              <Image style={styles.vehicleImage} src={entryImg} />
+            ) : (
+              <View style={styles.noImage}>
+                <Text style={styles.noImageText}>No Image Available</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.imageBox}>
+            <Text style={styles.imageLabel}>EXIT</Text>
+            {exitImg ? (
+              <Image style={styles.vehicleImage} src={exitImg} />
+            ) : (
+              <View style={styles.noImage}>
+                <Text style={styles.noImageText}>No Image Available</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -107,7 +137,6 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
 
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>WB State Warehousing Corporation</Text>
-
           <Text style={styles.footerText}>
             Generated: {formatDate(generatedAt)} {formatTime(generatedAt)}
           </Text>
