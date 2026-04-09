@@ -116,6 +116,8 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
               </View>
             )}
           </View>
+        </View>
+        <View style={styles.imageRow}>
           <View style={styles.imageBox}>
             <Text style={styles.imageLabel}>EXIT</Text>
             {exitImg ? (
@@ -127,7 +129,6 @@ const VehicleReport = ({ record }: { record: EventRecord }) => {
             )}
           </View>
         </View>
-
         <View style={styles.notesBox}>
           <Text style={styles.notesLabel}>REMARKS</Text>
           <Text style={styles.notesText}>

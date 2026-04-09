@@ -43,7 +43,7 @@ const PDFButton = ({ record }: { record: any }) => {
       }
 
       // Clean up the URL object from memory after the user has likely opened it after 60s
-      setTimeout(() => URL.revokeObjectURL(url), 60000)
+      setTimeout(() => URL.revokeObjectURL(url), 120000)
     } catch (error) {
       console.error('PDF Generation Error:', error)
     } finally {
