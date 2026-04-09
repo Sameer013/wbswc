@@ -8,7 +8,8 @@ import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 
 import { styles } from './styles/vehicleReport'
 import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
-import { getVehicleImage } from '@/app/server/action'
+
+// import { getVehicleImage } from '@/app/server/action'
 
 // import { getVehicleImage } from '@/app/server/action'
 
@@ -21,8 +22,8 @@ const formatTime = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${Stri
 
 const VehicleReport = ({ record }: { record: EventRecord }) => {
   const generatedAt = new Date()
-  const entryImg = getVehicleImage(record.entry_imageId || '') // Implement this function to fetch image URL based on ID
-  const exitImg = getVehicleImage(record.exit_imageId || '') // Implement this function to fetch image URL based on ID
+  const entryImg = record.entry_image || '' // Implement this function to fetch image URL based on ID
+  const exitImg = record.exit_image || '' // Implement this function to fetch image URL based on ID
 
   return (
     <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} producer='sigma' author='WBSWC'>
