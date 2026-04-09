@@ -10,8 +10,9 @@ import ProductListTable from '@views/list/ProductListTable'
 // import { getEcommerceData } from '@/app/server/actions'
 
 const VehiclesTable = async () => {
-  // const data = await getReportData(undefined, undefined, 20)
-  const data = await getReportData(new Date('2026-04-03'), new Date('2026-04-05'), 20)
+  const data = await getReportData(undefined, undefined, 20)
+
+  // const data = await getReportData(new Date('2026-04-03'), new Date('2026-04-05'), 20)
 
   // const data2 = await getVehicleData()
 
