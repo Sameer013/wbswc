@@ -429,7 +429,7 @@ export async function getReportData(
       return timeB.localeCompare(timeA)
     })
 
-    console.log('Processed Report Data:', ordered_reportData)
+    // console.log('Processed Report Data:', ordered_reportData)
 
     return order === 'asc' ? reportData : ordered_reportData
   } catch (error) {
