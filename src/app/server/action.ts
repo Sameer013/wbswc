@@ -284,10 +284,11 @@ export async function getReportData(
         // console.log('Parsed Gate Events:', gateEvents)
       }
 
-      // console.log('Gate Events before sorting:', gateEvents)
-      gateEvents.reverse()
+      // console.log('Gate Events for ', record.vehicleNo, ' before sorting:', gateEvents)
 
-      // console.log('Gate Events after sorting:', gateEvents)
+      // gateEvents.reverse()
+
+      // console.log('Gate Events for ', record.vehicleNo, ' after sorting:', gateEvents)
 
       type AnprEvent = { time: string; weight: number }
       let anprEvents: AnprEvent[] = []
@@ -302,6 +303,8 @@ export async function getReportData(
           weight: Number(w)
         }))
       }
+
+      anprEvents.reverse()
 
       // console.log('Parsed ANPR Events:', anprEvents)
 
