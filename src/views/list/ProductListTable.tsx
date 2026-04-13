@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 
 // import Link from 'next/link'
 
@@ -38,6 +38,8 @@ import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
+import TextField from '@mui/material/TextField'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // import OptionMenu from '@core/components/option-menu'
@@ -47,7 +49,8 @@ import TablePaginationComponent from '@components/TablePaginationComponent'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
-import { formatDate } from '@/utils/functions'
+import { exportToCSV, formatDate } from '@/utils/functions'
+import { getReportData } from '@/app/server/action'
 
 const PDFButton = dynamic(() => import('@/components/PDFButton'), {
   ssr: false,
@@ -68,19 +71,30 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   return itemRank.passed
 }
 
-// const handlePDFReports = (row: VehicleType) => () => {
-//   const router = useRouter()
-
-//   localStorage.setItem('v_pdfData', JSON.stringify(row))
-//   router.push(`reports/vehicle/${row.id}/pdf/PdfClient`)
-// }
-
 const columnHelper = createColumnHelper<VehicleType>()
 
 const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => {
-  const [data] = useState<VehicleType[]>(tableData)
+  const [data, setData] = useState<VehicleType[]>(tableData)
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState({})
+  const [fromDate, setFromDate] = useState<string>('')
+  const [toDate, setToDate] = useState<string>('')
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!fromDate && !toDate) {
+        const stats = await getReportData(undefined, undefined, 20)
+
+        setData(stats)
+      }
+    }
+
+    fetchData()
+
+    const interval = setInterval(fetchData, 60000)
+
+    return () => clearInterval(interval)
+  }, [fromDate, toDate])
 
   const columns = useMemo<ColumnDef<VehicleType, any>[]>(
     () => [
@@ -221,16 +235,61 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
     getPaginationRowModel: getPaginationRowModel()
   })
 
+  const handleExport = () => {
+    exportToCSV(table)
+  }
+
+  const handleDateFilter = async () => {
+    if (!fromDate || !toDate) {
+      alert('Please select both dates')
+
+      return
+    }
+
+    const filtered = await getReportData(new Date(fromDate), new Date(toDate))
+
+    setData(filtered)
+  }
+
   return (
     <Card>
       <CardHeader title='Vehicles Summary' />
       <div className='flex flex-wrap justify-between gap-4 p-4'>
-        <CustomTextField
-          value={globalFilter ?? ''}
-          onChange={e => setGlobalFilter(e.target.value)}
-          placeholder='Search'
-          className='max-sm:is-full'
-        />
+        <div className='flex flex-wrap items-center gap-4'>
+          {/* Search */}
+          <CustomTextField
+            value={globalFilter ?? ''}
+            onChange={e => setGlobalFilter(e.target.value)}
+            placeholder='Search'
+            size='small'
+            sx={{ width: { xs: '100%', sm: 250 } }}
+          />
+
+          {/* From Date */}
+          <TextField
+            label='From Date'
+            type='date'
+            size='small'
+            value={fromDate}
+            onChange={e => setFromDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: { xs: '48%', sm: 180 } }}
+          />
+
+          {/* To Date */}
+          <TextField
+            label='To Date'
+            type='date'
+            size='small'
+            value={toDate}
+            onChange={e => setToDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: { xs: '48%', sm: 180 } }}
+          />
+          <Button variant='contained' size='small' onClick={handleDateFilter}>
+            Apply
+          </Button>
+        </div>
         <div className='flex flex-wrap items-center gap-4 max-sm:flex-col max-sm:is-full'>
           <CustomTextField
             select
@@ -242,9 +301,9 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
             <MenuItem value='25'>25</MenuItem>
             <MenuItem value='50'>50</MenuItem>
           </CustomTextField>
-          {/* <Button color='primary' variant='tonal' startIcon={<i className='tabler-upload' />}>
-            Export
-          </Button> */}
+          <Button color='primary' variant='tonal' startIcon={<i className='tabler-upload' />} onClick={handleExport}>
+            Export CSV
+          </Button>
         </div>
       </div>
 

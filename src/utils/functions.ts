@@ -48,3 +48,58 @@ export function formatInputDate(dateStr: string): string {
 export function blobToBase64(buffer: ArrayBuffer): string {
   return `data:image/jpeg;base64,${Buffer.from(buffer).toString('base64')}`
 }
+
+export function exportToCSV(table: any) {
+  const rows = table.getFilteredRowModel().rows
+
+  if (!rows.length) {
+    alert('No data to export')
+
+    return
+  }
+
+  const headers = [
+    'Trip ID',
+    'Date',
+    'Vehicle No',
+    'Entry Time',
+    'Exit Time',
+    'Tare Weight',
+    'Gross Weight',
+    'Net Weight'
+  ]
+
+  const csvData = rows.map((row: any) => {
+    const r = row.original
+
+    return [
+      `T${r.id}`,
+      r.event_date ? new Date(r.event_date).toLocaleDateString() : '',
+      r.vehicleNo,
+      r.entry_time ?? '',
+      r.exit_time ?? '',
+      r.tare_wt ?? '',
+      r.gross_wt ?? '',
+      r.net_wt ?? ''
+    ]
+  })
+
+  const csvContent = [headers, ...csvData].map(row => row.map((val: any) => `"${val}"`).join(',')).join('\n')
+
+  const blob = new Blob([csvContent], {
+    type: 'text/csv;charset=utf-8;'
+  })
+
+  const url = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = `vehicle_report_${Date.now()}.csv`
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  URL.revokeObjectURL(url)
+}
