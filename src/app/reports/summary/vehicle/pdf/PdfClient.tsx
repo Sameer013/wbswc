@@ -1,9 +1,11 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import React, { useState } from 'react'
 
-// We are using dynamic import with ssr: false to prevent the PDFViewer component from being rendered on the server (SSR).
-const PDFViewer = dynamic(() => import('@react-pdf/renderer').then(mod => mod.PDFViewer), { ssr: false })
+import { pdf } from '@react-pdf/renderer'
+import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 import VehicleSummaryReport from '@/components/reports/VehicleSummaryReport'
 import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
@@ -17,19 +19,42 @@ export default function PdfClient({
   fromDate: string
   toDate: string
 }) {
-  // Convert the ISO string dates back into true Date objects for the PDF renderer
-  // const safeRecords = records.map(record => ({
-  //   ...record,
+  const [loading, setLoading] = useState(false)
 
-  //   // eventTimestamp: new Date(record.eventTimestamp)
-  //   eventTimestamp: record.eventTimestamp
-  // }))
+  const handleGeneratePdf = async () => {
+    setLoading(true)
+
+    try {
+      const doc = <VehicleSummaryReport records={records} fromDate={fromDate} toDate={toDate} />
+      const blob = await pdf(doc).toBlob()
+
+      const url = URL.createObjectURL(blob)
+      const pdfWindow = window.open(url, '_blank')
+
+      if (!pdfWindow) {
+        alert('Please allow popups to view the PDF report.')
+      }
+
+      setTimeout(() => URL.revokeObjectURL(url), 120000)
+    } catch (error) {
+      console.error('PDF Generation Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className='flex h-screen w-full flex-col'>
-      <PDFViewer className='min-h-screen w-full border-none'>
-        <VehicleSummaryReport records={records} fromDate={fromDate} toDate={toDate} />
-      </PDFViewer>
+    <div className='flex h-screen w-full flex-col items-center justify-center'>
+      <Button
+        variant='outlined'
+        startIcon={loading ? <CircularProgress size={18} color='inherit' /> : <PictureAsPdfIcon />}
+        size='small'
+        disabled={loading}
+        onClick={handleGeneratePdf}
+        sx={{ minWidth: '120px' }}
+      >
+        {loading ? 'Wait...' : 'Open PDF'}
+      </Button>
     </div>
   )
 }

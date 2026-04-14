@@ -241,6 +241,95 @@ function toISTDate(date: Date, time: 'start' | 'end'): Date {
   }
 }
 
+// function splitAnprIntoCycles(anprEvents: { time: string; weight: number }[]): { time: string; weight: number }[][] {
+//   if (anprEvents.length === 0) return []
+//   if (anprEvents.length === 1) return [anprEvents]
+
+//   const groups: { time: string; weight: number }[][] = []
+//   let current: { time: string; weight: number }[] = [anprEvents[0]]
+
+//   for (let i = 1; i < anprEvents.length; i++) {
+//     const prev = anprEvents[i - 1]
+//     const curr = anprEvents[i]
+
+//     // If weight drops significantly compared to previous reading,
+//     // it's a new vehicle cycle (gross → tare transition)
+//     // Using 30% drop as threshold to detect a new tare reading
+//     const DROP_THRESHOLD = 0.7 // curr weight < 70% of prev = new cycle
+
+//     if (curr.weight < prev.weight * DROP_THRESHOLD) {
+//       groups.push(current)
+//       current = [curr]
+//     } else {
+//       current.push(curr)
+//     }
+//   }
+
+//   groups.push(current)
+
+//   return groups
+// }
+type AnprEvent = { time: string; weight: number }
+
+function splitAnprIntoCycles(anprEvents: AnprEvent[], DROP_THRESHOLD = 0.7): AnprEvent[][] {
+  if (anprEvents.length === 0) return []
+  if (anprEvents.length === 1) return [anprEvents]
+
+  const groups: AnprEvent[][] = []
+  let current: AnprEvent[] = [anprEvents[0]]
+
+  for (let i = 1; i < anprEvents.length; i++) {
+    const prev = anprEvents[i - 1]
+    const curr = anprEvents[i]
+
+    if (curr.weight < prev.weight * DROP_THRESHOLD) {
+      groups.push(current)
+      current = [curr]
+    } else {
+      current.push(curr)
+    }
+  }
+
+  groups.push(current)
+
+  return groups
+}
+
+function deriveWeights(group: AnprEvent[]) {
+  if (group.length === 0) {
+    return {
+      tare_wt: null,
+      tare_wt_time: null,
+      gross_wt: null,
+      gross_wt_time: null,
+      net_wt: null
+    }
+  }
+
+  const sorted = [...group].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+
+  const first = sorted[0]
+  const last = sorted[sorted.length - 1]
+
+  if (last.weight === first.weight) {
+    return {
+      tare_wt: first.weight,
+      tare_wt_time: first.time,
+      gross_wt: null,
+      gross_wt_time: null,
+      net_wt: null
+    }
+  }
+
+  return {
+    tare_wt: first.weight,
+    tare_wt_time: first.time,
+    gross_wt: last.weight,
+    gross_wt_time: last.time,
+    net_wt: last.weight - first.weight
+  }
+}
+
 export async function getReportData(
   from?: Date,
   to?: Date,
@@ -250,19 +339,17 @@ export async function getReportData(
   try {
     const data = await prisma.vehicle_cycle.findMany({
       where: {
-        ...(from && to ? { cycle_date: { gte: from, lt: to } } : {})
+        ...(from && to ? { cycle_date: { gte: from, lte: to } } : {})
       },
-
       orderBy: { cycle_date: 'desc' },
       ...(limit ? { take: limit } : {})
     })
 
-    // console.log('Raw Report Data:', data)
     const reportData: EventSummaryRecord2[] = []
     let globalId = 1
 
     data.forEach(record => {
-      // Parsing info_entryexit
+      // ── 1. Parse gate events ──────────────────────────────
       type GateEvent = { time: string; movement: '1' | '2'; imageId: string }
       let gateEvents: GateEvent[] = []
 
@@ -272,25 +359,14 @@ export async function getReportData(
         const movements = movements_str?.split(',') ?? []
         const imageIds = image_str?.split(',') ?? []
 
-        // console.log('Times_str:', times_str)
-        // console.log('Movements_str:', movements_str)
-
         gateEvents = movements.map((movement, i) => ({
           time: times[i],
           imageId: imageIds[i],
           movement: movement as '1' | '2'
         }))
-
-        // console.log('Parsed Gate Events:', gateEvents)
       }
 
-      // console.log('Gate Events for ', record.vehicleNo, ' before sorting:', gateEvents)
-
-      // gateEvents.reverse()
-
-      // console.log('Gate Events for ', record.vehicleNo, ' after sorting:', gateEvents)
-
-      type AnprEvent = { time: string; weight: number }
+      // ── 2. Parse ANPR events, sort chronologically ────────
       let anprEvents: AnprEvent[] = []
 
       if (record.info_anpr) {
@@ -304,11 +380,9 @@ export async function getReportData(
         }))
       }
 
-      anprEvents.reverse()
+      anprEvents.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
 
-      // console.log('Parsed ANPR Events:', anprEvents)
-
-      // Vehicle cycles
+      // ── 3. Build gate cycles ──────────────────────────────
       type Cycle = {
         entry_time: string | null
         exit_time: string | null
@@ -317,10 +391,13 @@ export async function getReportData(
       }
       const cycles: Cycle[] = []
 
-      // It handles and creates cycles if there is no entry but exit, entry but no exit everything is taken care of
       if (gateEvents.length === 0) {
-        // no gate events at all — one dummy cycle for ANPR fallback
-        cycles.push({ entry_time: null, exit_time: null })
+        cycles.push({
+          entry_time: null,
+          exit_time: null,
+          entry_imageId: null,
+          exit_imageId: null
+        })
       } else {
         let currentEntry: string | null = null
         let currentEntryImg: string | null = null
@@ -328,8 +405,12 @@ export async function getReportData(
         gateEvents.forEach(event => {
           if (event.movement === '1') {
             if (currentEntry !== null) {
-              // missed exit — close previous cycle, start new one
-              cycles.push({ entry_time: currentEntry, exit_time: null, entry_imageId: null })
+              cycles.push({
+                entry_time: currentEntry,
+                exit_time: null,
+                entry_imageId: currentEntryImg,
+                exit_imageId: null
+              })
             }
 
             currentEntry = event.time
@@ -346,125 +427,270 @@ export async function getReportData(
           }
         })
 
-        // if last entry never got an exit
         if (currentEntry !== null) {
-          cycles.push({ entry_time: currentEntry, exit_time: null, entry_imageId: currentEntryImg, exit_imageId: null })
+          cycles.push({
+            entry_time: currentEntry,
+            exit_time: null,
+            entry_imageId: currentEntryImg,
+            exit_imageId: null
+          })
         }
       }
 
-      // Link ANPR weights to cycles
+      // ── 4. Link ANPR weights to cycles ────────────────────
       cycles.forEach(cycle => {
+        const hasGateWindow = !!(cycle.entry_time || cycle.exit_time)
         let cycleWeights: AnprEvent[] = []
 
-        if (cycle.entry_time || cycle.exit_time) {
-          // Find events where atleast one of these is true
-          // if entry missing → use start of day
-          // if exit missing → use end of day
+        if (hasGateWindow) {
           const cycleStart = cycle.entry_time
             ? new Date(cycle.entry_time)
             : toISTDate(new Date(record.cycle_date), 'start')
 
           const cycleEnd = cycle.exit_time ? new Date(cycle.exit_time) : toISTDate(new Date(record.cycle_date), 'end')
 
-          // filter weights that fall wiithin the cycle entry exit time
           cycleWeights = anprEvents.filter(e => {
             const t = new Date(e.time)
 
-            // Return true and false
             return t >= cycleStart && t <= cycleEnd && t.toDateString() === new Date(record.cycle_date).toDateString()
           })
         }
 
-        // fallback → no weights found in range, use all weights
-        if (cycleWeights.length === 0) {
-          cycleWeights = anprEvents
-        }
+        // weightsOutsideWindow is only true when a gate window existed
+        // but no ANPR reading fell inside it (e.g. WB15C8464).
+        // When there are no gate events it is simply ANPR-only data — not a mismatch.
+        const weightsOutsideWindow = hasGateWindow && cycleWeights.length === 0 && anprEvents.length > 0
 
-        // tare = min weight, gross = max weight
-        let tare_wt: number | null = null
-        let gross_wt: number | null = null
-        let tare_wt_time: string | null = null
-        let gross_wt_time: string | null = null
-        let net_wt: number | null = null
+        const weightsToSplit = cycleWeights.length > 0 ? cycleWeights : anprEvents
 
-        if (cycleWeights.length >= 1) {
-          // Using reduce() to comapre two values at a time in just 2 lines of code instead of loops
-          // tare_wt = 0
-          // gross_wt = 0
-          // for(let i=0; i< cycleWeights.length; i++){
-          // let wt = cycleWeights[i].weight
-          // let time = cycleWeights[i].time
-          // if( wt < tare_wt){ tare_wt = wt}
-          // if( wt > gross_wt){ gross_wt = wt}
-          // }
-          const minWt = cycleWeights.reduce((a, b) => (a.weight <= b.weight ? a : b))
-          const maxWt = cycleWeights.reduce((a, b) => (a.weight >= b.weight ? a : b))
+        // ── 5. Split into sub-cycles by weight-drop detection ──
+        const weightGroups = splitAnprIntoCycles(weightsToSplit)
 
-          tare_wt = minWt.weight
-          tare_wt_time = minWt.time
+        // const hasMultipleGroups = weightGroups.length > 1
 
-          if (maxWt.weight === minWt.weight) {
-            // only one unique weight reading no gross, no net
-            gross_wt = null
-            gross_wt_time = null
-            net_wt = null
-          } else {
-            gross_wt = maxWt.weight
-            gross_wt_time = maxWt.time
-            net_wt = gross_wt - tare_wt
-          }
-        }
+        weightGroups.forEach((group, groupIndex) => {
+          const isFirstGroup = groupIndex === 0
+          const isLastGroup = groupIndex === weightGroups.length - 1
 
-        if (gateEvents.length === 0) {
-          cycles.push({ entry_time: null, exit_time: null })
-        }
+          const { tare_wt, tare_wt_time, gross_wt, gross_wt_time, net_wt } = deriveWeights(group)
 
-        reportData.push({
-          id: globalId++,
-          vehicleNo: record.vehicleNo ?? null,
-          event_date: record.cycle_date,
-          entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
-          exit_time: cycle.exit_time?.slice(11, 16) ?? '-',
-          entry_imageId: cycle.entry_imageId ?? null,
-          exit_imageId: cycle.exit_imageId ?? null,
-          tare_wt: tare_wt,
-          tare_wt_time: tare_wt_time,
-          gross_wt: gross_wt,
-          gross_wt_time: gross_wt_time,
-          net_wt: net_wt
+          // Entry time:
+          //   - suppressed if weights don't match the gate window
+          //   - only first sub-cycle gets the entry time
+          const entry_time: string = weightsOutsideWindow
+            ? '-'
+            : isFirstGroup
+              ? (cycle.entry_time?.slice(11, 16) ?? '-')
+              : '-'
+
+          // Exit time:
+          //   - suppressed if weights don't match the gate window
+          //   - only LAST sub-cycle gets the exit time
+          //     (fixes: exit was wrongly suppressed for ALL groups on a split)
+          const exit_time: string = weightsOutsideWindow
+            ? '-'
+            : isLastGroup
+              ? (cycle.exit_time?.slice(11, 16) ?? '-')
+              : '-'
+
+          const entry_imageId = !weightsOutsideWindow && isFirstGroup ? (cycle.entry_imageId ?? null) : null
+
+          const exit_imageId = !weightsOutsideWindow && isLastGroup ? (cycle.exit_imageId ?? null) : null
+
+          reportData.push({
+            id: globalId++,
+            vehicleNo: record.vehicleNo ?? null,
+            event_date: record.cycle_date,
+            entry_time,
+            exit_time,
+            entry_imageId,
+            exit_imageId,
+            tare_wt,
+            tare_wt_time,
+            gross_wt,
+            gross_wt_time,
+            net_wt
+          })
         })
       })
     })
 
+    // ── 6. Sort ───────────────────────────────────────────────
     const ordered_reportData = reportData.sort((a, b) => {
-      // Sort by event_date desc
       const dateA = new Date(a.event_date as string)
       const dateB = new Date(b.event_date as string)
 
       if (dateB.getTime() !== dateA.getTime()) {
-        return dateB.getTime() - dateA.getTime() // desc by date
+        return dateB.getTime() - dateA.getTime()
       }
 
-      // If same date, sort by entry_time desc
       const timeA = a.entry_time !== '-' ? (a.entry_time as string) : '00:00'
       const timeB = b.entry_time !== '-' ? (b.entry_time as string) : '00:00'
 
       return timeB.localeCompare(timeA)
     })
 
-    // console.log('Order:', order)
-
-    const finalData = order === 'asc' ? reportData : ordered_reportData
-
-    // console.log('Final Report Data:', finalData)
-
-    return finalData
+    return order === 'asc' ? reportData : ordered_reportData
   } catch (error) {
     console.error('Fetch failed:', error)
 
     return []
   }
 }
+
+// export async function getReportData(
+//   from?: Date,
+//   to?: Date,
+//   limit?: number,
+//   order: 'asc' | 'desc' = 'desc'
+// ): Promise<EventSummaryRecord2[]> {
+//   try {
+//     const data = await prisma.vehicle_cycle.findMany({
+//       where: {
+//         ...(from && to ? { cycle_date: { gte: from, lt: to } } : {}),
+//       },
+//       orderBy: { cycle_date: 'desc' },
+//       ...(limit ? { take: limit } : {})
+//     })
+
+//     const reportData: EventSummaryRecord2[] = []
+//     let globalId = 1
+
+//     data.forEach(record => {
+//       // --- 1. PARSING RAW DATA ---
+//       type GateEvent = { time: string; movement: '1' | '2'; imageId: string }
+//       let gateEvents: GateEvent[] = []
+
+//       if (record.info_entryexit) {
+//         const [t, m, i] = record.info_entryexit.split('#')
+//         const times = t?.split(',') ?? [], movs = m?.split(',') ?? [], imgs = i?.split(',') ?? []
+
+//         gateEvents = movs.map((mov, idx) => ({ time: times[idx], movement: mov as '1' | '2', imageId: imgs[idx] }))
+//       }
+
+//       type AnprEvent = { time: string; weight: number }
+//       let anprEvents: AnprEvent[] = []
+
+//       if (record.info_anpr) {
+//         const [t, w] = record.info_anpr.split('#')
+//         const times = t?.split(',') ?? [], weights = w?.split(',') ?? []
+
+//         anprEvents = weights.map((wt, idx) => ({ time: times[idx], weight: Number(wt) }))
+//       }
+
+//       // --- 2. GENERATE GATE CYCLES ---
+//       type InternalCycle = {
+//         entry_time: string | null; exit_time: string | null;
+//         entry_imageId?: string | null; exit_imageId?: string | null;
+//         weights: AnprEvent[];
+//       }
+//       const gateCycles: InternalCycle[] = []
+//       let currentEntry: string | null = null, currentEntryImg: string | null = null
+
+//       gateEvents.forEach(event => {
+//         if (event.movement === '1') {
+//           if (currentEntry) gateCycles.push({ entry_time: currentEntry, exit_time: null, entry_imageId: currentEntryImg, weights: [] })
+//           currentEntry = event.time; currentEntryImg = event.imageId;
+//         } else if (event.movement === '2') {
+//           gateCycles.push({ entry_time: currentEntry, exit_time: event.time, entry_imageId: currentEntryImg, exit_imageId: event.imageId, weights: [] })
+//           currentEntry = null; currentEntryImg = null
+//         }
+//       })
+//       if (currentEntry) gateCycles.push({ entry_time: currentEntry, exit_time: null, entry_imageId: currentEntryImg, weights: [] })
+
+//       // --- 3. ALLOCATE WEIGHTS TO CYCLES (PASS 1) ---
+//       const usedWeightTimes = new Set<string>()
+
+//       gateCycles.forEach(cycle => {
+//         if (cycle.entry_time || cycle.exit_time) {
+//           const start = cycle.entry_time ? new Date(cycle.entry_time) : toISTDate(new Date(record.cycle_date), 'start')
+//           const end = cycle.exit_time ? new Date(cycle.exit_time) : toISTDate(new Date(record.cycle_date), 'end')
+
+//           cycle.weights = anprEvents.filter(e => {
+//             const t = new Date(e.time)
+//             const match = t >= start && t <= end
+
+//             if (match) usedWeightTimes.add(e.time)
+
+// return match
+//           })
+//         }
+//       })
+
+//       // --- 4. CAPTURE ORPHAN WEIGHTS (PASS 2) ---
+//       const orphanWeights = anprEvents.filter(e => !usedWeightTimes.has(e.time))
+//       const allCycles = [...gateCycles]
+
+//       if (orphanWeights.length > 0) {
+//         allCycles.push({
+//           entry_time: null, exit_time: null, entry_imageId: null, exit_imageId: null,
+//           weights: orphanWeights
+//         })
+//       }
+
+//       // --- 5. CALCULATE FINAL TARE/GROSS PER ROW ---
+//       allCycles.forEach(cycle => {
+//         let tare_wt: number | null = null, gross_wt: number | null = null, net_wt: number | null = null
+//         let tare_time: string | null = null, gross_time: string | null = null
+//         let displayExit = cycle.exit_time
+
+//         if (cycle.weights.length > 0) {
+//           const sorted = [...cycle.weights].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+
+//           tare_wt = sorted[0].weight
+//           tare_time = sorted[0].time
+
+//           if (sorted.length > 1) {
+//             gross_wt = sorted[sorted.length - 1].weight
+//             gross_time = sorted[sorted.length - 1].time
+//             net_wt = gross_wt - tare_wt
+
+//             // Virtual Exit Logic: if gate missed but weights exist, add 15 mins to last weight
+//             if (!displayExit && gross_time) {
+//               const vDate = new Date(new Date(gross_time).getTime() + 15 * 60 * 1000)
+
+//               displayExit = vDate.toISOString().replace('T', ' ').slice(0, 19)
+//             }
+//           }
+//         }
+
+//         // Only push if there's EITHER gate data OR weight data
+//         if (cycle.entry_time || cycle.exit_time || cycle.weights.length > 0) {
+//           reportData.push({
+//             id: globalId++,
+//             vehicleNo: record.vehicleNo ?? null,
+//             event_date: record.cycle_date,
+//             entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
+//             exit_time: displayExit?.slice(11, 16) ?? '-',
+//             entry_imageId: cycle.entry_imageId ?? null,
+//             exit_imageId: cycle.exit_imageId ?? null,
+//             tare_wt, tare_wt_time: tare_time,
+//             gross_wt, gross_wt_time: gross_time,
+//             net_wt
+//           })
+//         }
+//       })
+//     })
+
+//     // --- 6. FINAL SORTING ---
+//     const sortedReport = reportData.sort((a, b) => {
+//       const dateA = new Date(a.event_date as string).getTime()
+//       const dateB = new Date(b.event_date as string).getTime()
+
+//       if (dateB !== dateA) return dateB - dateA
+//       const timeA = a.entry_time !== '-' ? a.entry_time : (a.tare_wt_time?.slice(11,16) ?? '00:00')
+//       const timeB = b.entry_time !== '-' ? b.entry_time : (b.tare_wt_time?.slice(11,16) ?? '00:00')
+
+// return timeB.localeCompare(timeA)
+//     })
+
+//     return order === 'asc' ? sortedReport.reverse() : sortedReport
+//   } catch (error) {
+//     console.error('Report generation failed:', error)
+
+// return []
+//   }
+// }
 
 export async function getVehicleImage(id: string): Promise<string> {
   try {

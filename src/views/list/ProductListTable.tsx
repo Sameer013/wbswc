@@ -91,9 +91,9 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
 
     fetchData()
 
-    const interval = setInterval(fetchData, 60000)
+    // const interval = setInterval(fetchData, 60000)
 
-    return () => clearInterval(interval)
+    // return () => clearInterval(interval)
   }, [fromDate, toDate])
 
   const columns = useMemo<ColumnDef<VehicleType, any>[]>(
@@ -152,10 +152,6 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         header: 'Tare Weight (KG)',
         cell: ({ row }) => <Typography>{row.original.tare_wt}</Typography>
       }),
-      columnHelper.accessor('gross_wt', {
-        header: 'Gross Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.gross_wt}</Typography>
-      }),
       columnHelper.accessor('tare_wt_time', {
         header: 'Tare Timestamp',
 
@@ -166,6 +162,11 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         ) //TODO add weight timestamp
         // cell: ({ row }) => <Typography>NULL</Typography>
       }),
+      columnHelper.accessor('gross_wt', {
+        header: 'Gross Weight (KG)',
+        cell: ({ row }) => <Typography>{row.original.gross_wt}</Typography>
+      }),
+
       columnHelper.accessor('gross_wt_time', {
         header: 'Gross Timestamp',
 
@@ -246,8 +247,9 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       return
     }
 
-    const filtered = await getReportData(new Date(fromDate), new Date(toDate))
+    const filtered = await getReportData(new Date(fromDate), new Date(toDate), undefined, 'desc')
 
+    // console.log('Filtered Data:', filtered)
     setData(filtered)
   }
 
