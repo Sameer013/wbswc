@@ -121,21 +121,6 @@ order by e.eventTimestamp desc limit 20`)
 
 export async function getIntrusionAlerts(): Promise<AlertType[]> {
   try {
-    // const data = await prisma.intrusionevent.findMany({
-    //   include: {
-    //     eventmaster: {
-    //       select: {
-    //         eventTimestamp: true
-    //       }
-    //     }
-    //   },
-    //   orderBy: {
-    //     eventmaster: {
-    //       eventTimestamp: 'desc'
-    //     }
-    //   }
-    // })
-
     const data = await prisma.intrusion_event.findMany({
       orderBy: { created_at: 'desc' }
     })
@@ -144,6 +129,7 @@ export async function getIntrusionAlerts(): Promise<AlertType[]> {
       id: event.id,
       description: event.description,
       created_at: convertUTCtoLocalTime(event.created_at),
+      image: event.image ? `data:image/jpg;base64,${Buffer.from(event.image).toString('base64')}` : '',
       isNew: false
     }))
   } catch (error) {

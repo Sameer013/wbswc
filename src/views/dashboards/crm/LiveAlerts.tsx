@@ -10,6 +10,12 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import IconButton from '@mui/material/IconButton'
+import CircularProgress from '@mui/material/CircularProgress'
+import CloseIcon from '@mui/icons-material/Close'
 
 // Icon Imports
 import WarningAmber from '@mui/icons-material/WarningAmber'
@@ -25,6 +31,7 @@ export type AlertType = {
   id: number
   description: string | null
   created_at: Date | null
+  image: string | null
   location?: string
   severity?: string
   isNew?: boolean
@@ -45,6 +52,9 @@ const LiveAlerts = () => {
   const [alerts, setAlerts] = useState<AlertType[]>([])
   const [newIds, setNewIds] = useState<Set<number>>(new Set())
   const [error, setError] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [loadingImg] = useState(false)
+  const [imgUrl, setImgUrl] = useState<string | null>(null)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevIdsRef = useRef<Set<number>>(new Set())
@@ -81,6 +91,12 @@ const LiveAlerts = () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [loadAlerts])
+
+  const handleCardClick = (image: string | null) => {
+    if (!image) return
+    setImgUrl(image)
+    setIsModalOpen(true)
+  }
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -151,13 +167,32 @@ const LiveAlerts = () => {
         ) : (
           alerts.map((item, index) => (
             <Box key={item.id}>
-              <Box
+              {/* <Box
                 sx={{
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 3,
                   px: 4,
                   py: 3,
+                  transition: 'background-color 0.2s',
+                  backgroundColor: newIds.has(item.id) ? 'action.hover' : 'transparent',
+                  animation: newIds.has(item.id) ? 'slideIn 0.35s ease' : 'none',
+                  '@keyframes slideIn': {
+                    from: { opacity: 0, transform: 'translateY(-6px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' }
+                  },
+                  '&:hover': { backgroundColor: 'action.hover' }
+                }}
+              > */}
+              <Box
+                onClick={() => handleCardClick(item.image)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 3,
+                  px: 4,
+                  py: 3,
+                  cursor: item.image ? 'pointer' : 'default', // ← show pointer only if image exists
                   transition: 'background-color 0.2s',
                   backgroundColor: newIds.has(item.id) ? 'action.hover' : 'transparent',
                   animation: newIds.has(item.id) ? 'slideIn 0.35s ease' : 'none',
@@ -227,6 +262,36 @@ const LiveAlerts = () => {
           ))
         )}
       </CardContent>
+      <Dialog
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setImgUrl(null)
+        }} // ← clear on close
+        maxWidth='md'
+        fullWidth
+      >
+        <DialogTitle className='flex justify-between items-center'>
+          Intrusion Alert Image
+          <IconButton
+            onClick={() => {
+              setIsModalOpen(false)
+              setImgUrl(null)
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent className='flex justify-center items-center min-h-[300px]'>
+          {loadingImg ? (
+            <CircularProgress />
+          ) : imgUrl ? (
+            <img src={imgUrl} alt='Intrusion Alert' style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} />
+          ) : (
+            <Typography>No image available for this alert.</Typography>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
