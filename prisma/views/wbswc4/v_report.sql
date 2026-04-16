@@ -23,10 +23,10 @@ SELECT
 FROM
   (
     (
-      `wbswc3`.`weighbridge_records` `wr`
-      LEFT JOIN `wbswc3`.`anprevent` `a` ON((`a`.`vehicleNo` = `wr`.`vehicle_no`))
+      `wbswc4`.`weighbridge_records` `wr`
+      LEFT JOIN `wbswc4`.`anprevent` `a` ON((`a`.`vehicleNo` = `wr`.`vehicle_no`))
     )
-    LEFT JOIN `wbswc3`.`eventmaster` `em` ON((`em`.`id` = `a`.`eventMasterId`))
+    LEFT JOIN `wbswc4`.`eventmaster` `em` ON((`em`.`id` = `a`.`eventMasterId`))
   )
 GROUP BY
   `wr`.`id`

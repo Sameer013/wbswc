@@ -11,7 +11,13 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-const ReportPage = () => {
+interface FilterProps {
+  url: string
+  cardTitle: string
+  cardDesc: string
+}
+
+const FilterReport = ({ url, cardTitle, cardDesc }: FilterProps) => {
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
 
@@ -33,17 +39,18 @@ const ReportPage = () => {
       return
     }
 
-    window.open(`/reports/summary/vehicle/pdf?from=${fromDate}&to=${toDate}`, '_blank')
+    // window.open(`/reports/summary/vehicle/pdf?from=${fromDate}&to=${toDate}`, '_blank')
+    window.open(`${url}?from=${fromDate}&to=${toDate}`, '_blank')
   }
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12, md: 8, lg: 6 }}>
         <Card>
-          <CardHeader title='MIS Report' />
+          <CardHeader title={cardTitle} />
           <CardContent>
             <Typography variant='body2' className='mb-6'>
-              Select a date range below to generate MIS report.
+              {cardDesc}
             </Typography>
 
             <div className='flex flex-col sm:flex-row gap-4 mb-6'>
@@ -100,4 +107,4 @@ const ReportPage = () => {
   )
 }
 
-export default ReportPage
+export default FilterReport

@@ -13,9 +13,21 @@ FROM
       `ve`.`movement` AS `movement`,
       `ve`.`imageId` AS `imageId`
     FROM
-      `wbswc3`.`vehicle_event` `ve`
+      `wbswc4`.`vehicle_event` `ve`
     WHERE
-      (`ve`.`updated_vehicleNo` IS NOT NULL)
+      (
+        (`ve`.`updated_vehicleNo` IS NOT NULL)
+        AND (
+          cast(`ve`.`created_at` AS date) >= cast(
+            (
+              SELECT
+                `wbswc4`.`curation_state`.`last_run_l1`
+              FROM
+                `wbswc4`.`curation_state`
+            ) AS date
+          )
+        )
+      )
     ORDER BY
       cast(`ve`.`created_at` AS date),
       `vno`,

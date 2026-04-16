@@ -8,7 +8,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
 
 // Component Imports
-import { Menu, MenuItem } from '@menu/vertical-menu'
+import { Menu, MenuItem, SubMenu } from '@menu/vertical-menu'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -74,9 +74,30 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/vehicles' icon={<i className='tabler-car' />}>
           Vehicles
         </MenuItem>
-        <MenuItem href='/report' icon={<i className='tabler-report' />}>
+        {/* <SubMenu label={'Vehicles'} icon={<i className='tabler-car' />}>
+          <MenuItem href='/vehicles' icon={<i className='tabler-layout-dashboard' />}>
+            Summary
+          </MenuItem>
+          <MenuItem href='/vehicles/anpr' icon={<i className='tabler-camera' />}>
+            Anpr Event
+          </MenuItem>
+          <MenuItem href='/vehicles/entryexit' icon={<i className='tabler-barrier-block' />}>
+            Entry Exit
+          </MenuItem>
+        </SubMenu> */}
+
+        {/* <MenuItem href='/report' icon={<i className='tabler-report' />}>
           Reports
-        </MenuItem>
+        </MenuItem> */}
+        <SubMenu label={'Reports'} icon={<i className='tabler-report' />}>
+          <MenuItem href='/reports/vehicle' icon={<i className='tabler-layout-dashboard' />}>
+            Vehicles Report
+          </MenuItem>
+          <MenuItem href='/reports/bag' icon={<i className='tabler-camera' />}>
+            Bags Report
+          </MenuItem>
+        </SubMenu>
+
         {/* <MenuItem href='/users' icon={<i className='tabler-users' />}>
           Users
         </MenuItem>
