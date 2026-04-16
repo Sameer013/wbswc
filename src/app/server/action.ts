@@ -44,6 +44,9 @@ type ViewRow = {
 }
 
 import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
+import type { AnprEventRecord } from '../(dashboard)/vehicles/anpr/page'
+import type { VehicleEventRecord } from '../(dashboard)/vehicles/entryexit/page'
+import { convertUTCtoLocalTime } from '@/utils/functions'
 
 export async function getVehicleStats(): Promise<VehicleStats> {
   try {
@@ -118,27 +121,29 @@ order by e.eventTimestamp desc limit 20`)
 
 export async function getIntrusionAlerts(): Promise<AlertType[]> {
   try {
-    const data = await prisma.intrusionevent.findMany({
-      include: {
-        eventmaster: {
-          select: {
-            eventTimestamp: true
-          }
-        }
-      },
-      orderBy: {
-        eventmaster: {
-          eventTimestamp: 'desc'
-        }
-      }
+    // const data = await prisma.intrusionevent.findMany({
+    //   include: {
+    //     eventmaster: {
+    //       select: {
+    //         eventTimestamp: true
+    //       }
+    //     }
+    //   },
+    //   orderBy: {
+    //     eventmaster: {
+    //       eventTimestamp: 'desc'
+    //     }
+    //   }
+    // })
+
+    const data = await prisma.intrusion_event.findMany({
+      orderBy: { created_at: 'desc' }
     })
 
     return data.map(event => ({
       id: event.id,
       description: event.description,
-      location: event.location,
-      severity: event.severity,
-      timestamp: event.eventmaster.eventTimestamp.toISOString(),
+      created_at: convertUTCtoLocalTime(event.created_at),
       isNew: false
     }))
   } catch (error) {
@@ -705,5 +710,69 @@ export async function getVehicleImage(id: string): Promise<string> {
     console.error('Fetch failed:', error)
 
     return ''
+  }
+}
+
+export async function getAnprImage(id: string): Promise<string> {
+  try {
+    const image = await prisma.weighbridge_images.findUnique({
+      where: { id: Number(id) }
+    })
+
+    if (!image || !image.truckImage) return ''
+
+    return `data:image/jpg;base64,${Buffer.from(image.truckImage).toString('base64')}`
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return ''
+  }
+}
+
+export async function getAnprData(): Promise<[] | AnprEventRecord[]> {
+  try {
+    const data = await prisma.anprevent.findMany({
+      orderBy: { created_at: 'desc' },
+      take: 20
+    })
+
+    if (!data || data.length === 0) return []
+
+    // console.log(JSON.stringify(data))
+    const finalData = data.map(item => ({
+      ...item,
+      created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null,
+      updated_at: item.updated_at ? convertUTCtoLocalTime(item.updated_at) : null
+    }))
+
+    return finalData
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return [] as AnprEventRecord[]
+  }
+}
+
+export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
+  try {
+    const data = await prisma.vehicle_event.findMany({
+      orderBy: { created_at: 'desc' },
+      take: 20
+    })
+
+    if (!data || data.length === 0) return []
+
+    // console.log(JSON.stringify(data))
+    const finalData = data.map(item => ({
+      ...item,
+      created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null,
+      updated_at: item.updated_at ? convertUTCtoLocalTime(item.updated_at) : null
+    }))
+
+    return finalData
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return [] as AnprEventRecord[]
   }
 }

@@ -13,7 +13,8 @@ import Divider from '@mui/material/Divider'
 
 // Icon Imports
 import WarningAmber from '@mui/icons-material/WarningAmber'
-import LocationOn from '@mui/icons-material/LocationOn'
+
+// import LocationOn from '@mui/icons-material/LocationOn'
 import AccessTime from '@mui/icons-material/AccessTime'
 
 import OptionMenu from '@core/components/option-menu'
@@ -22,10 +23,10 @@ import { formatTimestamp } from '@/utils/functions'
 
 export type AlertType = {
   id: number
-  description: string
-  timestamp: string
-  location: string
-  severity: string
+  description: string | null
+  created_at: Date | null
+  location?: string
+  severity?: string
   isNew?: boolean
 }
 
@@ -197,9 +198,9 @@ const LiveAlerts = () => {
                       />
                     )}
                     <Chip
-                      label={item.severity.toUpperCase()}
+                      label='MEDIUM'
                       size='small'
-                      color={severityColor(item.severity) as any}
+                      color={severityColor('medium') as any}
                       sx={{ height: 18, fontSize: '0.6rem', fontWeight: 600, flexShrink: 0 }}
                     />
                   </Box>
@@ -208,15 +209,15 @@ const LiveAlerts = () => {
                     <Box className='flex items-center gap-1'>
                       <AccessTime sx={{ fontSize: 12, color: 'text.disabled' }} />
                       <Typography variant='caption' color='text.disabled'>
-                        {formatTimestamp(new Date(item.timestamp))}
+                        {item.created_at ? formatTimestamp(item.created_at) : '-'}
                       </Typography>
                     </Box>
-                    <Box className='flex items-center gap-1'>
+                    {/* <Box className='flex items-center gap-1'>
                       <LocationOn sx={{ fontSize: 12, color: 'text.disabled' }} />
                       <Typography variant='caption' color='text.disabled'>
                         {item.location}
                       </Typography>
-                    </Box>
+                    </Box> */}
                   </Box>
                 </Box>
               </Box>
