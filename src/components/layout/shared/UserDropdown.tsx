@@ -7,6 +7,8 @@ import type { MouseEvent } from 'react'
 // Next Imports
 import { useRouter } from 'next/navigation'
 
+import { signOut, useSession } from 'next-auth/react'
+
 // MUI Imports
 import { styled } from '@mui/material/styles'
 import Badge from '@mui/material/Badge'
@@ -64,8 +66,13 @@ const UserDropdown = () => {
 
   const handleUserLogout = async () => {
     // Redirect to login page
-    router.push('/login')
+    // router.push('/login')
+    await signOut({
+      callbackUrl: '/login'
+    })
   }
+
+  const { data: session } = useSession()
 
   return (
     <>
@@ -106,9 +113,9 @@ const UserDropdown = () => {
                     <Avatar alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        Admin User
+                        {session?.user?.name || 'User'}
                       </Typography>
-                      <Typography variant='caption'>admin@wbswc.com</Typography>
+                      <Typography variant='caption'> {session?.user?.email || 'No Email'}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />
