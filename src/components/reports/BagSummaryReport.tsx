@@ -38,8 +38,8 @@ const BagsSummaryReport = ({
     }
   }
 
-  const totalEntries = records.reduce((sum, r) => sum + r.entryCnt, 0n)
-  const totalExits = records.reduce((sum, r) => sum + r.exitCnt, 0n)
+  // const totalEntries = records.reduce((sum, r) => sum + r.entryCnt, 0n)
+  // const totalExits = records.reduce((sum, r) => sum + r.exitCnt, 0n)
   const totalLoads = records.reduce((sum, r) => sum + r.loadCnt, 0n)
   const totalUnloads = records.reduce((sum, r) => sum + r.unloadCnt, 0n)
 
@@ -68,20 +68,20 @@ const BagsSummaryReport = ({
             <Text style={styles.summaryLabel}>TOTAL VEHICLES</Text>
             <Text style={styles.summaryValue}>{records.length}</Text>
           </View> */}
-          <View style={styles.summaryItem}>
+          {/* <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>TOTAL ENTRIES</Text>
             <Text style={styles.summaryValue}>{totalEntries}</Text>
           </View>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>TOTAL EXITS</Text>
             <Text style={styles.summaryValue}>{totalExits}</Text>
-          </View>
+          </View> */}
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>TOTAL LOADS</Text>
+            <Text style={styles.summaryLabel}>TOTAL BAGS LOADS</Text>
             <Text style={styles.summaryValue}>{totalLoads}</Text>
           </View>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>TOTAL UNLOADS</Text>
+            <Text style={styles.summaryLabel}>TOTAL BAGS UNLOADS</Text>
             <Text style={styles.summaryValue}>{totalUnloads}</Text>
           </View>
           <View style={styles.summaryItem}>
@@ -104,12 +104,12 @@ const BagsSummaryReport = ({
             <View style={{ ...styles.tableCell, flex: 1.5 }}>
               <Text style={styles.tableCellValue}>Date</Text>
             </View>
-            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+            {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Entry Count</Text>
-            </View>
-            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+            </View> */}
+            {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Exit Count</Text>
-            </View>
+            </View> */}
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Load Count</Text>
             </View>
@@ -128,12 +128,12 @@ const BagsSummaryReport = ({
                 <View style={{ ...styles.tableCell, flex: 1.5 }}>
                   <Text style={styles.tableCellLabel}>{record.dt ? formatDate(record.dt) : '--'}</Text>
                 </View>
-                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.entryCnt}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.exitCnt}</Text>
-                </View>
+                </View> */}
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.loadCnt}</Text>
                 </View>
