@@ -65,7 +65,9 @@ export function exportToCSV(table: any) {
     'Entry Time',
     'Exit Time',
     'Tare Weight',
+    'Tare Weight Time',
     'Gross Weight',
+    'Gross Weight Time',
     'Net Weight'
   ]
 
@@ -79,7 +81,9 @@ export function exportToCSV(table: any) {
       r.entry_time ?? '',
       r.exit_time ?? '',
       r.tare_wt ?? '',
+      r.tare_wt_time ?? '',
       r.gross_wt ?? '',
+      r.gross_wt_time ?? '',
       r.net_wt ?? ''
     ]
   })
