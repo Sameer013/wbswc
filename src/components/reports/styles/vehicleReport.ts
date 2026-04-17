@@ -196,7 +196,7 @@ export const styles = StyleSheet.create({
   vehicleImage: {
     width: '100%',
     height: 140,
-    objectFit: 'cover',
+    objectFit: 'contain',
     borderRadius: 4
   },
   noImage: {

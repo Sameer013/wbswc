@@ -260,7 +260,7 @@ const LiveAlerts = () => {
 
   useEffect(() => {
     loadEvents()
-    intervalRef.current = setInterval(loadEvents, 1000)
+    intervalRef.current = setInterval(loadEvents, 10000)
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)

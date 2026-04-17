@@ -1,6 +1,5 @@
 'use client'
 
-// MUI Imports
 import { useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
@@ -8,23 +7,23 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 interface FilterProps {
-  url: string
   cardTitle: string
   cardDesc: string
+  onGenerate: (fromDate: string, toDate: string) => Promise<void>
+  loading?: boolean
 }
 
-const FilterReport = ({ url, cardTitle, cardDesc }: FilterProps) => {
+const FilterReport = ({ cardTitle, cardDesc, onGenerate, loading = false }: FilterProps) => {
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
-
-  // const [vehicleNo, setVehicleNo] = useState<string>('')
   const [error, setError] = useState<string>('')
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setError('')
 
     if (!fromDate || !toDate) {
@@ -39,8 +38,7 @@ const FilterReport = ({ url, cardTitle, cardDesc }: FilterProps) => {
       return
     }
 
-    // window.open(`/reports/summary/vehicle/pdf?from=${fromDate}&to=${toDate}`, '_blank')
-    window.open(`${url}?from=${fromDate}&to=${toDate}`, '_blank')
+    await onGenerate(fromDate, toDate)
   }
 
   return (
@@ -60,9 +58,7 @@ const FilterReport = ({ url, cardTitle, cardDesc }: FilterProps) => {
                 type='date'
                 value={fromDate}
                 onChange={e => setFromDate(e.target.value)}
-                InputLabelProps={{
-                  shrink: true
-                }}
+                InputLabelProps={{ shrink: true }}
               />
               <TextField
                 fullWidth
@@ -70,20 +66,8 @@ const FilterReport = ({ url, cardTitle, cardDesc }: FilterProps) => {
                 type='date'
                 value={toDate}
                 onChange={e => setToDate(e.target.value)}
-                InputLabelProps={{
-                  shrink: true
-                }}
+                InputLabelProps={{ shrink: true }}
               />
-              {/* <TextField
-                fullWidth
-                label='Vehicle No (Optional)'
-                type='text'
-                value={vehicleNo}
-                onChange={e => setVehicleNo(e.target.value)}
-                InputLabelProps={{
-                  shrink: true
-                }}
-              /> */}
             </div>
 
             {error && (
@@ -96,9 +80,12 @@ const FilterReport = ({ url, cardTitle, cardDesc }: FilterProps) => {
               variant='contained'
               color='primary'
               onClick={handleGenerate}
-              startIcon={<i className='tabler-file-invoice' />}
+              disabled={loading}
+              startIcon={
+                loading ? <CircularProgress size={16} color='inherit' /> : <i className='tabler-file-invoice' />
+              }
             >
-              Generate PDF
+              {loading ? 'Generating...' : 'Generate PDF'}
             </Button>
           </CardContent>
         </Card>

@@ -47,6 +47,7 @@ import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryRep
 import type { AnprEventRecord } from '../(dashboard)/vehicles/anpr/page'
 import type { VehicleEventRecord } from '../(dashboard)/vehicles/entryexit/page'
 import { convertUTCtoLocalTime } from '@/utils/functions'
+import type { BagSummaryRecord } from '@/components/reports/BagSummaryReport'
 
 export async function getVehicleStats(): Promise<VehicleStats> {
   try {
@@ -760,5 +761,19 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
     console.error('Fetch failed:', error)
 
     return [] as AnprEventRecord[]
+  }
+}
+
+export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord[]> {
+  try {
+    const data = await prisma.v_bagscnt.findMany({
+      where: { dt: { gte: from, lte: to } }
+    })
+
+    return (data ?? []).map((row, index) => ({ ...row, id: index + 1, dt: convertUTCtoLocalTime(row.dt) }))
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return []
   }
 }
