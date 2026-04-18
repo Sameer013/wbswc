@@ -263,7 +263,7 @@ function toISTDate(date: Date, time: 'start' | 'end'): Date {
 // }
 type AnprEvent = { time: string; weight: number }
 
-function splitAnprIntoCycles(anprEvents: AnprEvent[], DROP_THRESHOLD = 0.7): AnprEvent[][] {
+function splitAnprIntoCycles(anprEvents: AnprEvent[]): AnprEvent[][] {
   if (anprEvents.length === 0) return []
   if (anprEvents.length === 1) return [anprEvents]
 
@@ -274,7 +274,14 @@ function splitAnprIntoCycles(anprEvents: AnprEvent[], DROP_THRESHOLD = 0.7): Anp
     const prev = anprEvents[i - 1]
     const curr = anprEvents[i]
 
-    if (curr.weight < prev.weight * DROP_THRESHOLD) {
+    //   if (curr.weight < prev.weight * DROP_THRESHOLD) {
+    //     groups.push(current)
+    //     current = [curr]
+    //   } else {
+    //     current.push(curr)
+    //   }
+    // }
+    if (curr.time < prev.time) {
       groups.push(current)
       current = [curr]
     } else {
@@ -287,38 +294,56 @@ function splitAnprIntoCycles(anprEvents: AnprEvent[], DROP_THRESHOLD = 0.7): Anp
   return groups
 }
 
+// function deriveWeights(group: AnprEvent[]) {
+//   if (group.length === 0) {
+//     return {
+//       tare_wt: null,
+//       tare_wt_time: null,
+//       gross_wt: null,
+//       gross_wt_time: null,
+//       net_wt: null
+//     }
+//   }
+
+//   const sorted = [...group].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+
+//   const first = sorted[0]
+//   const last = sorted[sorted.length - 1]
+
+//   // if (last.weight === first.weight) {
+//   //   return {
+//   //     tare_wt: first.weight,
+//   //     tare_wt_time: first.time,
+//   //     gross_wt: null,
+//   //     gross_wt_time: null,
+//   //     net_wt: null
+//   //   }
+//   // }
+
+//   return {
+//     tare_wt: first.weight,
+//     tare_wt_time: first.time,
+//     gross_wt: last.weight,
+//     gross_wt_time: last.time,
+//     net_wt: last.weight - first.weight
+//   }
+// }
+
 function deriveWeights(group: AnprEvent[]) {
   if (group.length === 0) {
-    return {
-      tare_wt: null,
-      tare_wt_time: null,
-      gross_wt: null,
-      gross_wt_time: null,
-      net_wt: null
-    }
+    return { tare_wt: null, tare_wt_time: null, gross_wt: null, gross_wt_time: null, net_wt: null }
   }
 
   const sorted = [...group].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
-
-  const first = sorted[0]
-  const last = sorted[sorted.length - 1]
-
-  if (last.weight === first.weight) {
-    return {
-      tare_wt: first.weight,
-      tare_wt_time: first.time,
-      gross_wt: null,
-      gross_wt_time: null,
-      net_wt: null
-    }
-  }
+  const tare = sorted[0]
+  const gross = sorted[1] ?? null
 
   return {
-    tare_wt: first.weight,
-    tare_wt_time: first.time,
-    gross_wt: last.weight,
-    gross_wt_time: last.time,
-    net_wt: last.weight - first.weight
+    tare_wt: tare.weight,
+    tare_wt_time: tare.time,
+    gross_wt: gross?.weight ?? null,
+    gross_wt_time: gross?.time ?? null,
+    net_wt: gross ? Math.abs(gross.weight - tare.weight) : null
   }
 }
 
