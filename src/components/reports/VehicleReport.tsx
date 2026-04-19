@@ -22,8 +22,8 @@ const formatTime = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${Stri
 
 const VehicleReport = ({ record }: { record: EventRecord }) => {
   const generatedAt = new Date()
-  const entryImg = record.entry_image || '' // Implement this function to fetch image URL based on ID
-  const exitImg = record.exit_image || '' // Implement this function to fetch image URL based on ID
+  const entryImg = record.entry_image || ''
+  const exitImg = record.exit_image || ''
 
   return (
     <Document title={`Vehicle Event #${String(record.id).padStart(6, '0')} Report`} producer='sigma' author='WBSWC'>

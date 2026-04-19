@@ -38,7 +38,7 @@ const VehicleSummaryReport = ({
   fromDate,
   toDate
 }: {
-  records: EventSummaryRecord2[] //changing it to for new Types
+  records: EventSummaryRecord2[]
   fromDate: string
   toDate: string
 }) => {
