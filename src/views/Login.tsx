@@ -3,8 +3,11 @@
 // React Imports
 import { useState } from 'react'
 
-// Next Imports
 import { useRouter } from 'next/navigation'
+
+import { signIn } from 'next-auth/react'
+
+// Next Imports
 
 // MUI Imports
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -62,6 +65,9 @@ const MaskImg = styled('img')({
 const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
@@ -87,6 +93,25 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   )
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: false // important
+    })
+
+    if (res?.error) {
+      setError('Invalid credentials')
+
+      return
+    }
+
+    // success
+    router.push('/home')
+  }
 
   return (
     <div className='flex bs-full justify-center'>
@@ -116,16 +141,14 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <form
-            noValidate
-            autoComplete='off'
-            onSubmit={e => {
-              e.preventDefault()
-              router.push('/')
-            }}
-            className='flex flex-col gap-5'
-          >
-            <CustomTextField autoFocus fullWidth label='Email or Username' placeholder='Enter your email or username' />
+          <form noValidate autoComplete='off' onSubmit={handleLogin} className='flex flex-col gap-5'>
+            <CustomTextField
+              autoFocus
+              fullWidth
+              label='Email or Username'
+              placeholder='Enter your email or username'
+              onChange={e => setEmail(e.target.value)}
+            />
             <CustomTextField
               fullWidth
               label='Password'
@@ -143,6 +166,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
                   )
                 }
               }}
+              onChange={e => setPassword(e.target.value)}
             />
             <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
               <FormControlLabel control={<Checkbox />} label='Remember me' />
@@ -153,6 +177,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
             <Button fullWidth variant='contained' type='submit'>
               Login
             </Button>
+            {error && <p>{error}</p>}
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>New on our platform?</Typography>
               <Typography component={Link} color='primary.main'>

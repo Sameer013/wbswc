@@ -1,8 +1,12 @@
 'use server'
 
-import { prisma } from '@/libs/prisma'
+import { revalidatePath } from 'next/cache'
 
+import bcrypt from 'bcryptjs'
+
+import { prisma } from '@/libs/prisma'
 import db from '@/libs/db'
+
 import type { VehicleType } from '@/views/list/ProductListTable'
 import type { AlertType } from '@/views/dashboards/crm/LiveAlerts'
 
@@ -10,6 +14,52 @@ interface WarehouseEvent {
   id: number
   timestamp: Date
   event_msg: string
+}
+
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const roleRaw = formData.get('role_id')
+  const role_id = roleRaw ? parseInt(roleRaw.toString(), 10) : null
+
+  // Basic validation
+  if (!email || !password) {
+    return { error: 'Email and password are required' }
+  }
+
+  try {
+    // Check if user already exists
+    const existingUser = await prisma.users.findUnique({
+      where: { email }
+    })
+
+    if (existingUser) {
+      return { error: 'User already exists with this email' }
+    }
+
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create the user in the database
+    await prisma.users.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role_id
+      }
+    })
+
+    // Clear the cache for the user list page so the new user appears immediately
+    revalidatePath('/admin/users')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to create user:', error)
+
+    return { error: 'Failed to create user' }
+  }
 }
 
 export async function getLiveFeed(): Promise<WarehouseEvent[]> {
