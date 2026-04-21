@@ -30,7 +30,7 @@ model eventmaster {
   eventTimestamp DateTime
   value          String?
   anprevent      anprevent?
-  event_type     event_type      @relation(fields: [eventId], references: [event                                                                  Id], map: "EventMaster_eventId_fkey")
+  event_type     event_type      @relation(fields: [eventId], references: [eventId], map: "EventMaster_eventId_fkey")
   intrusionevent intrusionevent?
   vehicle_event  vehicle_event?
 
@@ -64,7 +64,7 @@ model vehicle_cycle {
 
 model anprevent {
   id                Int                 @id @default(autoincrement())
-  eventMasterId     Int                 @unique(map: "AnprEvent_eventMasterId_ke                                                                  y")
+  eventMasterId     Int                 @unique(map: "AnprEvent_eventMasterId_key")
   vehicleNo         String
   updated_vehicleNo String?             @db.VarChar(20)
   vehicleWt         Float?
@@ -73,19 +73,19 @@ model anprevent {
   created_at        DateTime?           @default(now()) @db.Timestamp(0)
   updated_at        DateTime?           @default(now()) @db.Timestamp(0)
   flag              Boolean             @default(false)
-  eventmaster       eventmaster         @relation(fields: [eventMasterId], refer                                                                  ences: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
-  anpr_images       weighbridge_images? @relation(fields: [imageId], references:                                                                   [id], map: "fk_anpr_images")
+  eventmaster       eventmaster         @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "AnprEvent_eventMasterId_fkey")
+  anpr_images       weighbridge_images? @relation(fields: [imageId], references: [id], map: "fk_anpr_images")
 
   @@index([imageId], map: "fk_anpr_images")
 }
 
 model intrusionevent {
   id            Int                     @id @default(autoincrement())
-  eventMasterId Int                     @unique(map: "IntrusionEvent_eventMaster                                                                  Id_key")
+  eventMasterId Int                     @unique(map: "IntrusionEvent_eventMasterId_key")
   location      String
   severity      intrusionevent_severity @default(medium)
   description   String
-  eventmaster   eventmaster             @relation(fields: [eventMasterId], refer                                                                  ences: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
+  eventmaster   eventmaster             @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "IntrusionEvent_eventMasterId_fkey")
 }
 
 model curation_state {
@@ -125,7 +125,7 @@ model entry_exit_images {
 
 model vehicle_event {
   id                Int                @id @default(autoincrement())
-  eventMasterId     Int                @unique(map: "AnprEvent_eventMasterId_key                                                                  ")
+  eventMasterId     Int                @unique(map: "AnprEvent_eventMasterId_key")
   vehicleNo         String?
   updated_vehicleNo String?            @db.VarChar(20)
   imageId           Int?
@@ -133,8 +133,8 @@ model vehicle_event {
   updated_at        DateTime?          @default(now()) @db.Timestamp(0)
   movement          String?            @db.VarChar(255)
   flag              Boolean            @default(false)
-  eventmaster       eventmaster        @relation(fields: [eventMasterId], refere                                                                  nces: [id], onDelete: Cascade, map: "vehicle_event_ibfk_1")
-  entry_exit_images entry_exit_images? @relation(fields: [imageId], references:                                                                   [id], map: "vehicle_event_ibfk_2")
+  eventmaster       eventmaster        @relation(fields: [eventMasterId], references: [id], onDelete: Cascade, map: "vehicle_event_ibfk_1")
+  entry_exit_images entry_exit_images? @relation(fields: [imageId], references:[id], map: "vehicle_event_ibfk_2")
 
   @@index([imageId], map: "fk_anpr_images")
 }
@@ -160,7 +160,7 @@ model weighbridge_records {
   raw_data         String?   @db.LongText
   created_at       DateTime? @default(now()) @db.Timestamp(0)
 
-  @@unique([vehicle_no, gross, tare, gross_timestamp, tare_timestamp], map: "uni                                                                  que_weigh")
+  @@unique([vehicle_no, gross, tare, gross_timestamp, tare_timestamp], map: "unique_weigh")
   @@index([gross_timestamp], map: "idx_gross_time")
   @@index([tare_timestamp], map: "idx_tare_time")
   @@index([vehicle_no], map: "idx_vehicle_no")
