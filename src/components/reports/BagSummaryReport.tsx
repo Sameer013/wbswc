@@ -45,7 +45,7 @@ const BagsSummaryReport = ({
 
   return (
     <Document title={`Bags Summary Report (${fromDate} to ${toDate})`} producer='sigma' author='WBSWC'>
-      <Page size='A4' orientation='landscape' style={styles.page}>
+      <Page size='A4' orientation='portrait' style={styles.page}>
         {/* Header */}
         <View style={styles.headerRow}>
           <View style={styles.logoContainer}>
@@ -101,20 +101,26 @@ const BagsSummaryReport = ({
             <View style={{ ...styles.tableCell, flex: 0.3 }}>
               <Text style={styles.tableCellValue}>ID</Text>
             </View>
-            <View style={{ ...styles.tableCell, flex: 1.5 }}>
+            <View style={{ ...styles.tableCell, flex: 0.8 }}>
               <Text style={styles.tableCellValue}>Date</Text>
             </View>
-            {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>Entry Count</Text>
-            </View> */}
+            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+              <Text style={styles.tableCellValue}>Vehicle No</Text>
+            </View>
+            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+              <Text style={styles.tableCellValue}>{'Time (In)'}</Text>
+            </View>
+            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+              <Text style={styles.tableCellValue}>{'Time (Out)'}</Text>
+            </View>
             {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Exit Count</Text>
             </View> */}
-            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>Load Count</Text>
+            <View style={{ ...styles.tableCell, flex: 2, textAlign: 'center' }}>
+              <Text style={styles.tableCellValue}>Event Activity (Load/ Unload)</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>Unload Count</Text>
+              <Text style={styles.tableCellValue}>Count</Text>
             </View>
           </View>
 

@@ -1,9 +1,21 @@
 SELECT
   `tve`.`dt` AS `dt`,
   `tve`.`vno` AS `vno`,
-  GROUP_CONCAT(`tve`.`created_at` SEPARATOR ',') AS `evt`,
-  GROUP_CONCAT(`tve`.`movement` SEPARATOR ',') AS `et`,
-  GROUP_CONCAT(`tve`.`imageId` SEPARATOR ',') AS `imgs`
+  GROUP_CONCAT(
+    `tve`.`created_at`
+    ORDER BY
+      `tve`.`created_at` ASC SEPARATOR ','
+  ) AS `evt`,
+  GROUP_CONCAT(
+    `tve`.`movement`
+    ORDER BY
+      `tve`.`created_at` ASC SEPARATOR ','
+  ) AS `et`,
+  GROUP_CONCAT(
+    `tve`.`imageId`
+    ORDER BY
+      `tve`.`created_at` ASC SEPARATOR ','
+  ) AS `imgs`
 FROM
   (
     SELECT
@@ -13,25 +25,22 @@ FROM
       `ve`.`movement` AS `movement`,
       `ve`.`imageId` AS `imageId`
     FROM
-      `wbswc4`.`vehicle_event` `ve`
+      `wbswc5`.`vehicle_event` `ve`
     WHERE
       (
         (`ve`.`updated_vehicleNo` IS NOT NULL)
+        AND (`ve`.`flag` = 1)
         AND (
           cast(`ve`.`created_at` AS date) >= cast(
             (
               SELECT
-                `wbswc4`.`curation_state`.`last_run_l1`
+                `wbswc5`.`curation_state`.`last_run_l1`
               FROM
-                `wbswc4`.`curation_state`
+                `wbswc5`.`curation_state`
             ) AS date
           )
         )
       )
-    ORDER BY
-      cast(`ve`.`created_at` AS date),
-      `vno`,
-      `ve`.`created_at`
   ) `tve`
 GROUP BY
   `tve`.`dt`,

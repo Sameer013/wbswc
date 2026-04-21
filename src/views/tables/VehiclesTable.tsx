@@ -7,7 +7,7 @@ import { getReportData } from '@/app/server/action'
 import ProductListTable from '@views/list/ProductListTable'
 
 const VehiclesTable = async () => {
-  const data = await getReportData(undefined, undefined, 20)
+  const data = await getReportData(undefined, undefined, 40)
 
   return (
     <Grid container spacing={6}>

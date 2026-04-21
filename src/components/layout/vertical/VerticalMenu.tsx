@@ -98,6 +98,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           </MenuItem>
         </SubMenu>
 
+        <MenuItem href='/status' icon={<i className='tabler-heart-rate-monitor' />}>
+          Device Status
+        </MenuItem>
         {/* <MenuItem href='/users' icon={<i className='tabler-users' />}>
           Users
         </MenuItem>

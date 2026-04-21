@@ -537,3 +537,33 @@ export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord
     return []
   }
 }
+
+export async function getDeviceStatus() {
+  const devices = await prisma.device_master.findMany({
+    include: {
+      downtime: {
+        orderBy: { down_start: 'desc' },
+        take: 1
+      }
+    }
+  })
+
+  // console.log('Devices', devices)
+
+  return devices.map(device => {
+    const lastLog = device.downtime[0] || null
+    const isOffline = lastLog && !lastLog.down_end // If down_end is null, it's offline
+
+    return {
+      id: device.id,
+      ip: device.ip,
+      desc: device.desc,
+      status: isOffline ? 'Offline' : 'Online',
+      last_down: lastLog ? convertUTCtoLocalTime(lastLog.down_start) : null,
+      duration:
+        lastLog && lastLog.down_end && lastLog.down_start
+          ? Math.round((new Date(lastLog.down_end).getTime() - new Date(lastLog.down_start).getTime()) / 60000)
+          : 0
+    }
+  })
+}
