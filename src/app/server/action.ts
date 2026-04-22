@@ -375,49 +375,67 @@ export async function getReportData(
         const weightsToSplit = cycleWeights.length > 0 ? cycleWeights : anprEvents
 
         // 5. Split into sub-cycles by weight-drop detection
-        const weightGroups = splitAnprIntoCycles(weightsToSplit)
 
         // const hasMultipleGroups = weightGroups.length > 1
 
-        weightGroups.forEach((group, groupIndex) => {
-          const isFirstGroup = groupIndex === 0
-          const isLastGroup = groupIndex === weightGroups.length - 1
-
-          const { tare_wt, tare_wt_time, gross_wt, gross_wt_time, net_wt } = deriveWeights(group)
-
-          // Entry time:
-          const entry_time: string = weightsOutsideWindow
-            ? '-'
-            : isFirstGroup
-              ? (cycle.entry_time?.slice(11, 16) ?? '-')
-              : '-'
-
-          // Exit time:
-          const exit_time: string = weightsOutsideWindow
-            ? '-'
-            : isLastGroup
-              ? (cycle.exit_time?.slice(11, 16) ?? '-')
-              : '-'
-
-          const entry_imageId = !weightsOutsideWindow && isFirstGroup ? (cycle.entry_imageId ?? null) : null
-
-          const exit_imageId = !weightsOutsideWindow && isLastGroup ? (cycle.exit_imageId ?? null) : null
-
+        if (cycleWeights.length === 0) {
           reportData.push({
             id: globalId++,
             vehicleNo: record.vehicleNo ?? null,
             event_date: record.cycle_date,
-            entry_time,
-            exit_time,
-            entry_imageId,
-            exit_imageId,
-            tare_wt,
-            tare_wt_time,
-            gross_wt,
-            gross_wt_time,
-            net_wt
+            entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
+            exit_time: cycle.exit_time?.slice(11, 16) ?? '-',
+            entry_imageId: cycle.entry_imageId ?? null,
+            exit_imageId: cycle.exit_imageId ?? null,
+            tare_wt: null,
+            tare_wt_time: null,
+            gross_wt: null,
+            gross_wt_time: null,
+            net_wt: null
           })
-        })
+        } else {
+          const weightGroups = splitAnprIntoCycles(weightsToSplit)
+
+          weightGroups.forEach((group, groupIndex) => {
+            const isFirstGroup = groupIndex === 0
+            const isLastGroup = groupIndex === weightGroups.length - 1
+
+            const { tare_wt, tare_wt_time, gross_wt, gross_wt_time, net_wt } = deriveWeights(group)
+
+            // Entry time:
+            const entry_time: string = weightsOutsideWindow
+              ? '-'
+              : isFirstGroup
+                ? (cycle.entry_time?.slice(11, 16) ?? '-')
+                : '-'
+
+            // Exit time:
+            const exit_time: string = weightsOutsideWindow
+              ? '-'
+              : isLastGroup
+                ? (cycle.exit_time?.slice(11, 16) ?? '-')
+                : '-'
+
+            const entry_imageId = !weightsOutsideWindow && isFirstGroup ? (cycle.entry_imageId ?? null) : null
+
+            const exit_imageId = !weightsOutsideWindow && isLastGroup ? (cycle.exit_imageId ?? null) : null
+
+            reportData.push({
+              id: globalId++,
+              vehicleNo: record.vehicleNo ?? null,
+              event_date: record.cycle_date,
+              entry_time,
+              exit_time,
+              entry_imageId,
+              exit_imageId,
+              tare_wt,
+              tare_wt_time,
+              gross_wt,
+              gross_wt_time,
+              net_wt
+            })
+          })
+        }
       })
     })
 
