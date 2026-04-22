@@ -22,7 +22,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   const toDate = new Date(to)
 
   // Add 1 day to the 'to' date to make the range inclusive of the whole day
-  toDate.setDate(toDate.getDate() + 1)
+  // toDate.setDate(toDate.getDate() + 1)
 
   if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
     return (
@@ -43,6 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
   //     event_date: 'asc'
   //   }
   // })
+  // console.log('Fetching data for PDF report from', fromDate, 'to', toDate)
   const events2 = await getReportData(fromDate, toDate, undefined, 'asc')
 
   // console.log(events2)
