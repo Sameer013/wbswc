@@ -83,7 +83,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
   useEffect(() => {
     const fetchData = async () => {
       if (!fromDate && !toDate) {
-        const stats = await getReportData(undefined, undefined, 20)
+        const stats = await getReportData(new Date(), new Date())
 
         setData(stats)
       }
