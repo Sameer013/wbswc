@@ -544,11 +544,23 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
 
 export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord[]> {
   try {
-    const data = await prisma.v_bagsCnt.findMany({
-      where: { dt: { gte: from, lt: to } }
+    const data = await prisma.bag_cycle.findMany({
+      where: { cycle_date: { gte: from, lt: to } }
     })
 
-    return (data ?? []).map((row, index) => ({ ...row, id: index + 1, dt: convertUTCtoLocalTime(row.dt) }))
+    // console.log('Bag cycle data', data)
+
+    return data.map((record, index) => ({
+      id: record.id ?? index + 1, // fallback if id?
+      cycle_date: record.cycle_date,
+      vehicleNo: record.vehicleNo,
+      type_of_event: record.type_of_event,
+      cnt: record.cnt,
+      created_at: convertUTCtoLocalTime(record.created_at),
+      start_time: convertUTCtoLocalTime(record.start_time),
+      end_time: convertUTCtoLocalTime(record.end_time),
+      imageId: record.imageId
+    }))
   } catch (error) {
     console.error('Fetch failed:', error)
 

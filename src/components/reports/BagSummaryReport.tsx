@@ -6,12 +6,14 @@ import { styles } from './styles/vehicleReport'
 
 export type BagSummaryRecord = {
   id: number
-  vehicleNo?: string | number
-  entryCnt: bigint
-  exitCnt: bigint
-  loadCnt: bigint
-  unloadCnt: bigint
-  dt: Date | null
+  cycle_date: Date | null
+  vehicleNo: string | null
+  type_of_event: string | null
+  cnt: number | null
+  created_at: Date | null
+  start_time: Date | null
+  end_time: Date | null
+  imageId: number | null
 }
 
 const formatDate = (d: Date) =>
@@ -38,10 +40,14 @@ const BagsSummaryReport = ({
     }
   }
 
-  // const totalEntries = records.reduce((sum, r) => sum + r.entryCnt, 0n)
-  // const totalExits = records.reduce((sum, r) => sum + r.exitCnt, 0n)
-  const totalLoads = records.reduce((sum, r) => sum + r.loadCnt, 0n)
-  const totalUnloads = records.reduce((sum, r) => sum + r.unloadCnt, 0n)
+  // Derive totals from type_of_event + cnt
+  const totalLoads = records
+    .filter(r => r.type_of_event?.toLowerCase() === 'load')
+    .reduce((sum, r) => sum + (r.cnt ?? 0), 0)
+
+  const totalUnloads = records
+    .filter(r => r.type_of_event?.toLowerCase() === 'unload')
+    .reduce((sum, r) => sum + (r.cnt ?? 0), 0)
 
   return (
     <Document title={`Bags Summary Report (${fromDate} to ${toDate})`} producer='sigma' author='WBSWC'>
@@ -64,18 +70,6 @@ const BagsSummaryReport = ({
 
         {/* Summary Band */}
         <View style={styles.summaryBand}>
-          {/* <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>TOTAL VEHICLES</Text>
-            <Text style={styles.summaryValue}>{records.length}</Text>
-          </View> */}
-          {/* <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>TOTAL ENTRIES</Text>
-            <Text style={styles.summaryValue}>{totalEntries}</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>TOTAL EXITS</Text>
-            <Text style={styles.summaryValue}>{totalExits}</Text>
-          </View> */}
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>TOTAL BAGS LOADS</Text>
             <Text style={styles.summaryValue}>{totalLoads}</Text>
@@ -108,16 +102,13 @@ const BagsSummaryReport = ({
               <Text style={styles.tableCellValue}>Vehicle No</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>{'Time (In)'}</Text>
+              <Text style={styles.tableCellValue}>Time (In)</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>{'Time (Out)'}</Text>
+              <Text style={styles.tableCellValue}>Time (Out)</Text>
             </View>
-            {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>Exit Count</Text>
-            </View> */}
             <View style={{ ...styles.tableCell, flex: 2, textAlign: 'center' }}>
-              <Text style={styles.tableCellValue}>Event Activity (Load/ Unload)</Text>
+              <Text style={styles.tableCellValue}>Event Activity (Load / Unload)</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Count</Text>
@@ -131,20 +122,23 @@ const BagsSummaryReport = ({
                 <View style={{ ...styles.tableCell, flex: 0.3 }}>
                   <Text style={styles.tableCellLabel}>#{record.id}</Text>
                 </View>
-                <View style={{ ...styles.tableCell, flex: 1.5 }}>
-                  <Text style={styles.tableCellLabel}>{record.dt ? formatDate(record.dt) : '--'}</Text>
-                </View>
-                {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{record.entryCnt}</Text>
+                <View style={{ ...styles.tableCell, flex: 0.8 }}>
+                  <Text style={styles.tableCellLabel}>{record.cycle_date ? formatDate(record.cycle_date) : '--'}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{record.exitCnt}</Text>
-                </View> */}
-                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{record.loadCnt}</Text>
+                  <Text style={styles.tableCellLabel}>{record.vehicleNo ?? '--'}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{record.unloadCnt}</Text>
+                  <Text style={styles.tableCellLabel}>{record.start_time ? formatTime(record.start_time) : '--'}</Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>{record.end_time ? formatTime(record.end_time) : '--'}</Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 2, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>{record.type_of_event ?? '--'}</Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>{record.cnt ?? '--'}</Text>
                 </View>
               </View>
             ))

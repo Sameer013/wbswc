@@ -232,6 +232,22 @@ model loading_truck_records {
   loading_truck_images loading_truck_images? @relation(fields: [truck_img_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "loading_truck_records_ibfk_1")
 
   @@index([truck_img_id], map: "truck_img_id")
+  @@index([created_at], map: "loading_truck_created_at")
+}
+
+model bag_cycle {
+  id            Int       @id @default(autoincrement())
+  cycle_date    DateTime? @db.Date
+  vehicleNo     String?   @db.VarChar(255)
+  type_of_event String?   @db.VarChar(255)
+  cnt           Int?
+  created_at    DateTime? @default(now()) @db.Timestamp(0)
+  start_time    DateTime? @db.Timestamp(0)
+  end_time      DateTime? @db.Timestamp(0)
+  imageId       Int?
+
+  @@unique([cycle_date, vehicleNo, id], map: "bag_cycle_uk")
+  @@unique([start_time, end_time, type_of_event], map: "uq_cycle")
 }
 
 view vw_danpr {
@@ -291,24 +307,36 @@ view v_report {
   gross_wt_time DateTime? @db.DateTime(0)
 }
 
-view v_report_old {
-  vehicleNo     String    @db.VarChar(50)
-  entry_time    DateTime? @db.DateTime(0)
-  exit_time     DateTime? @db.DateTime(0)
-  tear_wt_time  DateTime? @db.DateTime(0)
-  gross_wt_time DateTime? @db.DateTime(0)
-  tear_wt       Float?
-  gross_wt      Float?
-  net_wt        Float?
-  event_date    DateTime? @db.Date
-}
-
 view v_bagsCnt {
   dt        DateTime? @db.Date
   entryCnt  BigInt    @default(0)
   exitCnt   BigInt    @default(0)
   loadCnt   BigInt    @default(0)
   unloadCnt BigInt    @default(0)
+}
+
+view vw_loadingCnt {
+  eventId       Int
+  session_id    Decimal?  @db.Decimal(32, 0)
+  session_start DateTime?
+  session_end   DateTime?
+  total_events  BigInt    @default(0)
+}
+
+view vw_unloadingCnt {
+  eventId       Int
+  session_id    Decimal?  @db.Decimal(32, 0)
+  session_start DateTime?
+  session_end   DateTime?
+  total_events  BigInt    @default(0)
+}
+
+view vw_bags {
+  session       Decimal?  @db.Decimal(32, 0)
+  type_of_event String?   @db.VarChar(9)
+  start_time    DateTime?
+  end_time      DateTime?
+  cnt           BigInt    @default(0)
 }
 
 enum intrusionevent_severity {
