@@ -213,7 +213,7 @@ function splitAnprIntoCycles(anprEvents: AnprEvent[]): AnprEvent[][] {
     const prev = anprEvents[i - 1]
     const curr = anprEvents[i]
 
-    if (curr.time < prev.time) {
+    if (curr.weight < prev.weight) {
       groups.push(current)
       current = [curr]
     } else {
