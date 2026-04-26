@@ -213,7 +213,7 @@ function splitAnprIntoCycles(anprEvents: AnprEvent[]): AnprEvent[][] {
     const prev = anprEvents[i - 1]
     const curr = anprEvents[i]
 
-    if (curr.weight < prev.weight) {
+    if (curr.time < prev.time) {
       groups.push(current)
       current = [curr]
     } else {
@@ -231,9 +231,15 @@ function deriveWeights(group: AnprEvent[]) {
     return { tare_wt: null, tare_wt_time: null, gross_wt: null, gross_wt_time: null, net_wt: null }
   }
 
-  const sorted = [...group].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+  // Time based sorting for Tare and Gross
+  // const sorted = [...group].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+  // const tare = sorted[0]
+  // const gross = sorted[1] ?? null
+
+  // Weight based sorting for Tare and Gross
+  const sorted = [...group].sort((a, b) => a.weight - b.weight)
   const tare = sorted[0]
-  const gross = sorted[1] ?? null
+  const gross = sorted.length > 1 ? sorted[sorted.length - 1] : null // highest weight
 
   return {
     tare_wt: tare.weight,
@@ -438,6 +444,8 @@ export async function getReportData(
         }
       })
     })
+
+    console.log('Report data before sorting', reportData)
 
     // 6. Sort
     const ordered_reportData = reportData.sort((a, b) => {

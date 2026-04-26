@@ -150,7 +150,11 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
       columnHelper.accessor('tare_wt', {
         header: 'Tare Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.tare_wt}</Typography>
+        cell: ({ row }) => (
+          <Typography color={row.original.tare_wt ? 'inherit' : 'text.secondary'}>
+            {row.original.tare_wt ?? 'Not recorded'}
+          </Typography>
+        )
       }),
       columnHelper.accessor('tare_wt_time', {
         header: 'Tare Timestamp',
@@ -164,7 +168,11 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
       columnHelper.accessor('gross_wt', {
         header: 'Gross Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.gross_wt}</Typography>
+        cell: ({ row }) => (
+          <Typography sx={{ color: row.original.gross_wt ? 'inherit' : 'text.secondary' }}>
+            {row.original.gross_wt ?? 'Not recorded'}
+          </Typography>
+        )
       }),
 
       columnHelper.accessor('gross_wt_time', {
@@ -174,12 +182,11 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
           <Typography>
             {row.original.gross_wt_time ? row.original.gross_wt_time.toString().slice(11, 16) : '-'}
           </Typography>
-        ) //TODO add weight timestamp
-        // cell: ({ row }) => <Typography>NULL</Typography>
+        )
       }),
       columnHelper.accessor('net_wt', {
         header: 'Net Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.net_wt}</Typography>
+        cell: ({ row }) => <Typography>{row.original.net_wt ? row.original.net_wt : '-'}</Typography>
       }),
 
       {
@@ -340,7 +347,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  No data available
+                  No data available for today, Please Select a different date or check back later.
                 </td>
               </tr>
             ) : (

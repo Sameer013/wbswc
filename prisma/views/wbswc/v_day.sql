@@ -5,8 +5,8 @@ SELECT
   count(IF((`em`.`eventId` = 4), 1, NULL)) AS `unloadCnt`
 FROM
   (
-    `wbswc5`.`eventmaster` `em`
-    LEFT JOIN `wbswc5`.`vehicle_event` `ve` ON(
+    `wbswc`.`eventmaster` `em`
+    LEFT JOIN `wbswc`.`vehicle_event` `ve` ON(
       (
         (`em`.`id` = `ve`.`eventMasterId`)
         AND (`ve`.`updated_vehicleNo` IS NOT NULL)

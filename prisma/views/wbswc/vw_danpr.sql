@@ -19,26 +19,26 @@ SELECT
 FROM
   (
     SELECT
-      cast(`wbswc5`.`anprevent`.`created_at` AS date) AS `dt`,
-      `wbswc5`.`anprevent`.`created_at` AS `created_at`,
-      `wbswc5`.`anprevent`.`updated_vehicleNo` AS `vno`,
-      `wbswc5`.`anprevent`.`updated_vehicleWt` AS `vehiclewt`,
-      `wbswc5`.`anprevent`.`imageId` AS `imageid`
+      cast(`wbswc`.`anprevent`.`created_at` AS date) AS `dt`,
+      `wbswc`.`anprevent`.`created_at` AS `created_at`,
+      `wbswc`.`anprevent`.`updated_vehicleNo` AS `vno`,
+      `wbswc`.`anprevent`.`updated_vehicleWt` AS `vehiclewt`,
+      `wbswc`.`anprevent`.`imageId` AS `imageid`
     FROM
-      `wbswc5`.`anprevent`
+      `wbswc`.`anprevent`
     WHERE
       (
         (
-          `wbswc5`.`anprevent`.`updated_vehicleNo` IS NOT NULL
+          `wbswc`.`anprevent`.`updated_vehicleNo` IS NOT NULL
         )
-        AND (`wbswc5`.`anprevent`.`flag` = 1)
+        AND (`wbswc`.`anprevent`.`flag` = 1)
         AND (
-          cast(`wbswc5`.`anprevent`.`created_at` AS date) >= cast(
+          cast(`wbswc`.`anprevent`.`created_at` AS date) >= cast(
             (
               SELECT
-                `wbswc5`.`curation_state`.`last_run_l1`
+                `wbswc`.`curation_state`.`last_run_l1`
               FROM
-                `wbswc5`.`curation_state`
+                `wbswc`.`curation_state`
             ) AS date
           )
         )
