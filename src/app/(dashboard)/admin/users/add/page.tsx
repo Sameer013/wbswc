@@ -129,8 +129,8 @@ export default function CreateUserPage() {
                   )
                 }}
               >
-                <MenuItem value='2'>Standard User</MenuItem>
-                <MenuItem value='1'>Administrator</MenuItem>
+                <MenuItem value='2'>Manager</MenuItem>
+                <MenuItem value='1'>Admin</MenuItem>
               </TextField>
 
               <Button

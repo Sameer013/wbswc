@@ -16,6 +16,12 @@ interface WarehouseEvent {
   event_msg: string
 }
 
+export async function getUsers() {
+  const users = await prisma.users.findMany()
+
+  console.log('Fetched users:', users)
+}
+
 export async function createUser(formData: FormData) {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
@@ -445,7 +451,7 @@ export async function getReportData(
       })
     })
 
-    console.log('Report data before sorting', reportData)
+    // console.log('Report data before sorting', reportData)
 
     // 6. Sort
     const ordered_reportData = reportData.sort((a, b) => {

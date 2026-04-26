@@ -71,12 +71,15 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
           Home
         </MenuItem>
-        <MenuItem href='/vehicles' icon={<i className='tabler-car' />}>
+        {/* <MenuItem href='/vehicles' icon={<i className='tabler-car' />}>
           Vehicles
-        </MenuItem>
-        {/* <SubMenu label={'Vehicles'} icon={<i className='tabler-car' />}>
+        </MenuItem> */}
+        <SubMenu label={'Vehicles'} icon={<i className='tabler-car' />}>
           <MenuItem href='/vehicles' icon={<i className='tabler-layout-dashboard' />}>
-            Summary
+            Vehicle Trips
+          </MenuItem>
+          <MenuItem href='/vehicles/bags' icon={<i className='tabler-package' />}>
+            Bags Event
           </MenuItem>
           <MenuItem href='/vehicles/anpr' icon={<i className='tabler-camera' />}>
             Anpr Event
@@ -84,7 +87,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href='/vehicles/entryexit' icon={<i className='tabler-barrier-block' />}>
             Entry Exit
           </MenuItem>
-        </SubMenu> */}
+        </SubMenu>
 
         {/* <MenuItem href='/report' icon={<i className='tabler-report' />}>
           Reports
@@ -101,9 +104,10 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/status' icon={<i className='tabler-heart-rate-monitor' />}>
           Device Status
         </MenuItem>
-        {/* <MenuItem href='/users' icon={<i className='tabler-users' />}>
+        <MenuItem href='/admin/users' icon={<i className='tabler-users' />}>
           Users
         </MenuItem>
+        {/*
         <MenuItem href='/ai-camera-feed' icon={<i className='tabler-camera' />}>
           AI Camera Feed
         </MenuItem> */}

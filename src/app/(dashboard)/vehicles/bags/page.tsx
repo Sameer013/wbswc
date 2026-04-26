@@ -2,25 +2,16 @@
 
 import { useMemo, useState, useEffect } from 'react'
 
-// import Link from 'next/link'
-
-// import { useRouter } from 'next/navigation'
-
 // MUI Imports
-import dynamic from 'next/dynamic'
+// import dynamic from 'next/dynamic'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
-
-// import Chip from '@mui/material/Chip'
-// import Checkbox from '@mui/material/Checkbox'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
-
-// import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-
 import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -36,32 +27,31 @@ import {
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+// import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
-import TextField from '@mui/material/TextField'
-
+// Custom Components
 import CustomTextField from '@core/components/mui/TextField'
-
-// import OptionMenu from '@core/components/option-menu'
-
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
-import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
+
+// Types & Utils
+import type { BagSummaryRecord } from '@/components/reports/BagSummaryReport'
 import { exportToCSV, formatDate } from '@/utils/functions'
-import { getReportData } from '@/app/server/action'
+import { getBagsCnt } from '@/app/server/action'
 
-const PDFButton = dynamic(() => import('@/components/PDFButton'), {
-  ssr: false,
-  loading: () => (
-    <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium' disabled>
-      PDF
-    </Button>
-  )
-})
+// const PDFButton = dynamic(() => import('@/components/PDFButton'), {
+//   ssr: false,
+//   loading: () => (
+//     <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium' disabled>
+//       PDF
+//     </Button>
+//   )
+// })
 
-export type VehicleType = EventSummaryRecord2 & { actions?: string }
+// Refactored Type Helper
+export type BagVehicleType = BagSummaryRecord & { actions?: string }
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
@@ -71,10 +61,10 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   return itemRank.passed
 }
 
-const columnHelper = createColumnHelper<VehicleType>()
+const columnHelper = createColumnHelper<BagVehicleType>()
 
-const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => {
-  const [data, setData] = useState<VehicleType[]>(tableData)
+const BagsEvent = ({ tableData = [] }: { tableData?: BagVehicleType[] }) => {
+  const [data, setData] = useState<BagVehicleType[]>(tableData)
   const [globalFilter, setGlobalFilter] = useState('')
   const [rowSelection, setRowSelection] = useState({})
   const [fromDate, setFromDate] = useState<string>('')
@@ -83,146 +73,71 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
   useEffect(() => {
     const fetchData = async () => {
       if (!fromDate && !toDate) {
-        const stats = await getReportData(new Date(), new Date())
+        // Ensure getReportData returns the correct BagSummaryRecord format
+        const stats = await getBagsCnt(new Date(), new Date())
 
         setData(stats)
       }
     }
 
     fetchData()
-
-    // const interval = setInterval(fetchData, 60000)
-
-    // return () => clearInterval(interval)
   }, [fromDate, toDate])
 
-  const columns = useMemo<ColumnDef<VehicleType, any>[]>(
+  const columns = useMemo<ColumnDef<BagVehicleType, any>[]>(
     () => [
-      // {
-      //   id: 'select',
-      //   header: ({ table }) => (
-      //     <Checkbox
-      //       checked={table.getIsAllRowsSelected()}
-      //       indeterminate={table.getIsSomeRowsSelected()}
-      //       onChange={table.getToggleAllRowsSelectedHandler()}
-      //     />
-      //   ),
-      //   cell: ({ row }) => (
-      //     <Checkbox
-      //       checked={row.getIsSelected()}
-      //       disabled={!row.getCanSelect()}
-      //       indeterminate={row.getIsSomeSelected()}
-      //       onChange={row.getToggleSelectedHandler()}
-      //     />
-      //   )
-      // },
       columnHelper.accessor('id', {
-        header: 'Trip ID',
-        cell: ({ row }) => <Typography>T{row.original.id}</Typography>
+        header: 'ID',
+        cell: ({ row }) => <Typography>#{row.original.id}</Typography>
       }),
-
-      // columnHelper.accessor('timestamp', {
-      //   header: 'Timestamp',
-      //   cell: ({ row }) => <Typography>{new Date(row.original.timestamp).toLocaleString()}</Typography>
-      // }),
-      columnHelper.accessor('event_date', {
-        header: 'Date',
-        cell: ({ row }) => {
-          // const date = new Date(row.original.event_date?.toString() || '--')
-          // const formatted = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`
-
-          return (
-            <Typography>{row.original.event_date ? formatDate(new Date(row.original.event_date)) : '-'}</Typography>
-          )
-        }
+      columnHelper.accessor('cycle_date', {
+        header: 'Cycle Date',
+        cell: ({ row }) => (
+          <Typography>{row.original.cycle_date ? formatDate(new Date(row.original.cycle_date)) : '-'}</Typography>
+        )
       }),
       columnHelper.accessor('vehicleNo', {
         header: 'Vehicle No',
-        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo}</Typography>
+        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo ?? '-'}</Typography>
       }),
-      columnHelper.accessor('entry_time', {
-        header: 'Entry Time',
-        cell: ({ row }) => <Typography>{row.original.entry_time?.toString().slice(0, 5) ?? '-'}</Typography>
+      columnHelper.accessor('type_of_event', {
+        header: 'Event Type',
+        cell: ({ row }) => <Typography>{row.original.type_of_event ?? '-'}</Typography>
       }),
-      columnHelper.accessor('exit_time', {
-        header: 'Exit Time',
-        cell: ({ row }) => <Typography>{row.original.exit_time?.toString().slice(0, 5) ?? '-'}</Typography>
+      columnHelper.accessor('cnt', {
+        header: 'Bag Count',
+        cell: ({ row }) => <Typography>{row.original.cnt ?? 0}</Typography>
       }),
-      columnHelper.accessor('tare_wt', {
-        header: 'Tare Weight (KG)',
-        cell: ({ row }) => (
-          <Typography color={row.original.tare_wt ? 'inherit' : 'text.secondary'}>
-            {row.original.tare_wt ?? 'Not recorded'}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('tare_wt_time', {
-        header: 'Tare Timestamp',
-
+      columnHelper.accessor('start_time', {
+        header: 'Start Time',
         cell: ({ row }) => (
           <Typography>
-            {row.original.tare_wt_time ? row.original.tare_wt_time.toString().slice(11, 16) : '-'}
-          </Typography>
-        ) //TODO add weight timestamp
-        // cell: ({ row }) => <Typography>NULL</Typography>
-      }),
-      columnHelper.accessor('gross_wt', {
-        header: 'Gross Weight (KG)',
-        cell: ({ row }) => (
-          <Typography sx={{ color: row.original.gross_wt ? 'inherit' : 'text.secondary' }}>
-            {row.original.gross_wt ?? 'Not recorded'}
+            {row.original.start_time
+              ? new Date(row.original.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : '-'}
           </Typography>
         )
       }),
-
-      columnHelper.accessor('gross_wt_time', {
-        header: 'Gross Timestamp',
-
+      columnHelper.accessor('end_time', {
+        header: 'End Time',
         cell: ({ row }) => (
           <Typography>
-            {row.original.gross_wt_time ? row.original.gross_wt_time.toString().slice(11, 16) : '-'}
+            {row.original.end_time
+              ? new Date(row.original.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : '-'}
           </Typography>
         )
-      }),
-      columnHelper.accessor('net_wt', {
-        header: 'Net Weight (KG)',
-        cell: ({ row }) => <Typography>{row.original.net_wt ? row.original.net_wt : '-'}</Typography>
-      }),
+      })
 
-      {
-        id: 'actions',
-        header: 'Reports',
-        enableSorting: false,
-        cell: ({ row }) => (
-          <div className='flex items-center'>
-            {/* <Link href={`/reports/vehicle/${row.original.id}/pdf`} target='_blank' rel='noopener noreferrer'> */}
-            {/* <IconButton>
-                <i className='tabler-file-invoice text-textSecondary' />
-              </IconButton> */}
-            {/* <Button variant='outlined' startIcon={<PictureAsPdfIcon />} size='medium' onClick={() => window.open(`/reports/vehicle/${id}/pdf`, '_blank')}>
-              PDF
-            </Button> */}
-            <PDFButton record={row.original} />
-            {/* <PictureAsPdfIcon /> */}
-            {/* </Link> */}
-            {/* <OptionMenu
-              iconButtonProps={{ size: 'medium' }}
-              iconClassName='text-textSecondary'
-              options={[
-                { text: 'Download', icon: 'tabler-download' },
-                {
-                  text: 'Delete',
-                  icon: 'tabler-trash',
-                  menuItemProps: {
-                    onClick: () => setData(prev => prev.filter(v => v.id !== row.original.id))
-                  }
-                },
-                { text: 'Duplicate', icon: 'tabler-copy' }
-              ]}
-            /> */}
-          </div>
-        )
-      }
+      //   {
+      //     id: 'actions',
+      //     header: 'Reports',
+      //     enableSorting: false,
+      //     cell: ({ row }) => (
+      //       <div className='flex items-center'>
+      //         <PDFButton record={row.original} />
+      //       </div>
+      //     )
+      //   }
     ],
     []
   )
@@ -243,9 +158,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
     getPaginationRowModel: getPaginationRowModel()
   })
 
-  const handleExport = () => {
-    exportToCSV(table)
-  }
+  const handleExport = () => exportToCSV(table)
 
   const handleDateFilter = async () => {
     if (!fromDate || !toDate) {
@@ -254,18 +167,16 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       return
     }
 
-    const filtered = await getReportData(new Date(fromDate), new Date(toDate), undefined, 'desc')
+    const filtered = await getBagsCnt(new Date(fromDate), new Date(toDate))
 
-    // console.log('Filtered Data:', filtered)
     setData(filtered)
   }
 
   return (
     <Card>
-      <CardHeader title='Vehicles Summary' />
+      <CardHeader title='Bags Summary Report' />
       <div className='flex flex-wrap justify-between gap-4 p-4'>
         <div className='flex flex-wrap items-center gap-4'>
-          {/* Search */}
           <CustomTextField
             value={globalFilter ?? ''}
             onChange={e => setGlobalFilter(e.target.value)}
@@ -273,8 +184,6 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
             size='small'
             sx={{ width: { xs: '100%', sm: 250 } }}
           />
-
-          {/* From Date */}
           <TextField
             label='From Date'
             type='date'
@@ -284,8 +193,6 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
             InputLabelProps={{ shrink: true }}
             sx={{ width: { xs: '48%', sm: 180 } }}
           />
-
-          {/* To Date */}
           <TextField
             label='To Date'
             type='date'
@@ -346,8 +253,8 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
           <tbody>
             {table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  No data available for today, Please select a different date or check back later.
+                <td colSpan={table.getVisibleFlatColumns().length} className='text-center p-4'>
+                  No bag records found for the selected criteria.
                 </td>
               </tr>
             ) : (
@@ -374,4 +281,4 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
   )
 }
 
-export default ProductListTable
+export default BagsEvent
