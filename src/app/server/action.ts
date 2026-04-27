@@ -17,17 +17,31 @@ interface WarehouseEvent {
 }
 
 export async function getUsers() {
-  const users = await prisma.users.findMany()
+  try {
+    const users = await prisma.users.findMany()
 
-  console.log('Fetched users:', users)
+    const data = users.map(user => ({
+      ...user,
+      created_at: convertUTCtoLocalTime(user.created_at)
+    }))
+
+    // console.log('Fetched users:', users)
+
+    return data
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return []
+  }
 }
 
 export async function createUser(formData: FormData) {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const phone = formData.get('phone') as string
   const roleRaw = formData.get('role_id')
-  const role_id = roleRaw ? parseInt(roleRaw.toString(), 10) : null
+  const role_id = roleRaw ? parseInt(roleRaw.toString(), 10) : 1
 
   // Basic validation
   if (!email || !password) {
@@ -53,7 +67,8 @@ export async function createUser(formData: FormData) {
         name,
         email,
         password: hashedPassword,
-        role_id
+        role_id,
+        phone
       }
     })
 

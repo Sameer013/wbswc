@@ -18,6 +18,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 // Icons
 import PersonIcon from '@mui/icons-material/Person'
+import PhoneIcon from '@mui/icons-material/Phone'
 import EmailIcon from '@mui/icons-material/Email'
 import LockIcon from '@mui/icons-material/Lock'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
@@ -81,6 +82,21 @@ export default function CreateUserPage() {
                   )
                 }}
               />
+              <TextField
+                fullWidth
+                label='Phone No.'
+                name='phone'
+                required
+                variant='outlined'
+                placeholder='+91 98765 43210'
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <PhoneIcon color='action' />
+                    </InputAdornment>
+                  )
+                }}
+              />
 
               <TextField
                 fullWidth
@@ -129,8 +145,8 @@ export default function CreateUserPage() {
                   )
                 }}
               >
-                <MenuItem value='2'>Manager</MenuItem>
                 <MenuItem value='1'>Admin</MenuItem>
+                <MenuItem value='2'>Manager</MenuItem>
               </TextField>
 
               <Button

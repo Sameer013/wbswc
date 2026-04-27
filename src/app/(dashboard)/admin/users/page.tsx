@@ -2,20 +2,30 @@
 
 import { useMemo, useState, useEffect } from 'react'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
+
 import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
-import IconButton from '@mui/material/IconButton'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogActions from '@mui/material/DialogActions'
+import Typography from '@mui/material/Typography'
+
+// import Dialog from '@mui/material/Dialog'
+// import DialogContent from '@mui/material/DialogContent'
+// import DialogTitle from '@mui/material/DialogTitle'
+// import IconButton from '@mui/material/IconButton'
+// import CircularProgress from '@mui/material/CircularProgress'
+
+// import Chip from '@mui/material/Chip'
+
+// Icons
+// import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+// import VisibilityIcon from '@mui/icons-material/Visibility'
+
+// import CloseIcon from '@mui/icons-material/Close'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -31,20 +41,22 @@ import {
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 
-// Component & Style Imports
+// Custom Components & Utils
 import CustomTextField from '@core/components/mui/TextField'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import tableStyles from '@core/styles/table.module.css'
-import { formatDate } from '@/utils/functions'
+import { formatTimestamp } from '@/utils/functions'
+import { getUsers } from '@/app/server/action' // Assuming this is where you exported it
 
-// --- Types ---
-export type UserType = {
+// Define the type based on your SQL schema
+export type Users = {
   id: number
   email: string
-  phone: string | null
+  phone: string
   name: string
-  created_at: string | Date
-  role_id: number // 1: Admin, 2: Manager
+  role_id: number
+  created_at: Date | null
+  password: string
 }
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -55,89 +67,87 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   return itemRank.passed
 }
 
-const columnHelper = createColumnHelper<UserType>()
+const columnHelper = createColumnHelper<Users>()
 
-const UsersListTable = ({ tableData = [] }: { tableData?: UserType[] }) => {
-  // --- States ---
-  const [data, setData] = useState<UserType[]>(tableData)
+// const defaultData: AnprEventRecord[] = await getAnprData()
+
+const UsersTable = () => {
+  // States
+  const [data, setData] = useState<Users[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
-
   const router = useRouter()
 
-  // --- Auth Mock ---
-  // Replace this with your actual auth state (e.g., from useSession or Redux)
-  const currentUser = { role_id: 1 }
-  const isAdmin = currentUser.role_id === 1
+  // const [imgUrl, setImgUrl] = useState<string>('')
+  // const [isModalOpen, setIsModalOpen] = useState(false)
+  // const [loadingImg, setLoadingImg] = useState(false)
 
-  // --- Handlers ---
-  const handleDeleteClick = (id: number) => {
-    setSelectedUserId(id)
-    setDeleteDialogOpen(true)
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getUsers()
+
+      setData(data)
+
+      return data
+    }
+
+    fetchData()
+  }, [])
+
+  // Handle Image View
+  const handleButton = () => {
+    router.push('/admin/users/add')
   }
 
-  const handleConfirmDelete = async () => {
-    // Call your server action here: await deleteUser(selectedUserId)
-    setData(prev => prev.filter(user => user.id !== selectedUserId))
-    setDeleteDialogOpen(false)
-  }
+  const lastRunTime = '2026-04-14 11:12:34'
 
-  // --- Columns Definition ---
-  const columns = useMemo<ColumnDef<UserType, any>[]>(
+  const columns = useMemo<ColumnDef<Users, any>[]>(
     () => [
-      columnHelper.accessor('name', {
-        header: 'User',
-        cell: ({ row }) => (
-          <div className='flex flex-col'>
-            <Typography variant='h6' className='text-sm font-medium'>
-              {row.original.name}
-            </Typography>
-            <Typography variant='caption'>{row.original.email}</Typography>
-          </div>
-        )
+      columnHelper.accessor('id', {
+        header: 'ID',
+        cell: ({ row }) => <Typography color='primary'>#{row.original.id}</Typography>
       }),
-      columnHelper.accessor('role_id', {
-        header: 'Role',
-        cell: ({ row }) => (
-          <Typography color={row.original.role_id === 1 ? 'primary' : 'secondary'}>
-            {row.original.role_id === 1 ? 'Admin' : 'Manager'}
-          </Typography>
-        )
+      columnHelper.accessor('email', {
+        header: 'Email',
+        cell: ({ row }) => <Typography fontWeight={600}>{row.original.email}</Typography>
+      }),
+      columnHelper.accessor('name', {
+        header: 'Name',
+        cell: ({ row }) => <Typography fontWeight={600}>{row.original.name}</Typography>
       }),
       columnHelper.accessor('phone', {
         header: 'Phone',
         cell: ({ row }) => <Typography>{row.original.phone || 'N/A'}</Typography>
       }),
       columnHelper.accessor('created_at', {
-        header: 'Joined Date',
-        cell: ({ row }) => <Typography>{formatDate(new Date(row.original.created_at))}</Typography>
-      }),
-      {
-        id: 'actions',
-        header: 'Actions',
-        enableSorting: false,
+        header: 'Timestamp',
         cell: ({ row }) => (
-          <div className='flex items-center gap-2'>
-            {/* View/Edit Action: Navigates to a shared page */}
-            <IconButton
-              onClick={() => router.push(`/users/manage/${row.original.id}`)}
-              title={isAdmin ? 'Edit User' : 'View Details'}
-            >
-              <i className={isAdmin ? 'tabler-edit' : 'tabler-eye'} />
-            </IconButton>
-
-            {/* DELETE: Only allow admins to see/interact with delete */}
-            {isAdmin && (
-              <IconButton color='error' onClick={() => handleDeleteClick(row.original.id)}>
-                <i className='tabler-trash' />
-              </IconButton>
-            )}
-          </div>
+          <Typography>
+            {row.original.created_at ? formatTimestamp(new Date(row.original.created_at)) : 'N/A'}
+          </Typography>
         )
-      }
+      })
+
+      // {
+      //   id: 'actions',
+      //   header: 'Actions',
+      //   enableSorting: false,
+      //   cell: ({ row }) => (
+      //     <div className='flex items-center gap-2'>
+      //       {row.original.imageId && (
+      //         <Button
+      //           variant='tonal'
+      //           size='small'
+      //           startIcon={<VisibilityIcon />}
+      //           onClick={() => handleViewImage(row.original.imageId!)}
+      //         >
+      //           View Image
+      //         </Button>
+      //       )}
+      //     </div>
+      //   )
+      // }
     ],
-    [isAdmin, router]
+    []
   )
 
   const table = useReactTable({
@@ -145,6 +155,10 @@ const UsersListTable = ({ tableData = [] }: { tableData?: UserType[] }) => {
     columns,
     filterFns: { fuzzy: fuzzyFilter },
     state: { globalFilter },
+    initialState: {
+      pagination: { pageSize: 10 },
+      sorting: [{ id: 'id', desc: true }] // Default sort desc
+    },
     globalFilterFn: fuzzyFilter,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
@@ -155,37 +169,55 @@ const UsersListTable = ({ tableData = [] }: { tableData?: UserType[] }) => {
 
   return (
     <Card>
+      {/* <CardHeader title='Anpr Events Log' /> */}
       <CardHeader
         title='User Management'
         action={
-          /* Only Admins can create new users */
-          isAdmin && (
-            <Button
-              variant='contained'
-              startIcon={<i className='tabler-plus' />}
-              onClick={() => router.push('/users/manage')}
+          lastRunTime && (
+            <Typography
+              variant='caption'
+              color='textSecondary'
+              sx={{
+                fontStyle: 'italic',
+                display: 'block',
+                mt: 2, // Fine-tune vertical alignment with the title
+                mr: 2 // Spacing from the right edge
+              }}
             >
-              Add New User
-            </Button>
+              {/* Last run of Correction Algorithm: <strong>{lastRunTime}</strong> */}
+            </Typography>
           )
         }
       />
 
-      <div className='flex justify-between p-4 gap-4'>
+      <div className='flex flex-wrap justify-between gap-4 p-4'>
         <CustomTextField
           value={globalFilter ?? ''}
           onChange={e => setGlobalFilter(e.target.value)}
-          placeholder='Search Users...'
-          className='max-sm:is-full'
+          placeholder='Search'
+          size='small'
+          sx={{ width: { xs: '100%', sm: 250 } }}
         />
-        <CustomTextField
-          select
-          value={table.getState().pagination.pageSize}
-          onChange={e => table.setPageSize(Number(e.target.value))}
-        >
-          <MenuItem value='10'>10</MenuItem>
-          <MenuItem value='25'>25</MenuItem>
-        </CustomTextField>
+        <div className='flex items-center gap-4'>
+          <CustomTextField
+            select
+            value={table.getState().pagination.pageSize}
+            onChange={e => table.setPageSize(Number(e.target.value))}
+            className='is-[70px]'
+          >
+            <MenuItem value='10'>10</MenuItem>
+            <MenuItem value='25'>25</MenuItem>
+            <MenuItem value='50'>50</MenuItem>
+          </CustomTextField>
+          <Button
+            color='primary'
+            variant='contained'
+            startIcon={<i className='tabler-user-plus' />}
+            onClick={handleButton}
+          >
+            Add User
+          </Button>
+        </div>
       </div>
 
       <div className='overflow-x-auto'>
@@ -194,21 +226,41 @@ const UsersListTable = ({ tableData = [] }: { tableData?: UserType[] }) => {
             {table.getHeaderGroups().map(headerGroup => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <th key={header.id} onClick={header.column.getToggleSortingHandler()}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  <th key={header.id}>
+                    <div
+                      className={classnames({
+                        'flex items-center': header.column.getIsSorted(),
+                        'cursor-pointer select-none': header.column.getCanSort()
+                      })}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: <i className='tabler-chevron-up text-xl' />,
+                        desc: <i className='tabler-chevron-down text-xl' />
+                      }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                    </div>
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                ))}
+            {table.getRowModel().rows.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className='text-center p-10'>
+                  <Typography color='textSecondary'>No vehicle events recorded</Typography>
+                </td>
               </tr>
-            ))}
+            ) : (
+              table.getRowModel().rows.map(row => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -221,18 +273,26 @@ const UsersListTable = ({ tableData = [] }: { tableData?: UserType[] }) => {
         onPageChange={(_, page) => table.setPageIndex(page)}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Are you sure you want to delete this user?</DialogTitle>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button color='error' variant='contained' onClick={handleConfirmDelete}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Image Viewer Modal */}
+      {/* <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth='md' fullWidth>
+        <DialogTitle className='flex justify-between items-center'>
+          Captured Vehicle Image
+          <IconButton onClick={() => setIsModalOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent className='flex justify-center items-center min-h-[300px]'>
+          {loadingImg ? (
+            <CircularProgress />
+          ) : imgUrl ? (
+            <img src={imgUrl} alt='Vehicle Capture' style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} />
+          ) : (
+            <Typography>No image found for this record.</Typography>
+          )}
+        </DialogContent>
+      </Dialog> */}
     </Card>
   )
 }
 
-export default UsersListTable
+export default UsersTable
