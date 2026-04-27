@@ -45,8 +45,6 @@ import { getBagsCnt } from '@/app/server/action'
 
 export type BagVehicleType = BagSummaryRecord & { actions?: string }
 
-// ✅ Props no longer include `tableData` — use `initialData` to clarify
-// this data comes from the server, not from a parent page component.
 interface BagsEventProps {
   initialData?: BagVehicleType[]
 }
@@ -97,7 +95,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
         cell: ({ row }) => <Typography>#{row.original.id}</Typography>
       }),
       columnHelper.accessor('cycle_date', {
-        header: 'Cycle Date',
+        header: 'Date',
         cell: ({ row }) => (
           <Typography>{row.original.cycle_date ? formatDate(new Date(row.original.cycle_date)) : '-'}</Typography>
         )
@@ -106,16 +104,9 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
         header: 'Vehicle No',
         cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo ?? '-'}</Typography>
       }),
-      columnHelper.accessor('type_of_event', {
-        header: 'Event Type',
-        cell: ({ row }) => <Typography>{row.original.type_of_event ?? '-'}</Typography>
-      }),
-      columnHelper.accessor('cnt', {
-        header: 'Bag Count',
-        cell: ({ row }) => <Typography>{row.original.cnt ?? 0}</Typography>
-      }),
+
       columnHelper.accessor('start_time', {
-        header: 'Start Time',
+        header: 'Time (In)',
         cell: ({ row }) => (
           <Typography>
             {row.original.start_time
@@ -128,7 +119,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
         )
       }),
       columnHelper.accessor('end_time', {
-        header: 'End Time',
+        header: 'Time (Out)',
         cell: ({ row }) => (
           <Typography>
             {row.original.end_time
@@ -139,6 +130,14 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
               : '-'}
           </Typography>
         )
+      }),
+      columnHelper.accessor('type_of_event', {
+        header: 'Event (Load/Unload)',
+        cell: ({ row }) => <Typography>{row.original.type_of_event ?? '-'}</Typography>
+      }),
+      columnHelper.accessor('cnt', {
+        header: 'Bag Count',
+        cell: ({ row }) => <Typography>{row.original.cnt ?? 0}</Typography>
       })
     ],
     []
@@ -258,7 +257,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center p-4'>
-                  No bag records found for the selected criteria.
+                  No data available for today, Please select a different date or check back later.
                 </td>
               </tr>
             ) : (
@@ -274,7 +273,6 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
         </table>
       </div>
 
-      {/* Pagination */}
       <TablePagination
         component={() => <TablePaginationComponent table={table as Table<unknown>} />}
         count={table.getFilteredRowModel().rows.length}

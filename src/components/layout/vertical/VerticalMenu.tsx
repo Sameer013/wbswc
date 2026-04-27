@@ -5,6 +5,8 @@ import { useTheme } from '@mui/material/styles'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
+import { useSession } from 'next-auth/react'
+
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
 
 // Component Imports
@@ -44,6 +46,8 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
 
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
+  const { data: session } = useSession()
+  const role_id = session?.user?.role_id
 
   return (
     // eslint-disable-next-line lines-around-comment
@@ -74,20 +78,31 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         {/* <MenuItem href='/vehicles' icon={<i className='tabler-car' />}>
           Vehicles
         </MenuItem> */}
-        <SubMenu label={'Vehicles'} icon={<i className='tabler-car' />}>
-          <MenuItem href='/vehicles' icon={<i className='tabler-layout-dashboard' />}>
-            Vehicle Trips
-          </MenuItem>
-          <MenuItem href='/vehicles/bags' icon={<i className='tabler-package' />}>
-            Bags Event
-          </MenuItem>
-          <MenuItem href='/vehicles/anpr' icon={<i className='tabler-camera' />}>
-            Anpr Event
-          </MenuItem>
-          <MenuItem href='/vehicles/entryexit' icon={<i className='tabler-barrier-block' />}>
-            Entry Exit
-          </MenuItem>
-        </SubMenu>
+        {role_id === 1 ? (
+          <SubMenu label='Vehicles' icon={<i className='tabler-car' />}>
+            <MenuItem href='/vehicles' icon={<i className='tabler-layout-dashboard' />}>
+              Vehicle Trips
+            </MenuItem>
+            <MenuItem href='/vehicles/bags' icon={<i className='tabler-package' />}>
+              Bags Event
+            </MenuItem>
+            <MenuItem href='/vehicles/anpr' icon={<i className='tabler-camera' />}>
+              Anpr Event
+            </MenuItem>
+            <MenuItem href='/vehicles/entryexit' icon={<i className='tabler-barrier-block' />}>
+              Entry Exit
+            </MenuItem>
+          </SubMenu>
+        ) : (
+          <SubMenu label='Vehicles' icon={<i className='tabler-car' />}>
+            <MenuItem href='/vehicles' icon={<i className='tabler-layout-dashboard' />}>
+              Vehicle Trips
+            </MenuItem>
+            <MenuItem href='/vehicles/bags' icon={<i className='tabler-package' />}>
+              Bags Event
+            </MenuItem>
+          </SubMenu>
+        )}
 
         {/* <MenuItem href='/report' icon={<i className='tabler-report' />}>
           Reports
@@ -100,13 +115,17 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             Bags Report
           </MenuItem>
         </SubMenu>
+        {role_id === 1 && (
+          <MenuItem href='/status' icon={<i className='tabler-heart-rate-monitor' />}>
+            Device Status
+          </MenuItem>
+        )}
 
-        <MenuItem href='/status' icon={<i className='tabler-heart-rate-monitor' />}>
-          Device Status
-        </MenuItem>
-        <MenuItem href='/admin/users' icon={<i className='tabler-users' />}>
-          Users
-        </MenuItem>
+        {role_id === 1 && (
+          <MenuItem href='/admin/users' icon={<i className='tabler-users' />}>
+            Users
+          </MenuItem>
+        )}
         {/*
         <MenuItem href='/ai-camera-feed' icon={<i className='tabler-camera' />}>
           AI Camera Feed
