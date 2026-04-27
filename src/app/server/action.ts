@@ -579,7 +579,7 @@ export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord
 
     // console.log('Bag cycle data', data)
 
-    return data.map((record, index) => ({
+    const final_data = data.map((record, index) => ({
       id: record.id ?? index + 1, // fallback if id?
       cycle_date: record.cycle_date,
       vehicleNo: record.vehicleNo,
@@ -590,6 +590,10 @@ export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord
       end_time: convertUTCtoLocalTime(record.end_time),
       imageId: record.imageId
     }))
+
+    // console.log('Bag summary data', final_data)
+
+    return final_data
   } catch (error) {
     console.error('Fetch failed:', error)
 

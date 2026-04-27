@@ -11,11 +11,11 @@ datasource db {
 model users {
   id         Int      @id @default(autoincrement())
   email      String   @unique(map: "Users_email_key")
-  phone      String?  @db.VarChar(255)
-  name       String?
+  phone      String   @db.VarChar(255)
+  name       String
   created_at DateTime @default(now())
-  password   String?
-  role_id    Int?
+  password   String
+  role_id    Int
 }
 
 model event_type {
@@ -307,7 +307,15 @@ view v_report {
   gross_wt_time DateTime? @db.DateTime(0)
 }
 
-view v_bagsCnt {
+view vw_bags {
+  session       Decimal?  @db.Decimal(32, 0)
+  type_of_event String?   @db.VarChar(9)
+  start_time    DateTime?
+  end_time      DateTime?
+  cnt           BigInt    @default(0)
+}
+
+view v_bagscnt {
   dt        DateTime? @db.Date
   entryCnt  BigInt    @default(0)
   exitCnt   BigInt    @default(0)
@@ -315,7 +323,7 @@ view v_bagsCnt {
   unloadCnt BigInt    @default(0)
 }
 
-view vw_loadingCnt {
+view vw_loadingcnt {
   eventId       Int
   session_id    Decimal?  @db.Decimal(32, 0)
   session_start DateTime?
@@ -323,20 +331,12 @@ view vw_loadingCnt {
   total_events  BigInt    @default(0)
 }
 
-view vw_unloadingCnt {
+view vw_unloadingcnt {
   eventId       Int
   session_id    Decimal?  @db.Decimal(32, 0)
   session_start DateTime?
   session_end   DateTime?
   total_events  BigInt    @default(0)
-}
-
-view vw_bags {
-  session       Decimal?  @db.Decimal(32, 0)
-  type_of_event String?   @db.VarChar(9)
-  start_time    DateTime?
-  end_time      DateTime?
-  cnt           BigInt    @default(0)
 }
 
 enum intrusionevent_severity {
