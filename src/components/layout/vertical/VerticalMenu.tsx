@@ -75,11 +75,11 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
           Home
         </MenuItem>
-        {/* <MenuItem href='/vehicles' icon={<i className='tabler-car' />}>
-          Vehicles
-        </MenuItem> */}
+        <MenuItem href='/vehicles' icon={<i className='tabler-car' />}>
+          {`Role Id: ${role_id}`}
+        </MenuItem>
         {role_id === 1 ? (
-          <SubMenu label='Vehicles' icon={<i className='tabler-car' />}>
+          <SubMenu label={`Vehicles`} icon={<i className='tabler-car' />}>
             <MenuItem href='/vehicles' icon={<i className='tabler-layout-dashboard' />}>
               Vehicle Trips
             </MenuItem>
