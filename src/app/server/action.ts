@@ -574,7 +574,7 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
 export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord[]> {
   try {
     const data = await prisma.bag_cycle.findMany({
-      where: { cycle_date: { gte: from, lt: to } }
+      where: { cycle_date: { gte: from, lte: to } }
     })
 
     // console.log('Bag cycle data', data)
