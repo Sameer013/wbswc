@@ -40,6 +40,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 
 import TextField from '@mui/material/TextField'
 
+import SOPTooltip from '@/components/SOPTooltip'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // import OptionMenu from '@core/components/option-menu'
@@ -142,17 +144,17 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
       columnHelper.accessor('entry_time', {
         header: 'Entry Time',
-        cell: ({ row }) => <Typography>{row.original.entry_time?.toString().slice(0, 5) ?? '-'}</Typography>
+        cell: ({ row }) => <Typography>{row.original.entry_time?.toString().slice(0, 5) ?? <SOPTooltip />}</Typography>
       }),
       columnHelper.accessor('exit_time', {
         header: 'Exit Time',
-        cell: ({ row }) => <Typography>{row.original.exit_time?.toString().slice(0, 5) ?? '-'}</Typography>
+        cell: ({ row }) => <Typography>{row.original.exit_time?.toString().slice(0, 5) ?? <SOPTooltip />}</Typography>
       }),
       columnHelper.accessor('tare_wt', {
         header: 'Tare Weight (KG)',
         cell: ({ row }) => (
           <Typography color={row.original.tare_wt ? 'inherit' : 'text.secondary'}>
-            {row.original.tare_wt ?? 'Not recorded'}
+            {row.original.tare_wt ?? <SOPTooltip />}
           </Typography>
         )
       }),
@@ -170,7 +172,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         header: 'Gross Weight (KG)',
         cell: ({ row }) => (
           <Typography sx={{ color: row.original.gross_wt ? 'inherit' : 'text.secondary' }}>
-            {row.original.gross_wt ?? 'Not recorded'}
+            {row.original.gross_wt ?? <SOPTooltip />}
           </Typography>
         )
       }),
