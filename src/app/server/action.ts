@@ -410,8 +410,8 @@ export async function getReportData(
             id: globalId++,
             vehicleNo: record.vehicleNo ?? null,
             event_date: record.cycle_date,
-            entry_time: cycle.entry_time?.slice(11, 16) ?? '-',
-            exit_time: cycle.exit_time?.slice(11, 16) ?? '-',
+            entry_time: cycle.entry_time?.slice(11, 16) ?? null,
+            exit_time: cycle.exit_time?.slice(11, 16) ?? null,
             entry_imageId: cycle.entry_imageId ?? null,
             exit_imageId: cycle.exit_imageId ?? null,
             tare_wt: null,
@@ -430,18 +430,18 @@ export async function getReportData(
             const { tare_wt, tare_wt_time, gross_wt, gross_wt_time, net_wt } = deriveWeights(group)
 
             // Entry time:
-            const entry_time: string = weightsOutsideWindow
-              ? '-'
+            const entry_time: string | null = weightsOutsideWindow
+              ? null
               : isFirstGroup
-                ? (cycle.entry_time?.slice(11, 16) ?? '-')
-                : '-'
+                ? (cycle.entry_time?.slice(11, 16) ?? null)
+                : null
 
             // Exit time:
-            const exit_time: string = weightsOutsideWindow
-              ? '-'
+            const exit_time: string | null = weightsOutsideWindow
+              ? null
               : isLastGroup
-                ? (cycle.exit_time?.slice(11, 16) ?? '-')
-                : '-'
+                ? (cycle.exit_time?.slice(11, 16) ?? null)
+                : null
 
             const entry_imageId = !weightsOutsideWindow && isFirstGroup ? (cycle.entry_imageId ?? null) : null
 
@@ -477,8 +477,8 @@ export async function getReportData(
         return dateB.getTime() - dateA.getTime()
       }
 
-      const timeA = a.entry_time !== '-' ? (a.entry_time as string) : '00:00'
-      const timeB = b.entry_time !== '-' ? (b.entry_time as string) : '00:00'
+      const timeA = a.entry_time !== null ? (a.entry_time as string) : '00:00'
+      const timeB = b.entry_time !== null ? (b.entry_time as string) : '00:00'
 
       return timeB.localeCompare(timeA)
     })

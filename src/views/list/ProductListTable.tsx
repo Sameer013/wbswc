@@ -144,7 +144,12 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
       columnHelper.accessor('entry_time', {
         header: 'Entry Time',
-        cell: ({ row }) => <Typography>{row.original.entry_time?.toString().slice(0, 5) ?? <SOPTooltip />}</Typography>
+        cell: ({ row }) => (
+          <div className='flex items-center'>
+            <Typography>{row.original.entry_time?.toString().slice(0, 5) ?? '-'}</Typography>
+            {!row.original.entry_time && <SOPTooltip />}
+          </div>
+        )
       }),
       columnHelper.accessor('exit_time', {
         header: 'Exit Time',
@@ -163,7 +168,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
 
         cell: ({ row }) => (
           <Typography>
-            {row.original.tare_wt_time ? row.original.tare_wt_time.toString().slice(11, 16) : '-'}
+            {row.original.tare_wt_time ? row.original.tare_wt_time.toString().slice(11, 16) : <SOPTooltip />}
           </Typography>
         ) //TODO add weight timestamp
         // cell: ({ row }) => <Typography>NULL</Typography>
@@ -182,7 +187,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
 
         cell: ({ row }) => (
           <Typography>
-            {row.original.gross_wt_time ? row.original.gross_wt_time.toString().slice(11, 16) : '-'}
+            {row.original.gross_wt_time ? row.original.gross_wt_time.toString().slice(11, 16) : <SOPTooltip />}
           </Typography>
         )
       }),
@@ -317,7 +322,13 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
           </Button>
         </div>
       </div>
-
+      <div className='px-4 py-3 border-bs'>
+        <Typography variant='caption' color='text.secondary' className='flex items-center gap-1'>
+          <span style={{ color: 'var(--mui-palette-error-main)', fontWeight: 'bold' }}>*</span>
+          <strong>Note:</strong> Data marked with an asterisk is either not yet recorded or, if the day has ended, was
+          excluded due to an SOP Mismatch during automated curation.
+        </Typography>
+      </div>
       <div className='overflow-x-auto'>
         <table className={tableStyles.table}>
           <thead>

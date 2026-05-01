@@ -105,9 +105,15 @@ const VehicleEventTable = () => {
         cell: ({ row }) => <Typography color='primary'>#{row.original.id}</Typography>
       }),
       columnHelper.accessor('vehicleNo', {
-        header: 'Vehicle No',
+        header: 'Raw Vehicle No',
         cell: ({ row }) => (
-          <Typography fontWeight={600}>{row.original.updated_vehicleNo || row.original.vehicleNo || 'N/A'}</Typography>
+          <Typography fontWeight={600}>{row.original.vehicleNo || 'N/A'}</Typography>
+        )
+      }),
+      columnHelper.accessor('updated_vehicleNo', {
+        header: 'Corrected Vehicle No',
+        cell: ({ row }) => (
+          <Typography fontWeight={600}>{row.original.updated_vehicleNo || 'N/A'}</Typography>
         )
       }),
       columnHelper.accessor('movement', {
