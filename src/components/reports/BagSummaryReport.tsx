@@ -42,11 +42,11 @@ const BagsSummaryReport = ({
 
   // Derive totals from type_of_event + cnt
   const totalLoads = records
-    .filter(r => r.type_of_event?.toLowerCase() === 'load')
+    .filter(r => r.type_of_event?.toLowerCase() === 'loading')
     .reduce((sum, r) => sum + (r.cnt ?? 0), 0)
 
   const totalUnloads = records
-    .filter(r => r.type_of_event?.toLowerCase() === 'unload')
+    .filter(r => r.type_of_event?.toLowerCase() === 'unloading')
     .reduce((sum, r) => sum + (r.cnt ?? 0), 0)
 
   return (
