@@ -1,7 +1,7 @@
 'use client'
 
 // app/(dashboard)/vehicles/bags/BagsEvent.tsx (or components/BagsEvent.tsx)
-// ─── Client Component ─────────────────────────────────────────────────────────
+// Client Component
 
 import { useMemo, useState, useTransition, useCallback } from 'react'
 
@@ -41,7 +41,7 @@ import type { BagSummaryRecord } from '@/components/reports/BagSummaryReport'
 import { exportToCSV, formatDate } from '@/utils/functions'
 import { getBagsCnt } from '@/app/server/action'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 export type BagVehicleType = BagSummaryRecord & { actions?: string }
 
@@ -49,7 +49,7 @@ interface BagsEventProps {
   initialData?: BagVehicleType[]
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 const fuzzyFilter: FilterFn<BagVehicleType> = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
@@ -61,8 +61,6 @@ const fuzzyFilter: FilterFn<BagVehicleType> = (row, columnId, value, addMeta) =>
 
 const columnHelper = createColumnHelper<BagVehicleType>()
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
   // Seed state from server-fetched data — no useEffect for initial load needed
   const [data, setData] = useState<BagVehicleType[]>(initialData)
@@ -72,7 +70,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
   const [toDate, setToDate] = useState<string>('')
   const [isPending, startTransition] = useTransition()
 
-  // ── Date-filter handler ─────────────────────────────────────────────────────
+  // Date-filter handler
   const handleDateFilter = useCallback(() => {
     if (!fromDate || !toDate) {
       alert('Please select both dates')
@@ -87,7 +85,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
     })
   }, [fromDate, toDate])
 
-  // ── Columns ─────────────────────────────────────────────────────────────────
+  // Columns
   const columns = useMemo<ColumnDef<BagVehicleType, any>[]>(
     () => [
       columnHelper.accessor('id', {
@@ -97,54 +95,54 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
       columnHelper.accessor('cycle_date', {
         header: 'Date',
         cell: ({ row }) => (
-          <Typography>{row.original.cycle_date ? formatDate(new Date(row.original.cycle_date)) : '-'}</Typography>
+          <Typography>{row.original.cycle_date ? formatDate(new Date(row.original.cycle_date)) : '*'}</Typography>
         )
       }),
 
-      // columnHelper.accessor('vehicleNo', {
-      //   header: 'Vehicle No',
-      //   cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo ?? '-'}</Typography>
-      // }),
+      columnHelper.accessor('vehicleNo', {
+        header: 'Vehicle No',
+        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo ?? '*'}</Typography>
+      }),
 
-      // columnHelper.accessor('start_time', {
-      //   header: 'Time (In)',
-      //   cell: ({ row }) => (
-      //     <Typography>
-      //       {row.original.start_time
-      //         ? new Date(row.original.start_time).toLocaleTimeString([], {
-      //             hour: '2-digit',
-      //             minute: '2-digit'
-      //           })
-      //         : '-'}
-      //     </Typography>
-      //   )
-      // }),
-      // columnHelper.accessor('end_time', {
-      //   header: 'Time (Out)',
-      //   cell: ({ row }) => (
-      //     <Typography>
-      //       {row.original.end_time
-      //         ? new Date(row.original.end_time).toLocaleTimeString([], {
-      //             hour: '2-digit',
-      //             minute: '2-digit'
-      //           })
-      //         : '-'}
-      //     </Typography>
-      //   )
-      // }),
+      columnHelper.accessor('start_time', {
+        header: 'Time (In)',
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.start_time
+              ? new Date(row.original.start_time).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '*'}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('end_time', {
+        header: 'Time (Out)',
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.end_time
+              ? new Date(row.original.end_time).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '*'}
+          </Typography>
+        )
+      }),
       columnHelper.accessor('type_of_event', {
         header: 'Event (Load/Unload)',
-        cell: ({ row }) => <Typography>{row.original.type_of_event ?? '-'}</Typography>
+        cell: ({ row }) => <Typography>{row.original.type_of_event ?? '*'}</Typography>
       }),
       columnHelper.accessor('cnt', {
         header: 'Bag Count',
-        cell: ({ row }) => <Typography>{row.original.cnt ?? 0}</Typography>
+        cell: ({ row }) => <Typography>{row.original.cnt ?? '0'}</Typography>
       })
     ],
     []
   )
 
-  // ── Table instance ──────────────────────────────────────────────────────────
+  // Table instance
   const table = useReactTable({
     data,
     columns,
@@ -163,7 +161,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
 
   const handleExport = () => exportToCSV(table)
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // Render
   return (
     <Card>
       <CardHeader title='Bags Summary Report' />
