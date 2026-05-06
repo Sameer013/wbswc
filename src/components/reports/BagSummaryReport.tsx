@@ -98,7 +98,7 @@ const BagsSummaryReport = ({
             <View style={{ ...styles.tableCell, flex: 0.8 }}>
               <Text style={styles.tableCellValue}>Date</Text>
             </View>
-            <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+            {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Vehicle No</Text>
             </View>
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
@@ -106,7 +106,7 @@ const BagsSummaryReport = ({
             </View>
             <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Time (Out)</Text>
-            </View>
+            </View> */}
             <View style={{ ...styles.tableCell, flex: 2, textAlign: 'center' }}>
               <Text style={styles.tableCellValue}>Event Activity (Load / Unload)</Text>
             </View>
@@ -125,7 +125,7 @@ const BagsSummaryReport = ({
                 <View style={{ ...styles.tableCell, flex: 0.8 }}>
                   <Text style={styles.tableCellLabel}>{record.cycle_date ? formatDate(record.cycle_date) : '--'}</Text>
                 </View>
-                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.vehicleNo ?? '--'}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
@@ -133,7 +133,7 @@ const BagsSummaryReport = ({
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.end_time ? formatTime(record.end_time) : '--'}</Text>
-                </View>
+                </View> */}
                 <View style={{ ...styles.tableCell, flex: 2, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.type_of_event ?? '--'}</Text>
                 </View>

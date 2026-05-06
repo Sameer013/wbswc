@@ -100,37 +100,38 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
           <Typography>{row.original.cycle_date ? formatDate(new Date(row.original.cycle_date)) : '-'}</Typography>
         )
       }),
-      columnHelper.accessor('vehicleNo', {
-        header: 'Vehicle No',
-        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo ?? '-'}</Typography>
-      }),
 
-      columnHelper.accessor('start_time', {
-        header: 'Time (In)',
-        cell: ({ row }) => (
-          <Typography>
-            {row.original.start_time
-              ? new Date(row.original.start_time).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
-              : '-'}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('end_time', {
-        header: 'Time (Out)',
-        cell: ({ row }) => (
-          <Typography>
-            {row.original.end_time
-              ? new Date(row.original.end_time).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
-              : '-'}
-          </Typography>
-        )
-      }),
+      // columnHelper.accessor('vehicleNo', {
+      //   header: 'Vehicle No',
+      //   cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicleNo ?? '-'}</Typography>
+      // }),
+
+      // columnHelper.accessor('start_time', {
+      //   header: 'Time (In)',
+      //   cell: ({ row }) => (
+      //     <Typography>
+      //       {row.original.start_time
+      //         ? new Date(row.original.start_time).toLocaleTimeString([], {
+      //             hour: '2-digit',
+      //             minute: '2-digit'
+      //           })
+      //         : '-'}
+      //     </Typography>
+      //   )
+      // }),
+      // columnHelper.accessor('end_time', {
+      //   header: 'Time (Out)',
+      //   cell: ({ row }) => (
+      //     <Typography>
+      //       {row.original.end_time
+      //         ? new Date(row.original.end_time).toLocaleTimeString([], {
+      //             hour: '2-digit',
+      //             minute: '2-digit'
+      //           })
+      //         : '-'}
+      //     </Typography>
+      //   )
+      // }),
       columnHelper.accessor('type_of_event', {
         header: 'Event (Load/Unload)',
         cell: ({ row }) => <Typography>{row.original.type_of_event ?? '-'}</Typography>
