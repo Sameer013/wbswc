@@ -323,10 +323,10 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         </div>
       </div>
       <div className='px-4 py-3 border-bs'>
-        <Typography variant='caption' color='text.secondary' className='flex items-center gap-1'>
+        <Typography variant='caption' color='var(--mui-palette-error-main)' className='flex items-center gap-1'>
           <span style={{ color: 'var(--mui-palette-error-main)', fontWeight: 'bold' }}>*</span>
-          <strong>Note:</strong> Data marked with an asterisk is either not yet recorded or, if the day has ended, was
-          excluded due to an SOP Mismatch during automated curation.
+          <strong>Note:</strong>
+          Data marked with an asterisk was excluded due to an SOP Mismatch during automated curation.
         </Typography>
       </div>
       <div className='overflow-x-auto'>

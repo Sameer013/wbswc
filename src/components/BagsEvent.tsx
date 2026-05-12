@@ -222,6 +222,13 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
             Export CSV
           </Button>
         </div>
+        <div className='px-4 py-3 border-bs'>
+          <Typography variant='caption' color='var(--mui-palette-error-main)' className='flex items-center gap-1'>
+            <span style={{ color: 'var(--mui-palette-error-main)', fontWeight: 'bold' }}>*</span>
+            <strong>Note:</strong>Data marked with an asterisk was excluded due to an SOP Mismatch during automated
+            curation.
+          </Typography>
+        </div>
       </div>
 
       {/* Table */}

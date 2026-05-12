@@ -523,6 +523,22 @@ export async function getAnprImage(id: string): Promise<string> {
   }
 }
 
+export async function getIntrusionImage(id: number): Promise<string> {
+  try {
+    const image = await prisma.intrusion_event.findUnique({
+      where: { id: Number(id) }
+    })
+
+    if (!image || !image.image) return ''
+
+    return `data:image/jpg;base64,${Buffer.from(image.image).toString('base64')}`
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return ''
+  }
+}
+
 export async function getAnprData(): Promise<[] | AnprEventRecord[]> {
   try {
     const data = await prisma.anprevent.findMany({
@@ -568,6 +584,41 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
     console.error('Fetch failed:', error)
 
     return [] as AnprEventRecord[]
+  }
+}
+
+import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/page'
+
+export async function getIntrusionData(from: Date, to: Date): Promise<[] | IntrusionEventRecord[]> {
+  let data = [] as IntrusionEventRecord[]
+
+  try {
+    if (!from || !to) {
+      data = await prisma.intrusion_event.findMany({
+        orderBy: { created_at: 'desc' },
+        take: 100
+      })
+    } else {
+      data = await prisma.intrusion_event.findMany({
+        where: { created_at: { gte: from, lte: to } },
+        orderBy: { created_at: 'desc' },
+        take: 100
+      })
+    }
+
+    if (!data || data.length === 0) return []
+
+    // console.log(JSON.stringify(data))
+    const finalData = data.map(item => ({
+      ...item,
+      created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null
+    }))
+
+    return finalData
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return [] as IntrusionEventRecord[]
   }
 }
 

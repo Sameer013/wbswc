@@ -92,6 +92,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             <MenuItem href='/vehicles/entryexit' icon={<i className='tabler-barrier-block' />}>
               Entry Exit
             </MenuItem>
+            <MenuItem href='/vehicles/intrusion' icon={<i className='tabler-barrier-block' />}>
+              Intrusion
+            </MenuItem>
           </SubMenu>
         ) : (
           <SubMenu label='Vehicles' icon={<i className='tabler-car' />}>
@@ -100,6 +103,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             </MenuItem>
             <MenuItem href='/vehicles/bags' icon={<i className='tabler-package' />}>
               Bags Event
+            </MenuItem>
+            <MenuItem href='/vehicles/intrusion' icon={<i className='tabler-barrier-block' />}>
+              Intrusion
             </MenuItem>
           </SubMenu>
         )}
@@ -113,6 +119,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           </MenuItem>
           <MenuItem href='/reports/bag' icon={<i className='tabler-camera' />}>
             Bags Report
+          </MenuItem>
+          <MenuItem href='/reports/intrusion' icon={<i className='tabler-camera' />}>
+            Intrusion Report
           </MenuItem>
         </SubMenu>
         {role_id === 1 && (
