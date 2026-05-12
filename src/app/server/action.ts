@@ -589,7 +589,7 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
 
 import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/page'
 
-export async function getIntrusionData(from: Date, to: Date): Promise<[] | IntrusionEventRecord[]> {
+export async function getIntrusionData(from?: Date, to?: Date): Promise<[] | IntrusionEventRecord[]> {
   let data = [] as IntrusionEventRecord[]
 
   try {
@@ -622,7 +622,7 @@ export async function getIntrusionData(from: Date, to: Date): Promise<[] | Intru
   }
 }
 
-export async function getBagsCnt(from?: Date, to?: Date): Promise<BagSummaryRecord[]> {
+export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord[]> {
   try {
     const data = await prisma.bag_cycle.findMany({
       where: { cycle_date: { gte: from, lte: to } }
