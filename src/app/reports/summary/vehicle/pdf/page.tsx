@@ -1,10 +1,4 @@
-// import { get } from 'node:http'
-
-// import { prisma } from '@/libs/prisma'
-
 import PdfClient from './PdfClient'
-
-// import { convertUTCtoLocalTime } from '@/utils/functions'
 import { getReportData } from '@/app/server/action'
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ from: string; to: string }> }) {
@@ -32,35 +26,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
     )
   }
 
-  // const events2 = await prisma.v_report.findMany({
-  //   where: {
-  //     event_date: {
-  //       gte: fromDate,
-  //       lt: toDate
-  //     }
-  //   },
-  //   orderBy: {
-  //     event_date: 'asc'
-  //   }
-  // })
-  // console.log('Fetching data for PDF report from', fromDate, 'to', toDate)
   const events2 = await getReportData(fromDate, toDate, undefined, 'asc')
 
   // console.log(events2)
 
   const formattedRecords2 = events2.map((event, index) => {
-    // return {
-    //   id: index + 1,
-    //   vehicleNo: event.vehicleNo || 0,
-    //   entry_time: convertUTCtoLocalTime(event.entry_time),
-    //   exit_time: convertUTCtoLocalTime(event.exit_time),
-    //   tare_wt_time: convertUTCtoLocalTime(event.tare_wt_time),
-    //   gross_wt_time: convertUTCtoLocalTime(event.gross_wt_time),
-    //   tare_wt: event.tare_wt || 0,
-    //   gross_wt: event.gross_wt || 0,
-    //   net_wt: event.net_wt || 0,
-    //   event_date: convertUTCtoLocalTime(event.event_date)
-    // }
     return {
       id: index + 1,
       vehicleNo: event.vehicleNo || 0,
