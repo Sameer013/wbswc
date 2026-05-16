@@ -589,26 +589,22 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
 
 import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/page'
 
-export async function getIntrusionData(from?: Date, to?: Date): Promise<[] | IntrusionEventRecord[]> {
-  let data = [] as IntrusionEventRecord[]
-
+export async function getIntrusionData(from?: Date, to?: Date, limit?: number): Promise<[] | IntrusionEventRecord[]> {
   try {
-    if (!from || !to) {
-      data = await prisma.intrusion_event.findMany({
-        orderBy: { created_at: 'desc' },
-        take: 100
-      })
-    } else {
-      data = await prisma.intrusion_event.findMany({
-        where: { created_at: { gte: from, lte: to } },
-        orderBy: { created_at: 'desc' },
-        take: 100
-      })
-    }
+    const toEOD = to ? new Date(to) : undefined
+
+    toEOD?.setHours(23, 59, 59, 999)
+
+    const data = await prisma.intrusion_event.findMany({
+      where: {
+        ...(from && to ? { created_at: { gte: from, lte: toEOD } } : {})
+      },
+      orderBy: { created_at: 'desc' },
+      ...(limit ? { take: limit } : {})
+    })
 
     if (!data || data.length === 0) return []
 
-    // console.log(JSON.stringify(data))
     const finalData = data.map(item => ({
       ...item,
       created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null

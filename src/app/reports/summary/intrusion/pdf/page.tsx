@@ -25,6 +25,7 @@ export default function Page() {
     const downloadPdf = async () => {
       const records: IntrusionEventRecord[] = await getIntrusionData(fromDate, toDate)
 
+      // console.log('Fetched Records:', records)
       const { pdf } = await import('@react-pdf/renderer')
 
       const blob = await pdf(<IntrusionReport records={records} fromDate={from} toDate={to} />).toBlob()
