@@ -49,7 +49,7 @@ export function blobToBase64(buffer: ArrayBuffer): string {
   return `data:image/jpeg;base64,${Buffer.from(buffer).toString('base64')}`
 }
 
-export function exportToCSV(table: any) {
+export function exportToCSV(table: any, filename: string) {
   const rows = table.getFilteredRowModel().rows
 
   if (!rows.length) {
@@ -99,7 +99,7 @@ export function exportToCSV(table: any) {
   const link = document.createElement('a')
 
   link.href = url
-  link.download = `vehicle_report_${Date.now()}.csv`
+  link.download = `${filename}_${Date.now()}.csv`
 
   document.body.appendChild(link)
   link.click()

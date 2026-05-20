@@ -69,6 +69,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
   const [isPending, startTransition] = useTransition()
+  const [eventFilter, setEventFilter] = useState<string>('')
 
   // Date-filter handler
   const handleDateFilter = useCallback(() => {
@@ -84,6 +85,12 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
       setData(filtered)
     })
   }, [fromDate, toDate])
+
+  const filteredData = useMemo(() => {
+    if (!eventFilter) return data
+
+    return data.filter(row => row.type_of_event === eventFilter)
+  }, [data, eventFilter])
 
   // Columns
   const columns = useMemo<ColumnDef<BagVehicleType, any>[]>(
@@ -150,7 +157,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
 
   // Table instance
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     filterFns: { fuzzy: fuzzyFilter },
     state: { rowSelection, globalFilter },
@@ -165,7 +172,7 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
     getPaginationRowModel: getPaginationRowModel()
   })
 
-  const handleExport = () => exportToCSV(table)
+  const handleExport = () => exportToCSV(table, 'bags_report')
 
   // Render
   return (
@@ -183,6 +190,20 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
             size='small'
             sx={{ width: { xs: '100%', sm: 250 } }}
           />
+          <TextField
+            select
+            label='Event Type'
+            value={eventFilter}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEventFilter(e.target.value)}
+            size='small'
+            InputLabelProps={{ shrink: true }}
+            SelectProps={{ displayEmpty: true }}
+            sx={{ width: { xs: '100%', sm: 160 } }}
+          >
+            <MenuItem value=''>All Events</MenuItem>
+            <MenuItem value='Loading'>Loading</MenuItem>
+            <MenuItem value='Unloading'>Unloading</MenuItem>
+          </TextField>
           <TextField
             label='From Date'
             type='date'

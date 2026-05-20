@@ -133,7 +133,12 @@ const DeviceStatusTable = () => {
             <Button variant='outlined' startIcon={<RefreshIcon />} onClick={fetchData} disabled={loading}>
               Refresh
             </Button>
-            <Button variant='contained' startIcon={<DownloadIcon />} onClick={() => exportToCSV(table)} color='primary'>
+            <Button
+              variant='contained'
+              startIcon={<DownloadIcon />}
+              onClick={() => exportToCSV(table, 'status_report')}
+              color='primary'
+            >
               Export CSV
             </Button>
           </Box>

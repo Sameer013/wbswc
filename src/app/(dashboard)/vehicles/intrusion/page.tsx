@@ -16,6 +16,7 @@ import IconButton from '@mui/material/IconButton'
 import CircularProgress from '@mui/material/CircularProgress'
 import Chip from '@mui/material/Chip'
 import Skeleton from '@mui/material/Skeleton'
+import TextField from '@mui/material/TextField'
 
 // Icons
 import VisibilityIcon from '@mui/icons-material/Visibility'
@@ -44,7 +45,6 @@ import { formatTimestamp } from '@/utils/functions'
 // Server Actions
 import { getIntrusionData, getIntrusionImage } from '@/app/server/action'
 
-// Define the type based on intrusion_event schema
 export type IntrusionEventRecord = {
   id: number
   intrusion_type: string
@@ -65,13 +65,14 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 const columnHelper = createColumnHelper<IntrusionEventRecord>()
 
 const IntrusionEventTable = () => {
-  // States
   const [data, setData] = useState<IntrusionEventRecord[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [imgUrl, setImgUrl] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [loading, setLoading] = useState(true) // Table loading state
-  const [loadingImg, setLoadingImg] = useState(false) // Modal image loading state
+  const [loading, setLoading] = useState(true)
+  const [loadingImg, setLoadingImg] = useState(false)
+  const [fromDate, setFromDate] = useState<string>('')
+  const [toDate, setToDate] = useState<string>('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,7 +92,26 @@ const IntrusionEventTable = () => {
     fetchData()
   }, [])
 
-  // Handle Image View
+  const handleDateFilter = async () => {
+    if (!fromDate || !toDate) {
+      alert('Please select both dates')
+
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const result = await getIntrusionData(new Date(fromDate), new Date(toDate))
+
+      setData(result)
+    } catch (error) {
+      console.error('Error fetching filtered intrusion data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleViewImage = async (id: number) => {
     setLoadingImg(true)
     setIsModalOpen(true)
@@ -134,7 +154,6 @@ const IntrusionEventTable = () => {
           </Typography>
         )
       }),
-
       {
         id: 'actions',
         header: 'Actions',
@@ -177,13 +196,36 @@ const IntrusionEventTable = () => {
     <Card>
       <CardHeader title='Intrusion Events Log' />
       <div className='flex flex-wrap justify-between gap-4 p-4'>
-        <CustomTextField
-          value={globalFilter ?? ''}
-          onChange={e => setGlobalFilter(e.target.value)}
-          placeholder='Search Intrusion Type...'
-          size='small'
-          sx={{ width: { xs: '100%', sm: 250 } }}
-        />
+        <div className='flex flex-wrap items-center gap-4'>
+          <CustomTextField
+            value={globalFilter ?? ''}
+            onChange={e => setGlobalFilter(e.target.value)}
+            placeholder='Search Intrusion Type...'
+            size='small'
+            sx={{ width: { xs: '100%', sm: 250 } }}
+          />
+          <TextField
+            label='From Date'
+            type='date'
+            size='small'
+            value={fromDate}
+            onChange={e => setFromDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: { xs: '48%', sm: 180 } }}
+          />
+          <TextField
+            label='To Date'
+            type='date'
+            size='small'
+            value={toDate}
+            onChange={e => setToDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: { xs: '48%', sm: 180 } }}
+          />
+          <Button variant='contained' size='small' onClick={handleDateFilter}>
+            Apply
+          </Button>
+        </div>
         <div className='flex items-center gap-4'>
           <CustomTextField
             select
@@ -261,7 +303,6 @@ const IntrusionEventTable = () => {
         onPageChange={(_, page) => table.setPageIndex(page)}
       />
 
-      {/* Image Viewer Modal */}
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth='md' fullWidth>
         <DialogTitle className='flex justify-between items-center'>
           Intrusion Evidence
