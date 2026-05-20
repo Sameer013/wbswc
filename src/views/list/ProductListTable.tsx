@@ -156,7 +156,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         cell: ({ row }) => <Typography>{row.original.exit_time?.toString().slice(0, 5) ?? <SOPTooltip />}</Typography>
       }),
       columnHelper.accessor('tare_wt', {
-        header: 'Tare/Intial Weight (KG)',
+        header: 'Tare/Initial Weight (KG)',
         cell: ({ row }) => (
           <Typography color={row.original.tare_wt ? 'inherit' : 'text.secondary'}>
             {row.original.tare_wt ?? <SOPTooltip />}
@@ -164,7 +164,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         )
       }),
       columnHelper.accessor('tare_wt_time', {
-        header: 'Tare/Intial Timestamp',
+        header: 'Tare/Initial Timestamp',
 
         cell: ({ row }) => (
           <Typography>
