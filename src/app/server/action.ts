@@ -1,3 +1,6 @@
+// updated getIntrusionData and getIntrusionAlerts function on 24-05
+// it was loading all the data from intrusion table including images costs alot of bandwidth, now image will only load when clicked
+
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -191,9 +194,46 @@ order by e.eventTimestamp desc limit 20`)
   }
 }
 
+// export async function getIntrusionAlerts(): Promise<AlertType[]> {
+//   try {
+//     const data = await prisma.intrusion_event.findMany({
+//       orderBy: { created_at: 'desc' }
+//     })
+
+//     return data.map(event => ({
+//       id: event.id,
+//       description: event.description,
+//       created_at: convertUTCtoLocalTime(event.created_at),
+//       image: event.image ? `data:image/jpg;base64,${Buffer.from(event.image).toString('base64')}` : '',
+//       isNew: false
+//     }))
+//   } catch (error) {
+//     console.error('Fetch failed:', error)
+
+//     return []
+//   }
+// }
+
 export async function getIntrusionAlerts(): Promise<AlertType[]> {
   try {
+    // 1. Get the start of today to filter the dashboard alerts
+    const today = new Date()
+
+    today.setHours(0, 0, 0, 0)
+
     const data = await prisma.intrusion_event.findMany({
+      where: {
+        created_at: {
+          gte: today // Only fetch events from today forward
+        }
+      },
+
+      // 2. Explicitly select fields to EXCLUDE the heavy 'image' blob
+      select: {
+        id: true,
+        description: true,
+        created_at: true
+      },
       orderBy: { created_at: 'desc' }
     })
 
@@ -201,7 +241,7 @@ export async function getIntrusionAlerts(): Promise<AlertType[]> {
       id: event.id,
       description: event.description,
       created_at: convertUTCtoLocalTime(event.created_at),
-      image: event.image ? `data:image/jpg;base64,${Buffer.from(event.image).toString('base64')}` : '',
+      image: '', // Send an empty string to save bandwidth
       isNew: false
     }))
   } catch (error) {
@@ -271,16 +311,53 @@ function deriveWeights(group: AnprEvent[]) {
   }
 }
 
+// export async function getReportData(
+//   from?: Date,
+//   to?: Date,
+//   limit?: number,
+//   order: 'asc' | 'desc' = 'desc'
+// ): Promise<EventSummaryRecord2[]> {
+//   try {
+//     const data = await prisma.vehicle_cycle.findMany({
+//       where: {
+//         ...(from && to ? { cycle_date: { gte: from, lte: to } } : {})
+//       },
+//       orderBy: { cycle_date: 'desc' },
+//       ...(limit ? { take: limit } : {})
+//     })
+
+//     const reportData: EventSummaryRecord2[] = []
+//     let globalId = 1
+
 export async function getReportData(
-  from?: Date,
-  to?: Date,
+  from?: Date | string,
+  to?: Date | string,
   limit?: number,
   order: 'asc' | 'desc' = 'desc'
 ): Promise<EventSummaryRecord2[]> {
   try {
+    let gte: Date | undefined
+    let lte: Date | undefined
+
+    if (from && to) {
+      const fromObj = new Date(from)
+      const toObj = new Date(to)
+
+      // Subtract exactly 1 day from the 'to' date to cancel out the ghost addition
+      // toObj.setDate(toObj.getDate() - 1)
+
+      // Extract the clean YYYY-MM-DD strings
+      const fromStr = fromObj.toISOString().split('T')[0]
+      const toStr = toObj.toISOString().split('T')[0]
+
+      // Create perfect Midnight UTC boundaries for your @db.Date schema
+      gte = new Date(`${fromStr}T00:00:00.000Z`)
+      lte = new Date(`${toStr}T00:00:00.000Z`)
+    }
+
     const data = await prisma.vehicle_cycle.findMany({
       where: {
-        ...(from && to ? { cycle_date: { gte: from, lte: to } } : {})
+        ...(gte && lte ? { cycle_date: { gte: gte, lte: lte } } : {})
       },
       orderBy: { cycle_date: 'desc' },
       ...(limit ? { take: limit } : {})
@@ -589,6 +666,35 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
 
 import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/page'
 
+// export async function getIntrusionData(from?: Date, to?: Date, limit?: number): Promise<[] | IntrusionEventRecord[]> {
+//   try {
+//     const toEOD = to ? new Date(to) : undefined
+
+//     toEOD?.setHours(23, 59, 59, 999)
+
+//     const data = await prisma.intrusion_event.findMany({
+//       where: {
+//         ...(from && to ? { created_at: { gte: from, lte: toEOD } } : {})
+//       },
+//       orderBy: { created_at: 'desc' },
+//       ...(limit ? { take: limit } : {})
+//     })
+
+//     if (!data || data.length === 0) return []
+
+//     const finalData = data.map(item => ({
+//       ...item,
+//       created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null
+//     }))
+
+//     return finalData
+//   } catch (error) {
+//     console.error('Fetch failed:', error)
+
+//     return [] as IntrusionEventRecord[]
+//   }
+// }
+
 export async function getIntrusionData(from?: Date, to?: Date, limit?: number): Promise<[] | IntrusionEventRecord[]> {
   try {
     const toEOD = to ? new Date(to) : undefined
@@ -599,15 +705,26 @@ export async function getIntrusionData(from?: Date, to?: Date, limit?: number): 
       where: {
         ...(from && to ? { created_at: { gte: from, lte: toEOD } } : {})
       },
+
+      // 1. Explicitly select fields to EXCLUDE the heavy 'image' blob
+      select: {
+        id: true,
+        intrusion_type: true,
+        description: true,
+        created_at: true
+
+        // Add any other specific fields your table needs here (except image)
+      },
       orderBy: { created_at: 'desc' },
       ...(limit ? { take: limit } : {})
     })
 
     if (!data || data.length === 0) return []
 
-    const finalData = data.map(item => ({
+    const finalData = data.map((item: any) => ({
       ...item,
-      created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null
+      created_at: item.created_at ? convertUTCtoLocalTime(item.created_at) : null,
+      image: '' // Ensure image is empty in the table payload
     }))
 
     return finalData

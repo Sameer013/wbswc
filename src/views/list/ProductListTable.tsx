@@ -156,7 +156,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         cell: ({ row }) => <Typography>{row.original.exit_time?.toString().slice(0, 5) ?? <SOPTooltip />}</Typography>
       }),
       columnHelper.accessor('tare_wt', {
-        header: 'Tare/Initial Weight (KG)',
+        header: 'Tare (KG)',
         cell: ({ row }) => (
           <Typography color={row.original.tare_wt ? 'inherit' : 'text.secondary'}>
             {row.original.tare_wt ?? <SOPTooltip />}
@@ -164,7 +164,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         )
       }),
       columnHelper.accessor('tare_wt_time', {
-        header: 'Tare/Initial Timestamp',
+        header: 'Tare Timestamp',
 
         cell: ({ row }) => (
           <Typography>
@@ -174,7 +174,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
         // cell: ({ row }) => <Typography>NULL</Typography>
       }),
       columnHelper.accessor('gross_wt', {
-        header: 'Gross/Final Weight (KG)',
+        header: 'Gross Weight (KG)',
         cell: ({ row }) => (
           <Typography sx={{ color: row.original.gross_wt ? 'inherit' : 'text.secondary' }}>
             {row.original.gross_wt ?? <SOPTooltip />}
@@ -183,7 +183,7 @@ const ProductListTable = ({ tableData = [] }: { tableData?: VehicleType[] }) => 
       }),
 
       columnHelper.accessor('gross_wt_time', {
-        header: 'Gross/Final Timestamp',
+        header: 'Gross Timestamp',
 
         cell: ({ row }) => (
           <Typography>

@@ -19,12 +19,12 @@ import CloseIcon from '@mui/icons-material/Close'
 
 // Icon Imports
 import WarningAmber from '@mui/icons-material/WarningAmber'
-
-// import LocationOn from '@mui/icons-material/LocationOn'
 import AccessTime from '@mui/icons-material/AccessTime'
 
 import OptionMenu from '@core/components/option-menu'
-import { getIntrusionAlerts } from '@/app/server/action'
+
+// Added getIntrusionImage here
+import { getIntrusionAlerts, getIntrusionImage } from '@/app/server/action'
 import { formatTimestamp } from '@/utils/functions'
 
 export type AlertType = {
@@ -53,7 +53,9 @@ const LiveAlerts = () => {
   const [newIds, setNewIds] = useState<Set<number>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [loadingImg] = useState(false)
+
+  // Added setLoadingImg setter
+  const [loadingImg, setLoadingImg] = useState(false)
   const [imgUrl, setImgUrl] = useState<string | null>(null)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -92,10 +94,22 @@ const LiveAlerts = () => {
     }
   }, [loadAlerts])
 
-  const handleCardClick = (image: string | null) => {
-    if (!image) return
-    setImgUrl(image)
+  // UPDATED: Now takes an ID, opens modal, and fetches the image dynamically
+  const handleCardClick = async (id: number) => {
     setIsModalOpen(true)
+    setLoadingImg(true)
+    setImgUrl(null) // Clear any old image
+
+    try {
+      const fetchedImg = await getIntrusionImage(id)
+
+      setImgUrl(fetchedImg || null)
+    } catch (err) {
+      console.error('Failed to fetch image:', err)
+      setImgUrl(null)
+    } finally {
+      setLoadingImg(false)
+    }
   }
 
   return (
@@ -167,32 +181,15 @@ const LiveAlerts = () => {
         ) : (
           alerts.map((item, index) => (
             <Box key={item.id}>
-              {/* <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 3,
-                  px: 4,
-                  py: 3,
-                  transition: 'background-color 0.2s',
-                  backgroundColor: newIds.has(item.id) ? 'action.hover' : 'transparent',
-                  animation: newIds.has(item.id) ? 'slideIn 0.35s ease' : 'none',
-                  '@keyframes slideIn': {
-                    from: { opacity: 0, transform: 'translateY(-6px)' },
-                    to: { opacity: 1, transform: 'translateY(0)' }
-                  },
-                  '&:hover': { backgroundColor: 'action.hover' }
-                }}
-              > */}
               <Box
-                onClick={() => handleCardClick(item.image)}
+                onClick={() => handleCardClick(item.id)}
                 sx={{
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 3,
                   px: 4,
                   py: 3,
-                  cursor: item.image ? 'pointer' : 'default', // ← show pointer only if image exists
+                  cursor: 'pointer', // Always show pointer now
                   transition: 'background-color 0.2s',
                   backgroundColor: newIds.has(item.id) ? 'action.hover' : 'transparent',
                   animation: newIds.has(item.id) ? 'slideIn 0.35s ease' : 'none',
@@ -247,12 +244,6 @@ const LiveAlerts = () => {
                         {item.created_at ? formatTimestamp(item.created_at) : '-'}
                       </Typography>
                     </Box>
-                    {/* <Box className='flex items-center gap-1'>
-                      <LocationOn sx={{ fontSize: 12, color: 'text.disabled' }} />
-                      <Typography variant='caption' color='text.disabled'>
-                        {item.location}
-                      </Typography>
-                    </Box> */}
                   </Box>
                 </Box>
               </Box>
@@ -267,7 +258,7 @@ const LiveAlerts = () => {
         onClose={() => {
           setIsModalOpen(false)
           setImgUrl(null)
-        }} // ← clear on close
+        }}
         maxWidth='md'
         fullWidth
       >

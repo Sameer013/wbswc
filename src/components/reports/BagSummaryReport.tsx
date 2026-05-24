@@ -132,7 +132,7 @@ const BagsSummaryReport = ({
                 <View style={{ ...styles.tableCell, flex: 0.8 }}>
                   <Text style={styles.tableCellLabel}>{record.cycle_date ? formatDate(record.cycle_date) : '--'}</Text>
                 </View>
-                {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.vehicleNo ?? '--'}</Text>
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
@@ -140,16 +140,16 @@ const BagsSummaryReport = ({
                 </View>
                 <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.end_time ? formatTime(record.end_time) : '--'}</Text>
+                </View>
+                {/* <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>{'*'}</Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>{'*'}</Text>
+                </View>
+                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
+                  <Text style={styles.tableCellLabel}>{'*'}</Text>
                 </View> */}
-                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{'*'}</Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{'*'}</Text>
-                </View>
-                <View style={{ ...styles.tableCell, flex: 1, textAlign: 'center' }}>
-                  <Text style={styles.tableCellLabel}>{'*'}</Text>
-                </View>
                 <View style={{ ...styles.tableCell, flex: 2, textAlign: 'center' }}>
                   <Text style={styles.tableCellLabel}>{record.type_of_event ?? '--'}</Text>
                 </View>
