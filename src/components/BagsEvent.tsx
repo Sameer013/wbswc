@@ -38,7 +38,7 @@ import tableStyles from '@core/styles/table.module.css'
 
 // Types & Utils
 import type { BagSummaryRecord } from '@/components/reports/BagSummaryReport'
-import { exportToCSV, formatDate } from '@/utils/functions'
+import { formatDate } from '@/utils/functions'
 import { getBagsCnt } from '@/app/server/action'
 
 // Types
@@ -174,6 +174,51 @@ const BagsEvent = ({ initialData = [] }: BagsEventProps) => {
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   })
+
+  function exportToCSV(table: any, filename: string) {
+    const rows = table.getFilteredRowModel().rows
+
+    if (!rows.length) {
+      alert('No data to export')
+
+      return
+    }
+
+    const headers = ['ID', 'Date', 'Vehicle No', 'Time_in', 'Time_out', 'event_type', 'bag_count']
+
+    const csvData = rows.map((row: any) => {
+      const r = row.original
+
+      return [
+        `${r.id}`,
+        formatDate(new Date(r.cycle_date)),
+        r.vehicleNo,
+        r.start_time ? new Date(r.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '*',
+        r.end_time ? new Date(r.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '*',
+        r.type_of_event ?? '*',
+        r.cnt ?? '0'
+      ]
+    })
+
+    const csvContent = [headers, ...csvData].map(row => row.map((val: any) => `"${val}"`).join(',')).join('\n')
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;'
+    })
+
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+
+    link.href = url
+    link.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    URL.revokeObjectURL(url)
+  }
 
   const handleExport = () => exportToCSV(table, 'bags_report')
 
