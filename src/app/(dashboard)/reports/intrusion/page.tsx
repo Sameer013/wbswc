@@ -17,10 +17,12 @@ const IntrusionReport = () => {
 
       const from = new Date(fromDate)
       const to = new Date(toDate)
+      const fromDt = new Date(from.setHours(0, 0, 0, 0))
+      const toDt = new Date(to.setHours(23, 59, 59, 999))
 
       // to.setDate(to.getDate() + 1)
 
-      const events = await getIntrusionData(from, to)
+      const events = await getIntrusionData(fromDt, toDt)
       const records = events.map((event, index) => ({ ...event, id: index + 1 }))
 
       const blob = await pdf(<IntrusionReport records={records} fromDate={fromDate} toDate={toDate} />).toBlob()
