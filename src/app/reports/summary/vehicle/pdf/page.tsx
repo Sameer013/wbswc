@@ -45,7 +45,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
     }
   })
 
-  // console.log(formattedRecords2)
+  console.log(formattedRecords2)
 
   return <PdfClient records={formattedRecords2} fromDate={from} toDate={to} />
 }

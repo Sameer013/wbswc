@@ -18,7 +18,7 @@ const BagsReport = () => {
       const from = new Date(fromDate)
       const to = new Date(toDate)
 
-      to.setDate(to.getDate() + 1)
+      // to.setDate(to.getDate() + 1)
 
       const events = await getBagsCnt(from, to)
       const records = events.map((event, index) => ({ ...event, id: index + 1 }))

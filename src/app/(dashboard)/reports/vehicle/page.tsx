@@ -18,7 +18,7 @@ const VehiclesReport = () => {
       const from = new Date(fromDate)
       const to = new Date(toDate)
 
-      to.setDate(to.getDate() + 1)
+      // to.setDate(to.getDate() + 1)
 
       const events = await getReportData(from, to, undefined, 'asc')
       const records = events.map((event, index) => ({ ...event, id: index + 1 }))
