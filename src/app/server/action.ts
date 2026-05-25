@@ -697,13 +697,11 @@ import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/pag
 
 export async function getIntrusionData(from?: Date, to?: Date, limit?: number): Promise<[] | IntrusionEventRecord[]> {
   try {
-    const toEOD = to ? new Date(to) : undefined
-
-    toEOD?.setHours(23, 59, 59, 999)
+    const nextDay = to ? new Date(new Date(to).setDate(new Date(to).getDate() + 1)) : undefined
 
     const data = await prisma.intrusion_event.findMany({
       where: {
-        ...(from && to ? { created_at: { gte: from, lte: toEOD } } : {})
+        ...(from && to ? { created_at: { gte: from, lt: nextDay } } : {})
       },
 
       // 1. Explicitly select fields to EXCLUDE the heavy 'image' blob
@@ -727,6 +725,10 @@ export async function getIntrusionData(from?: Date, to?: Date, limit?: number): 
       image: '' // Ensure image is empty in the table payload
     }))
 
+    console.log('From:', from, 'To:', to, 'Next Day', nextDay)
+
+    // console.log('Intrusion data fetched:', finalData)
+
     return finalData
   } catch (error) {
     console.error('Fetch failed:', error)
@@ -737,8 +739,10 @@ export async function getIntrusionData(from?: Date, to?: Date, limit?: number): 
 
 export async function getBagsCnt(from: Date, to: Date): Promise<BagSummaryRecord[]> {
   try {
+    const nextDay = to ? new Date(new Date(to).setDate(new Date(to).getDate() + 1)) : undefined
+
     const data = await prisma.bag_cycle.findMany({
-      where: { cycle_date: { gte: from, lte: to } }
+      where: { cycle_date: { gte: from, lt: nextDay } }
     })
 
     // console.log('Bag cycle data', data)
