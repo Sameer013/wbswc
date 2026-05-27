@@ -117,11 +117,14 @@ type ViewRow = {
   unloadCnt: number
 }
 
+// Import Types
 import type { EventSummaryRecord2 } from '@/components/reports/VehicleSummaryReport'
 import type { AnprEventRecord } from '../(dashboard)/vehicles/anpr/page'
 import type { VehicleEventRecord } from '../(dashboard)/vehicles/entryexit/page'
 import { convertUTCtoLocalTime } from '@/utils/functions'
 import type { BagSummaryRecord } from '@/components/reports/BagSummaryReport'
+import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/page'
+import type { MandiCaseRecord } from '../(dashboard)/vehicles/mandi/page'
 
 export async function getVehicleStats(): Promise<VehicleStats> {
   try {
@@ -664,8 +667,6 @@ export async function getEntryExitData(): Promise<[] | VehicleEventRecord[]> {
   }
 }
 
-import type { IntrusionEventRecord } from '../(dashboard)/vehicles/intrusion/page'
-
 // export async function getIntrusionData(from?: Date, to?: Date, limit?: number): Promise<[] | IntrusionEventRecord[]> {
 //   try {
 //     const toEOD = to ? new Date(to) : undefined
@@ -797,4 +798,32 @@ export async function getDeviceStatus() {
           : 0
     }
   })
+}
+
+export async function getMandiCases(from?: Date, to?: Date, limit?: number): Promise<MandiCaseRecord[]> {
+  try {
+    // const nextDay = to ? new Date(new Date(to).setDate(new Date(to).getDate() + 1)) : undefined
+
+    const data = await prisma.mandi_cases.findMany({
+      where: { cycle_date: { gte: from, lte: to } },
+      orderBy: { cycle_date: 'desc' },
+      ...(limit ? { take: limit } : {})
+    })
+
+    const final_data = data.map((record, index) => ({
+      id: record.id ?? index + 1, // fallback if id?
+      cycle_date: record.cycle_date,
+      vehicle_no: record.vehicle_no,
+      cycle_part: record.cycle_part,
+      weights: record.weights,
+      entry_time: convertUTCtoLocalTime(record.entry_time),
+      exit_time: convertUTCtoLocalTime(record.exit_time)
+    }))
+
+    return final_data
+  } catch (error) {
+    console.error('Fetch failed:', error)
+
+    return []
+  }
 }

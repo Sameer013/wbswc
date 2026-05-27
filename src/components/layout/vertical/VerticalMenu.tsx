@@ -95,6 +95,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             <MenuItem href='/vehicles/intrusion' icon={<i className='tabler-barrier-block' />}>
               Intrusion
             </MenuItem>
+            <MenuItem href='/vehicles/mandi' icon={<i className='tabler-barrier-block' />}>
+              Mandi Cases
+            </MenuItem>
           </SubMenu>
         ) : (
           <SubMenu label='Vehicles' icon={<i className='tabler-car' />}>
@@ -106,6 +109,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             </MenuItem>
             <MenuItem href='/vehicles/intrusion' icon={<i className='tabler-barrier-block' />}>
               Intrusion
+            </MenuItem>
+            <MenuItem href='/vehicles/mandi' icon={<i className='tabler-barrier-block' />}>
+              Mandi Cases
             </MenuItem>
           </SubMenu>
         )}
