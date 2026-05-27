@@ -116,7 +116,7 @@ const MandiCaseTable = () => {
         )
       }),
       columnHelper.accessor('vehicle_no', {
-        header: 'Vehicle Number',
+        header: 'Vehicle No',
         cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicle_no}</Typography>
       }),
       columnHelper.accessor('cycle_part', {
