@@ -800,14 +800,18 @@ export async function getDeviceStatus() {
   })
 }
 
-export async function getMandiCases(from?: Date, to?: Date, limit?: number): Promise<MandiCaseRecord[]> {
+export async function getMandiCases(from?: Date, to?: Date, limit: number = 100): Promise<MandiCaseRecord[]> {
   try {
     // const nextDay = to ? new Date(new Date(to).setDate(new Date(to).getDate() + 1)) : undefined
 
     const data = await prisma.mandi_cases.findMany({
-      where: { cycle_date: { gte: from, lte: to } },
+      // where: { cycle_date: { gte: from, lte: to } },
+      // orderBy: { cycle_date: 'desc' },
+      // ...(limit ? { take: limit } : {})
+
+      ...(from || to ? { where: { cycle_date: { gte: from, lte: to } } } : {}),
       orderBy: { cycle_date: 'desc' },
-      ...(limit ? { take: limit } : {})
+      take: limit
     })
 
     const final_data = data.map((record, index) => ({

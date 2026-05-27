@@ -10,7 +10,6 @@ import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
 import Typography from '@mui/material/Typography'
 
-import Chip from '@mui/material/Chip'
 import Skeleton from '@mui/material/Skeleton'
 import TextField from '@mui/material/TextField'
 
@@ -69,7 +68,7 @@ const MandiCaseTable = () => {
       setLoading(true)
 
       try {
-        const result = await getMandiCases(new Date(), new Date(), 100)
+        const result = await getMandiCases()
 
         setData(result)
       } catch (error) {
@@ -118,20 +117,18 @@ const MandiCaseTable = () => {
       }),
       columnHelper.accessor('vehicle_no', {
         header: 'Vehicle Number',
-        cell: ({ row }) => <Chip label={row.original.vehicle_no} color='error' variant='tonal' size='small' />
+        cell: ({ row }) => <Typography fontWeight={700}>{row.original.vehicle_no}</Typography>
       }),
       columnHelper.accessor('cycle_part', {
         header: 'Cycle Part',
         cell: ({ row }) => (
-          <Typography variant='body2' className='max-w-[200px] truncate'>
-            {row.original.cycle_part || 'No cycle part'}
-          </Typography>
+          <Typography className='max-w-[200px] truncate'>{row.original.cycle_part || 'No cycle part'}</Typography>
         )
       }),
       columnHelper.accessor('entry_time', {
         header: 'Entry Time',
         cell: ({ row }) => (
-          <Typography variant='body2' className='max-w-[200px] truncate'>
+          <Typography className='max-w-[200px] truncate'>
             {row.original.entry_time ? formatTimestamp(row.original.entry_time) : '--'}
           </Typography>
         )
@@ -139,15 +136,15 @@ const MandiCaseTable = () => {
       columnHelper.accessor('exit_time', {
         header: 'Exit Time',
         cell: ({ row }) => (
-          <Typography variant='body2' className='max-w-[200px] truncate'>
+          <Typography className='max-w-[200px] truncate'>
             {row.original.exit_time ? formatTimestamp(row.original.exit_time) : '--'}
           </Typography>
         )
       }),
       columnHelper.accessor('weights', {
-        header: 'Weight',
+        header: 'Weight(Kg)',
         cell: ({ row }) => (
-          <Typography variant='body2' className='max-w-[200px] truncate'>
+          <Typography className='max-w-[200px] truncate'>
             {row.original.weights !== null ? row.original.weights : '--'}
           </Typography>
         )
